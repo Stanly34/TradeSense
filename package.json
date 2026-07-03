@@ -1,0 +1,21 @@
+{
+  "name": "tradesense",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TradeSense - Premium Trading Journal Platform",
+  "scripts": {
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev": "concurrently -n client,server -c cyan,green \"npm run dev:client\" \"npm run dev:server\"",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build": "npm run build:client && npm run build:server",
+    "start": "pm2 start ecosystem.config.cjs",
+    "stop": "pm2 stop ecosystem.config.cjs",
+    "status": "pm2 status",
+    "logs": "pm2 logs"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

@@ -1,0 +1,479 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum TemplateType {
+  JOURNAL
+  PROP_FIRM
+  PERSONAL_ACCOUNT
+}
+
+enum TradeStatus {
+  DRAFT
+  COMPLETED
+  ARCHIVED
+}
+
+enum TradeResult {
+  WIN
+  LOSS
+  BREAK_EVEN
+  CANCELLED
+}
+
+enum TradeDirection {
+  LONG
+  SHORT
+}
+
+enum ImageCategory {
+  ANALYSIS
+  ENTRY
+  MANAGEMENT
+  EXIT
+  REVIEW
+  CUSTOM
+}
+
+enum SessionType {
+  LONDON
+  NEW_YORK
+  ASIA
+  CUSTOM
+}
+
+enum MarketBias {
+  BULLISH
+  BEARISH
+  NEUTRAL
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  fullName       String
+  username       String   @unique
+  email          String   @unique
+  password       String
+  profileImage   String?
+  role           UserRole @default(USER)
+  isVerified     Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  lastLogin      DateTime?
+  subscriptionId String?  @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  subscription   Subscription?
+  trades         Trade[]
+  journals       JournalEntry[]
+  tags           Tag[]
+  templates      Template[]
+  aiReviews      AIReview[]
+  aiChats        AIChat[]
+  notifications      Notification[]
+  favoriteInstruments FavoriteInstrument[]
+  refreshTokens      RefreshToken[]
+  couponUsage        CouponUsage[]
+  payments           Payment[]
+  sessions           Session[]
+  outlooks           WeeklyOutlook[]
+
+  @@index([email])
+  @@index([username])
+}
+
+model Plan {
+  id                 String   @id @default(uuid()) @db.Uuid
+  name               String   @unique
+  price              Float    @default(0)
+  journalLimit       Int?
+  imageLimit         Int?
+  accountLimit       Int?
+  checklistLimit     Int?
+  monthlyTradeLimit  Int?
+  dailyTradeLimit    Int?
+  weeklyOutlook      Boolean  @default(false)
+  aiEnabled          Boolean  @default(false)
+  stripePriceId      String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id        String             @id @default(uuid()) @db.Uuid
+  userId    String             @unique @db.Uuid
+  planId    String             @db.Uuid
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime?
+  autoRenew Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user       User          @relation(fields: [userId], references: [id])
+  plan       Plan          @relation(fields: [planId], references: [id])
+  couponUsage CouponUsage[]
+  payments   Payment[]
+
+  @@index([userId])
+  @@index([planId])
+}
+
+model Coupon {
+  id            String       @id @default(uuid()) @db.Uuid
+  code          String       @unique
+  description   String?
+  discountType  DiscountType
+  discountValue Float
+  maxUsage      Int?
+  usedCount     Int          @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  couponUsage CouponUsage[]
+
+  @@index([code])
+}
+
+model CouponUsage {
+  id               String   @id @default(uuid()) @db.Uuid
+  couponId         String   @db.Uuid
+  userId           String   @db.Uuid
+  subscriptionId   String   @db.Uuid
+  discountApplied  Float    @default(0)
+  usedAt           DateTime @default(now())
+
+  coupon       Coupon       @relation(fields: [couponId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([couponId])
+  @@index([userId])
+}
+
+model Trade {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  instrument  String
+  direction   TradeDirection
+  entryPrice  Float?
+  exitPrice   Float?
+  stopLoss    Float?
+  takeProfit  Float?
+  quantity    Float?
+  pipSize     Float?      @default(1)
+  pipValue    Float?      @default(1)
+  fees        Float?
+  broker      String?
+  account     String?
+  session     SessionType?
+  marketBias  MarketBias?
+  entryTime   DateTime?
+  exitTime    DateTime?
+  status      TradeStatus   @default(DRAFT)
+  result      TradeResult?
+  riskReward  Float?
+  notes       String?
+  reason      String?
+  mistakes    String?
+  templateId      String?       @db.Uuid
+  checklistData   Json?
+  isDeleted       Boolean       @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        User           @relation(fields: [userId], references: [id])
+  template    Template?      @relation(fields: [templateId], references: [id])
+  images      TradeImage[]
+  partialExits PartialExit[]
+  timeline    TradeTimeline[]
+  journal     JournalEntry?
+  aiReviews   AIReview[]
+  tags        TradeTag[]
+
+  @@index([userId])
+  @@index([instrument])
+  @@index([createdAt])
+}
+
+model PartialExit {
+  id        String   @id @default(uuid()) @db.Uuid
+  tradeId   String   @db.Uuid
+  quantity  Float
+  exitPrice Float
+  exitTime  DateTime?
+  createdAt DateTime @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+}
+
+model TradeImage {
+  id             String        @id @default(uuid()) @db.Uuid
+  tradeId        String        @db.Uuid
+  imageUrl       String
+  category       ImageCategory @default(ANALYSIS)
+  description    String?
+  tradeTimestamp DateTime?
+  width          Int?
+  height         Int?
+  cloudinaryId   String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  trade Trade @relation(fields: [tradeId], references: [id])
+
+  @@index([tradeId])
+}
+
+model TradeTimeline {
+  id          String   @id @default(uuid()) @db.Uuid
+  tradeId     String   @db.Uuid
+  eventType   String
+  title       String
+  description String?
+  eventTime   DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id])
+
+  @@index([tradeId])
+  @@index([eventTime])
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  tradeId   String   @unique @db.Uuid
+  userId    String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trade Trade @relation(fields: [tradeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([tradeId])
+  @@index([userId])
+}
+
+
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  name      String
+  color     String?
+  content   String?
+  createdAt DateTime @default(now())
+
+  user   User       @relation(fields: [userId], references: [id])
+  trades TradeTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model TradeTag {
+  tradeId String @db.Uuid
+  tagId   String @db.Uuid
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([tradeId, tagId])
+}
+
+model FavoriteInstrument {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  instrument  String
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, instrument])
+  @@index([userId])
+}
+
+model Template {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @db.Uuid
+  name          String
+  description   String?
+  type          TemplateType @default(JOURNAL)
+  defaultValues Json?
+  isFavorite    Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  trades Trade[]
+
+  @@index([userId])
+}
+
+model AIReview {
+  id          String   @id @default(uuid()) @db.Uuid
+  tradeId     String   @db.Uuid
+  userId      String   @db.Uuid
+  score       Int?
+  review      String?
+  suggestions Json?
+  strengths   Json?
+  weaknesses  Json?
+  model       String?
+  promptVersion String?
+  tokenUsage  Int?
+  latency     Int?
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  trade Trade @relation(fields: [tradeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([tradeId])
+  @@index([userId])
+}
+
+model AIChat {
+  id        String      @id @default(uuid()) @db.Uuid
+  userId    String      @db.Uuid
+  title     String?
+  isPinned  Boolean     @default(false)
+  isArchived Boolean    @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id])
+  messages AIMessage[]
+
+  @@index([userId])
+}
+
+model AIMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  chatId    String   @db.Uuid
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  chat AIChat @relation(fields: [chatId], references: [id])
+
+  @@index([chatId])
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  title     String
+  message   String?
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Payment {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  subscriptionId  String   @db.Uuid
+  amount          Float
+  couponId        String?  @db.Uuid
+  provider        String?
+  transactionId   String?
+  status          String   @default("PAID")
+  createdAt       DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+  @@index([subscriptionId])
+}
+
+model Session {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  refreshTokenId String? @db.Uuid
+  browser       String?
+  os            String?
+  ipAddress     String?
+  lastActivity  DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model WeeklyOutlook {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  weekStart   DateTime
+  instrument  String
+  direction   String?
+  beforeImage String?
+  afterImage  String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart, instrument])
+  @@index([userId])
+}
+
+model Setting {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique
+  value     String?
+  category  String?
+  updatedBy String?  @db.Uuid
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
