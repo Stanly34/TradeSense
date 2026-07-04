@@ -190,10 +190,9 @@ export function TradesPage() {
     const dir = trade.direction === 'LONG' ? 1 : -1
     const pipScale = trade.pipSize && trade.pipSize !== 0 ? 1 / trade.pipSize : 1
     const pipVal = trade.pipValue || 1
-    const feeMult = trade.fees ? 1 - trade.fees / 100 : 1
 
     const calcPnl = (price: number, qty: number) =>
-      (price - trade.entryPrice!) * dir * pipScale * pipVal * qty * feeMult
+      (price - trade.entryPrice!) * dir * pipScale * pipVal * qty
 
     const partialQty = (trade.partialExits || []).reduce((s, pe) => s + pe.quantity, 0)
     const mainQty = (trade.quantity || 1) - partialQty
@@ -202,7 +201,7 @@ export function TradesPage() {
     for (const pe of trade.partialExits || []) {
       total += calcPnl(pe.exitPrice, pe.quantity)
     }
-    return total
+    return total - (trade.fees || 0)
   }
 
   return (

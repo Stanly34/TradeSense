@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FileText, Plus, Star, Trash2, Building2, User, TrendingUp, Target, AlertTriangle, DollarSign, BarChart3, Globe, X, CheckCircle, Circle } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -210,7 +210,7 @@ export function TemplatesPage() {
     if (!deleteTarget) return
     if (deleteWithTrades) {
       const trades = await tradeService.listTrades({ templateId: deleteTarget, limit: 1000 })
-      for (const t of trades.data) {
+      for (const t of trades.trades) {
         await tradeService.deleteTrade(t.id)
       }
     }
@@ -290,6 +290,16 @@ export function TemplatesPage() {
       case 'PERSONAL_ACCOUNT': return 'bg-blue-500/10 text-blue-400'
     }
   }
+
+  const sortedTemplates = useMemo(() => {
+    const statusOrder: Record<string, number> = { ACTIVE: 0, PASSED: 1, FAILED: 2 }
+    return [...templates].sort((a, b) => {
+      if (a.isFavorite !== b.isFavorite) return a.isFavorite ? -1 : 1
+      const sa = statusOrder[progressMap[a.id]?.status || 'ACTIVE'] ?? 0
+      const sb = statusOrder[progressMap[b.id]?.status || 'ACTIVE'] ?? 0
+      return sa - sb
+    })
+  }, [templates, progressMap])
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
@@ -391,15 +401,17 @@ export function TemplatesPage() {
                 value={currentAccountSize} onChange={(e) => setCurrentAccountSize(e.target.value)} />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Select label="Phase" value={phase} onChange={setPhase}
+                <Select label="Phase" value={phase} onChange={(v) => { setPhase(v); if (v === 'FUNDED') setTargetProfit('') }}
                   placeholder="Select phase"
                   options={[
                     { value: 'EVALUATION_PHASE1', label: 'Evaluation Phase 1' },
                     ...(marketType !== 'FUTURES' ? [{ value: 'EVALUATION_PHASE2', label: 'Evaluation Phase 2' }] : []),
                     { value: 'FUNDED', label: 'Funded' },
                   ]} />
-                <Input id="target-profit" label="Target Profit ($)" type="number" placeholder="e.g., 5000"
-                  value={targetProfit} onChange={(e) => setTargetProfit(e.target.value)} />
+                {phase !== 'FUNDED' && (
+                  <Input id="target-profit" label="Target Profit ($)" type="number" placeholder="e.g., 5000"
+                    value={targetProfit} onChange={(e) => setTargetProfit(e.target.value)} />
+                )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
@@ -451,7 +463,7 @@ export function TemplatesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {templates.map((tpl) => {
+          {sortedTemplates.map((tpl) => {
             const dv = tpl.defaultValues || {}
             const progress = progressMap[tpl.id]
             const target = dv.targetProfit as number || 0
@@ -685,7 +697,7 @@ export function TemplatesPage() {
                   if (!t.entryPrice || !t.exitPrice) return 0
                   const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
                   const pips = t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff
-                  return pips * (t.pipValue || 1) * (t.quantity || 1) * (t.fees ? 1 - t.fees / 100 : 1)
+                  return pips * (t.pipValue || 1) * (t.quantity || 1) - (t.fees || 0)
                 }
 
                 const totalPnL = accountTrades.reduce((s, t) => s + tradePnL(t), 0)
@@ -727,19 +739,14 @@ export function TemplatesPage() {
                             <p className="text-sm font-medium text-text-primary mt-0.5">${(dv.accountSize as number).toLocaleString()}</p>
                           </div>
                         )}
-                        {(() => {
-                          const baseSize = dv.accountSize as number || 0
-                          const effectiveBalance = baseSize + totalPnL
-                          if (!baseSize && accountTrades.length === 0) return null
-                          return (
-                            <div className="bg-hover rounded-xl p-3">
-                              <p className="text-[10px] text-text-muted uppercase tracking-wider">Current Balance</p>
-                              <p className={`text-sm font-bold mt-0.5 ${effectiveBalance >= baseSize ? 'text-success' : 'text-danger'}`}>
-                                ${effectiveBalance.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                              </p>
-                            </div>
-                          )
-                        })()}
+                        {dv.currentAccountSize && (
+                          <div className="bg-hover rounded-xl p-3">
+                            <p className="text-[10px] text-text-muted uppercase tracking-wider">Current Balance</p>
+                            <p className="text-sm font-bold mt-0.5 text-text-primary">
+                              ${(dv.currentAccountSize as number).toLocaleString()}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -901,7 +908,7 @@ export function TemplatesPage() {
                   if (batchDeleteWithTrades) {
                     for (const id of ids) {
                       const trades = await tradeService.listTrades({ templateId: id, limit: 1000 })
-                      for (const t of trades.data) {
+                      for (const t of trades.trades) {
                         await tradeService.deleteTrade(t.id)
                       }
                     }

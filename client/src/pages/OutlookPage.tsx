@@ -619,7 +619,7 @@ export function OutlookPage() {
       {viewingEntry && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-20 overflow-y-auto"
           onClick={() => setViewingEntry(null)}>
-          <div className="bg-elevated rounded-2xl border border-border w-full max-w-lg my-auto shadow-[0_6px_25px_rgba(0,0,0,0.08)]"
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-2xl my-auto shadow-[0_6px_25px_rgba(0,0,0,0.08)]"
             onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-6 border-b border-border">
               <h2 className="text-lg font-semibold text-text-primary">Outlook Details</h2>
@@ -658,7 +658,7 @@ export function OutlookPage() {
               </div>
 
               {(viewingEntry.beforeImage || viewingEntry.afterImage) && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {viewingEntry.beforeImage && (
                     <div>
                       <label className="block text-xs font-medium text-text-muted mb-1">Before Week</label>
@@ -688,10 +688,10 @@ export function OutlookPage() {
               )}
 
               <div className="flex justify-end gap-3 pt-2 border-t border-border">
-                <Button type="button" variant="secondary" onClick={() => { setDeleteTarget(viewingEntry.id) }}
-                  leftIcon={<Trash2 className="w-4 h-4" />}>Delete</Button>
                 <Button type="button" onClick={() => openEdit(viewingEntry)}
                   leftIcon={<Edit2 className="w-4 h-4" />}>Edit</Button>
+                <Button type="button" variant="secondary" onClick={() => { setDeleteTarget(viewingEntry.id) }}
+                  leftIcon={<Trash2 className="w-4 h-4" />}>Delete</Button>
               </div>
             </div>
           </div>
@@ -700,7 +700,7 @@ export function OutlookPage() {
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-20 overflow-y-auto">
-          <div className="bg-elevated rounded-2xl border border-border w-full max-w-lg my-auto shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-2xl my-auto shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
             <div className="flex items-center justify-between p-6 border-b border-border">
               <h2 className="text-lg font-semibold text-text-primary">{editingId ? 'Edit Outlook' : 'New Outlook'}</h2>
               <button onClick={() => { setShowForm(false); resetForm() }} className="p-1 text-text-muted hover:text-text-primary transition-colors">

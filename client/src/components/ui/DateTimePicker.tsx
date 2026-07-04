@@ -42,8 +42,8 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
     const start = () => {
       fnRef.current()
       holdTimerRef.current = setTimeout(() => {
-        holdIntervalRef.current = setInterval(() => fnRef.current(), 40)
-      }, 100)
+        holdIntervalRef.current = setInterval(() => fnRef.current(), 100)
+      }, 300)
     }
     const stop = () => {
       clearTimeout(holdTimerRef.current)

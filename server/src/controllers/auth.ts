@@ -4,6 +4,23 @@ import { prisma } from '../lib/prisma.js'
 import { sendSuccess, sendError } from '../utils/response.js'
 import { sendPasswordResetEmail } from '../services/email.js'
 
+export async function checkAvailability(req: Request, res: Response) {
+  try {
+    const { username, email } = req.query
+    if (username) {
+      const result = await authService.checkAvailability('username', username as string)
+      return sendSuccess(res, result)
+    }
+    if (email) {
+      const result = await authService.checkAvailability('email', email as string)
+      return sendSuccess(res, result)
+    }
+    return sendError(res, 'Provide username or email query parameter', 400)
+  } catch (err) {
+    return sendError(res, 'Availability check failed', 500)
+  }
+}
+
 export async function register(req: Request, res: Response) {
   try {
     const result = await authService.register(req.body)
@@ -88,10 +105,14 @@ export async function forgotPassword(req: Request, res: Response) {
   try {
     const { email } = req.body
     const token = await authService.forgotPassword(email)
-    if (token) await sendPasswordResetEmail(email, token)
+    if (token) {
+      sendPasswordResetEmail(email, token).catch(e => console.error('[EMAIL ERROR]', e))
+      return sendSuccess(res, null, 'If the email exists, a reset link has been sent')
+    }
     return sendSuccess(res, null, 'If the email exists, a reset link has been sent')
-  } catch {
-    return sendError(res, 'Failed to process request', 500)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to process request'
+    return sendError(res, message, 400)
   }
 }
 

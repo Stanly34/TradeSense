@@ -21,6 +21,11 @@ export interface AuthResponse {
   verificationToken?: string
 }
 
+export async function checkAvailability(field: 'username' | 'email', value: string): Promise<{ available: boolean }> {
+  const { data } = await api.get(`/auth/check-availability?${field}=${encodeURIComponent(value)}`)
+  return data.data
+}
+
 export async function register(input: RegisterInput): Promise<AuthResponse> {
   const { data } = await api.post('/auth/register', input)
   const result = data.data

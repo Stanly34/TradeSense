@@ -33,7 +33,8 @@ export async function getStats(userId: string, templateId?: string, startDate?: 
     if (t.entryPrice && t.exitPrice) {
       const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
       const pips = (t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff)
-      const tradePnl = pips * (t.pipValue || 1) * (t.quantity || 1) * (t.fees ? 1 - t.fees / 100 : 1)
+      const grossPnl = pips * (t.pipValue || 1) * (t.quantity || 1)
+      const tradePnl = grossPnl - (t.fees || 0)
       pnl += tradePnl
       if (tradePnl > 0) grossProfit += tradePnl
       else if (tradePnl < 0) grossLoss += Math.abs(tradePnl)
@@ -50,7 +51,8 @@ export async function getStats(userId: string, templateId?: string, startDate?: 
       const dateKey = t.entryTime ? t.entryTime.toISOString().slice(0, 10) : 'unknown'
       const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
       const pips = (t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff)
-      dailyPnL[dateKey] = (dailyPnL[dateKey] || 0) + pips * (t.pipValue || 1) * (t.quantity || 1) * (t.fees ? 1 - t.fees / 100 : 1)
+      const grossPnl = pips * (t.pipValue || 1) * (t.quantity || 1)
+      dailyPnL[dateKey] = (dailyPnL[dateKey] || 0) + (grossPnl - (t.fees || 0))
     }
   })
   let bestDate: string | null = null, worstDate: string | null = null
@@ -68,7 +70,7 @@ export async function getStats(userId: string, templateId?: string, startDate?: 
 export async function getMonthlyPerformance(userId: string, templateId?: string, startDate?: Date, endDate?: Date) {
   const trades = await prisma.trade.findMany({
     where: withDateRange(withTemplate({ userId, isDeleted: false, status: 'COMPLETED' }, templateId), startDate, endDate),
-    select: { entryPrice: true, exitPrice: true, direction: true, entryTime: true, quantity: true, pipSize: true, pipValue: true },
+    select: { entryPrice: true, exitPrice: true, direction: true, entryTime: true, quantity: true, pipSize: true, pipValue: true, fees: true },
   })
 
   const monthly: Record<string, { pnl: number; trades: number; wins: number }> = {}
@@ -81,7 +83,7 @@ export async function getMonthlyPerformance(userId: string, templateId?: string,
     if (t.entryPrice && t.exitPrice) {
       const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
       const pips = (t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff)
-      monthly[monthKey].pnl += pips * (t.pipValue || 1) * (t.quantity || 1)
+      monthly[monthKey].pnl += pips * (t.pipValue || 1) * (t.quantity || 1) - (t.fees || 0)
     }
   })
 
@@ -157,10 +159,9 @@ export async function getCalendarData(userId: string, year: number, month: numbe
       const dir = t.direction === 'LONG' ? 1 : -1
       const pipScale = t.pipSize && t.pipSize !== 0 ? 1 / t.pipSize : 1
       const pipVal = t.pipValue || 1
-      const feeMult = t.fees ? 1 - t.fees / 100 : 1
 
       const legPnl = (exitPx: number, qty: number) =>
-        (exitPx - t.entryPrice!) * dir * pipScale * pipVal * qty * feeMult
+        (exitPx - t.entryPrice!) * dir * pipScale * pipVal * qty
 
       const partialQty = t.partialExits.reduce((s, pe) => s + pe.quantity, 0)
       const mainQty = (t.quantity || 1) - partialQty
@@ -169,6 +170,7 @@ export async function getCalendarData(userId: string, year: number, month: numbe
       for (const pe of t.partialExits) {
         daily[dateKey].pnl += legPnl(pe.exitPrice, pe.quantity)
       }
+      daily[dateKey].pnl -= (t.fees || 0)
     }
   })
 

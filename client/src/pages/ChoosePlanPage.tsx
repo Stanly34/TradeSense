@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CreditCard, Sparkles, Check } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 import { Button } from '../components/ui/Button'
 import * as subscriptionService from '../services/subscriptions'
 import toast from 'react-hot-toast'
 
 export function ChoosePlanPage() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [isLoading, setIsLoading] = useState<string | null>(null)
 
   async function handleSelect(planName: string) {
     setIsLoading(planName)
     try {
       await subscriptionService.selectPlan(planName)
+      await refreshUser()
       toast.success(`Started with ${planName} plan`)
       navigate('/dashboard')
     } catch (err) {
@@ -82,7 +85,7 @@ export function ChoosePlanPage() {
                 </li>
               ))}
             </ul>
-            <Button className="w-full mt-6" onClick={() => handleSelect('PRO')} isLoading={isLoading === 'PRO'}>
+            <Button className="w-full mt-6" onClick={() => toast.error('Payment system not available yet.')}>
               <Sparkles className="w-4 h-4 mr-2" />
               Go Pro
             </Button>

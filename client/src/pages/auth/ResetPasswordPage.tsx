@@ -4,6 +4,7 @@ import { resetPassword } from '../../services/auth'
 import { AuthLayout } from '../../components/layout/AuthLayout'
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
+import { Eye, EyeOff, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export function ResetPasswordPage() {
@@ -14,6 +15,9 @@ export function ResetPasswordPage() {
   const [form, setForm] = useState({ password: '', confirmPassword: '' })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -29,8 +33,7 @@ export function ResetPasswordPage() {
     setIsLoading(true)
     try {
       await resetPassword(token, form.password, form.confirmPassword)
-      toast.success('Password reset successfully! Please sign in.')
-      navigate('/login')
+      setResetSuccess(true)
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
@@ -40,6 +43,17 @@ export function ResetPasswordPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (resetSuccess) {
+    return (
+      <AuthLayout title="Password changed">
+        <div className="flex flex-col items-center text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
+          <p className="text-text-muted text-sm">Your password has been changed successfully.</p>
+        </div>
+      </AuthLayout>
+    )
   }
 
   if (!token) {
@@ -58,21 +72,33 @@ export function ResetPasswordPage() {
         <Input
           id="password"
           label="New Password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           placeholder="Min. 8 characters"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
           error={errors.password}
+          endAdornment={
+            <button type="button" onClick={() => setShowPassword(!showPassword)}
+              className="text-text-muted hover:text-text-primary transition-colors p-0.5" tabIndex={-1}>
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          }
           required
         />
         <Input
           id="confirmPassword"
           label="Confirm New Password"
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           placeholder="Repeat your password"
           value={form.confirmPassword}
           onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
           error={errors.confirmPassword}
+          endAdornment={
+            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="text-text-muted hover:text-text-primary transition-colors p-0.5" tabIndex={-1}>
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          }
           required
         />
         <Button type="submit" className="w-full" isLoading={isLoading}>

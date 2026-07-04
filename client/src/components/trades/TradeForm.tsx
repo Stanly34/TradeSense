@@ -260,7 +260,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
   const [isLoading, setIsLoading] = useState(false)
   const [resetNext, setResetNext] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [partialExits, setPartialExits] = useState<Array<{ quantity: number; exitPrice: number; exitTime?: string }>>(initial?._partialExits || [])
+  const [partialExits, setPartialExits] = useState<Array<{ quantity?: number; exitPrice?: number; exitTime?: string }>>(initial?._partialExits || [])
   const [showPartialClose, setShowPartialClose] = useState(false)
   const submitRef = useRef<HTMLButtonElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -486,11 +486,12 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
     setResetNext(false)
     try {
       const ids = selectedTemplateIds.length > 0 ? selectedTemplateIds : (form.templateId ? [form.templateId] : [])
+      const completePartialExits = partialExits.filter((pe): pe is { quantity: number; exitPrice: number; exitTime?: string } => pe.quantity != null && pe.exitPrice != null && pe.quantity > 0)
       for (const id of ids) {
-        await onSubmit({ ...form, templateId: id, _pendingImages: pendingFiles, _partialExits: partialExits.length > 0 ? partialExits : undefined })
+        await onSubmit({ ...form, templateId: id, _pendingImages: pendingFiles, _partialExits: completePartialExits.length > 0 ? completePartialExits : undefined })
       }
       if (ids.length === 0) {
-        await onSubmit({ ...form, _pendingImages: pendingFiles, _partialExits: partialExits.length > 0 ? partialExits : undefined })
+        await onSubmit({ ...form, _pendingImages: pendingFiles, _partialExits: completePartialExits.length > 0 ? completePartialExits : undefined })
       }
       if (willReset) {
         setForm({
@@ -815,20 +816,24 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
                     <input type="number" step={isFuturesQty ? "1" : "any"} min={isFuturesQty ? "1" : "0"} placeholder="Qty"
-                      value={pe.quantity || ''}
+                      value={pe.quantity ?? ''}
+                      onWheel={(e) => (e.target as HTMLElement).blur()}
                       onChange={(e) => {
                         const next = [...partialExits]
-                        next[i] = { ...next[i], quantity: isFuturesQty ? (parseInt(e.target.value) || 0) : (parseFloat(e.target.value) || 0) }
+                        const raw = e.target.value
+                        next[i] = { ...next[i], quantity: isFuturesQty ? (parseInt(raw) || 0) : (raw === '' ? undefined : parseFloat(raw)) }
                         setPartialExits(next)
                       }}
                       className="block w-full rounded-lg border border-border px-3 py-1.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary transition-all" />
                   </div>
                   <div className="flex-1">
                     <input type="number" step="any" placeholder="Exit price"
-                      value={pe.exitPrice || ''}
+                      value={pe.exitPrice ?? ''}
+                      onWheel={(e) => (e.target as HTMLElement).blur()}
                       onChange={(e) => {
                         const next = [...partialExits]
-                        next[i] = { ...next[i], exitPrice: parseFloat(e.target.value) || 0 }
+                        const raw = e.target.value
+                        next[i] = { ...next[i], exitPrice: raw === '' ? undefined : parseFloat(raw) }
                         setPartialExits(next)
                       }}
                       className="block w-full rounded-lg border border-border px-3 py-1.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary transition-all" />
@@ -852,7 +857,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
               </div>
               )
             })}
-            <button type="button" onClick={() => setPartialExits([...partialExits, { quantity: 0, exitPrice: 0 }])}
+            <button type="button" onClick={() => setPartialExits([...partialExits, {}])}
               className="flex items-center gap-2 text-sm text-primary-light hover:text-primary font-medium transition-colors">
               <Plus className="w-3.5 h-3.5" />
               Add Exit

@@ -13,6 +13,7 @@ import {
 
 const router = Router()
 
+router.get('/check-availability', authController.checkAvailability)
 router.post('/register', validate(registerSchema), authController.register)
 router.post('/login', validate(loginSchema), authController.login)
 router.post('/refresh', authController.refreshToken)

@@ -125,6 +125,7 @@ export function WeekPicker({ label, value, onChange }: WeekPickerProps) {
 
   const weeks = getMonthGrid(viewYear, viewMonth)
   const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  const currentMonday = getMonday(new Date())
 
   return (
     <div className="space-y-1.5" ref={ref}>
@@ -176,6 +177,7 @@ export function WeekPicker({ label, value, onChange }: WeekPickerProps) {
                 if (!mon || !fri) return null
                 const inMonth = mon.getMonth() === viewMonth
                 const isSelected = isSameDay(mon, monday)
+                const isCurrent = isSameDay(mon, currentMonday)
                 return (
                   <button key={i} type="button" onClick={() => selectWeek(mon)}
                     className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all ${
@@ -185,7 +187,10 @@ export function WeekPicker({ label, value, onChange }: WeekPickerProps) {
                           ? 'text-text-primary hover:bg-[#2A2A3E]'
                           : 'text-text-muted/30 hover:bg-[#2A2A3E]'
                     }`}>
-                    <span>{formatDateLong(mon)}</span>
+                    <span className="flex items-center gap-2">
+                      {formatDateLong(mon)}
+                      {isCurrent && <span className="text-[10px] font-bold text-primary-light uppercase tracking-wider">Current</span>}
+                    </span>
                     <span className={`text-xs font-medium ${isSelected ? 'text-primary-light' : 'text-text-muted'}`}>→</span>
                     <span>{formatDateLong(fri)}</span>
                   </button>

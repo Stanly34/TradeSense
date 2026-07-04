@@ -65,11 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           // access token expired, fall through to refresh
         }
-      } else {
-        // No in-memory token on page load — require fresh login
-        localStorage.removeItem('refreshToken')
-        setIsLoading(false)
-        return
       }
       const { data } = await api.post('/auth/refresh', { refreshToken })
       setAccessToken(data.data.accessToken)

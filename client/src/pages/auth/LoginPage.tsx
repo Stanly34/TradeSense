@@ -19,7 +19,7 @@ export function LoginPage() {
     setErrors({})
 
     const newErrors: Record<string, string> = {}
-    if (!form.email.trim()) newErrors.email = 'Email is required'
+    if (!form.email.trim()) newErrors.email = 'Email or username is required'
     if (!form.password) newErrors.password = 'Password is required'
     if (Object.keys(newErrors).length) { setErrors(newErrors); return }
 
@@ -43,9 +43,9 @@ export function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
           id="email"
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
+          label="Email or Username"
+          type="text"
+          placeholder="email or username"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           error={errors.email}

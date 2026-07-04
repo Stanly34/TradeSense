@@ -157,8 +157,12 @@ export function SettingsPage() {
               <input
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all"
+                disabled={user?.role !== 'ADMIN'}
+                className={`w-full px-3 py-2 text-sm bg-input border border-border rounded-lg placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all ${
+                  user?.role !== 'ADMIN' ? 'text-text-muted cursor-not-allowed' : 'text-text-primary'
+                }`}
               />
+              {user?.role !== 'ADMIN' && <p className="text-xs text-text-muted mt-1">Username cannot be changed</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1.5">Email</label>

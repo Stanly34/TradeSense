@@ -96,6 +96,11 @@ export function TradeDetailPage() {
     reason: t.reason ?? undefined,
     mistakes: t.mistakes ?? undefined,
     checklistData: t.checklistData ?? undefined,
+    _partialExits: t.partialExits?.map((pe) => ({
+      quantity: pe.quantity,
+      exitPrice: pe.exitPrice,
+      exitTime: pe.exitTime ?? undefined,
+    })) || undefined,
   }
 
   const tradePnl = t.entryPrice && t.exitPrice
@@ -103,10 +108,9 @@ export function TradeDetailPage() {
         const dir = t.direction === 'LONG' ? 1 : -1
         const pipScale = t.pipSize && t.pipSize !== 0 ? 1 / t.pipSize : 1
         const pipVal = t.pipValue || 1
-        const feeMult = t.fees ? 1 - t.fees / 100 : 1
 
         const calcPnl = (price: number, qty: number) =>
-          (price - t.entryPrice!) * dir * pipScale * pipVal * qty * feeMult
+          (price - t.entryPrice!) * dir * pipScale * pipVal * qty
 
         const partialQty = (t.partialExits || []).reduce((s, pe) => s + pe.quantity, 0)
         const mainQty = (t.quantity || 1) - partialQty
@@ -115,7 +119,7 @@ export function TradeDetailPage() {
         for (const pe of t.partialExits || []) {
           total += calcPnl(pe.exitPrice, pe.quantity)
         }
-        return total
+        return total - (t.fees || 0)
       })()
     : null
 
@@ -194,7 +198,7 @@ export function TradeDetailPage() {
             {t.partialExits.map((pe, i) => {
               const diff = t.direction === 'LONG' ? pe.exitPrice - t.entryPrice! : t.entryPrice! - pe.exitPrice
               const pips = t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff
-              const legPnl = pips * (t.pipValue || 1) * pe.quantity * (t.fees ? 1 - t.fees / 100 : 1)
+              const legPnl = pips * (t.pipValue || 1) * pe.quantity
               return (
                 <div key={pe.id} className="flex items-center justify-between text-sm py-2 px-3 rounded-lg bg-hover">
                   <div className="flex items-center gap-4">
@@ -203,8 +207,11 @@ export function TradeDetailPage() {
                     <span><span className="text-text-muted">Price:</span> ${pe.exitPrice.toFixed(2)}</span>
                     {pe.exitTime && <span className="text-text-muted text-xs">{new Date(pe.exitTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>}
                   </div>
-                  <span className={`font-medium ${legPnl >= 0 ? 'text-success' : 'text-danger'}`}>
-                    {legPnl >= 0 ? '+' : ''}{legPnl.toFixed(2)}
+                  <span>
+                    <span className="text-text-muted mr-1">P&L:</span>
+                    <span className={`font-medium ${legPnl >= 0 ? 'text-success' : 'text-danger'}`}>
+                      {legPnl >= 0 ? '+' : ''}{legPnl.toFixed(2)}
+                    </span>
                   </span>
                 </div>
               )
@@ -361,11 +368,11 @@ export function TradeDetailPage() {
           <h3 className="text-sm font-medium text-text-primary">Trade Images</h3>
 
           {t.images.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-4">
               {t.images.map((img) => (
                 <div key={img.id} className="relative group rounded-xl overflow-hidden border border-border cursor-pointer"
                   onClick={() => setSelectedImage(img.imageUrl)}>
-                  <img src={img.imageUrl} alt="" className="w-full h-40 object-cover" />
+                  <img src={img.imageUrl} alt="" className="w-full h-80 object-cover" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-sm text-white">Click to view</span>
                   </div>

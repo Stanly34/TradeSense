@@ -120,8 +120,7 @@ export async function getAllProgressStatuses(userId: string) {
         if (t.entryPrice && t.exitPrice) {
           const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
           const pips = (t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff)
-          const feeMultiplier = t.fees ? 1 - t.fees / 100 : 1
-          tradePnl = pips * (t.pipValue || 1) * (t.quantity || 1) * feeMultiplier
+          tradePnl = pips * (t.pipValue || 1) * (t.quantity || 1) - (t.fees || 0)
         }
         dailyPnL += tradePnl
         totalPnl = startOfDayTotalPnl + dailyPnL
@@ -218,8 +217,7 @@ export async function getChallengeProgress(userId: string, templateId: string) {
       if (t.entryPrice && t.exitPrice) {
           const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
           const pips = (t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff)
-          const feeMultiplier = t.fees ? 1 - t.fees / 100 : 1
-          tradePnl = pips * (t.pipValue || 1) * (t.quantity || 1) * feeMultiplier
+          tradePnl = pips * (t.pipValue || 1) * (t.quantity || 1) - (t.fees || 0)
       }
       if (t.result === 'WIN') winningTrades++
       if (t.result === 'LOSS') losingTrades++

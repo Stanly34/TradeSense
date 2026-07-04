@@ -8,6 +8,11 @@ function excludePassword(user: Record<string, unknown>) {
   return rest
 }
 
+export async function checkAvailability(field: 'username' | 'email', value: string) {
+  const user = await prisma.user.findFirst({ where: { [field]: value } })
+  return { available: !user }
+}
+
 export async function register(data: {
   fullName: string
   username: string
@@ -26,8 +31,6 @@ export async function register(data: {
 
   const hashedPassword = await bcrypt.hash(data.password, 12)
 
-  const freePlan = await prisma.plan.findUnique({ where: { name: 'BASIC' } })
-
   const user = await prisma.user.create({
     data: {
       fullName: data.fullName,
@@ -37,16 +40,6 @@ export async function register(data: {
       isVerified: true,
     },
   })
-
-  if (freePlan) {
-    await prisma.subscription.create({
-      data: {
-        userId: user.id,
-        planId: freePlan.id,
-        status: 'ACTIVE',
-      },
-    })
-  }
 
   const tokenPayload = { userId: user.id, role: user.role }
   const accessToken = generateAccessToken(tokenPayload)
@@ -77,9 +70,11 @@ export async function register(data: {
   }
 }
 
-export async function login(email: string, password: string) {
-  const user = await prisma.user.findUnique({
-    where: { email },
+export async function login(emailOrUsername: string, password: string) {
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    },
     include: {
       subscription: { include: { plan: true } },
     },
@@ -167,12 +162,12 @@ export async function verifyEmail(userId: string) {
 
 export async function forgotPassword(email: string) {
   const user = await prisma.user.findUnique({ where: { email } })
-  if (!user) return
+  if (!user) throw new Error('Email is not registered')
 
   const token = crypto.randomBytes(32).toString('hex')
   await prisma.setting.upsert({
     where: { key: `reset:${user.id}` },
-    update: { value: token },
+    update: { value: token, createdAt: new Date() },
     create: {
       key: `reset:${user.id}`,
       value: token,
@@ -187,6 +182,12 @@ export async function resetPassword(token: string, newPassword: string) {
     where: { key: { startsWith: 'reset:' }, value: token },
   })
   if (!setting) throw new Error('Invalid or expired reset token')
+
+  const elapsed = Date.now() - setting.createdAt.getTime()
+  if (elapsed > 5 * 60 * 1000) {
+    await prisma.setting.delete({ where: { id: setting.id } })
+    throw new Error('Reset token has expired. Please request a new one.')
+  }
 
   const userId = setting.key.replace('reset:', '')
   const hashedPassword = await bcrypt.hash(newPassword, 12)
@@ -213,7 +214,14 @@ export async function getCurrentUser(userId: string) {
 }
 
 export async function updateProfile(userId: string, data: { fullName?: string; username?: string }) {
-  if (data.username) {
+  const currentUser = await prisma.user.findUnique({ where: { id: userId }, select: { username: true, role: true } })
+  if (!currentUser) throw new Error('User not found')
+
+  if (data.username !== undefined && currentUser.role !== 'ADMIN') {
+    data.username = currentUser.username
+  }
+
+  if (data.username && data.username !== currentUser.username) {
     const existing = await prisma.user.findFirst({
       where: { username: data.username, id: { not: userId } },
     })
