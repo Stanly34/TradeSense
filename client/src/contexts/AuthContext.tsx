@@ -16,16 +16,17 @@ export interface AuthUser {
     status: string
     endDate?: string | null
     autoRenew: boolean
-    plan: {
-      id: string
-      name: string
-      price: number
-      accountLimit: number | null
-      imageLimit: number | null
-      checklistLimit: number | null
-      monthlyTradeLimit: number | null
-      weeklyOutlook: boolean
-    }
+      plan: {
+        id: string
+        name: string
+        price: number
+        accountLimit: number | null
+        imageLimit: number | null
+        checklistLimit: number | null
+        monthlyTradeLimit: number | null
+        dailyTradeLimit: number | null
+        weeklyOutlook: boolean
+      }
   }
   [key: string]: unknown
 }
@@ -34,8 +35,8 @@ export interface AuthContextType {
   user: AuthUser | null
   isLoading: boolean
   isAuthenticated: boolean
-  login: (input: authService.LoginInput) => Promise<void>
-  register: (input: authService.RegisterInput) => Promise<void>
+  login: (input: authService.LoginInput) => Promise<AuthUser | undefined>
+
   logout: () => Promise<void>
   logoutAll: () => Promise<void>
   updateUser: (user: AuthUser) => void
@@ -85,12 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (input: authService.LoginInput) => {
     const result = await authService.login(input)
-    setUser(result.user as AuthUser)
-  }, [])
-
-  const register = useCallback(async (input: authService.RegisterInput) => {
-    const result = await authService.register(input)
-    setUser(result.user as AuthUser)
+    const userData = result.user as AuthUser
+    setUser(userData)
+    return userData
   }, [])
 
   const logout = useCallback(async () => {
@@ -123,7 +121,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         login,
-        register,
         logout,
         logoutAll,
         updateUser,

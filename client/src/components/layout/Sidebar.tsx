@@ -23,7 +23,7 @@ import { useAuth } from '../../hooks/useAuth'
 import * as notificationService from '../../services/notifications'
 import type { Notification } from '../../services/notifications'
 
-const ALL_NAV_ITEMS = [
+const USER_NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/outlook', label: 'Outlook', icon: CalendarCheck },
   { to: '/trades', label: 'Journals', icon: TrendingUp },
@@ -31,7 +31,11 @@ const ALL_NAV_ITEMS = [
   { to: '/tags', label: 'Checklist', icon: Tags },
   { to: '/plans', label: 'Plans', icon: CreditCard },
   { to: '/settings', label: 'Settings', icon: Settings },
-  { to: '/admin', label: 'Admin', icon: Shield },
+] as const
+
+const ADMIN_NAV_ITEMS = [
+  { to: '/admin', label: 'Admin Panel', icon: Shield },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ] as const
 
 interface SidebarProps {
@@ -51,9 +55,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const notifRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
-  const navItems = ALL_NAV_ITEMS.filter(
-    (item) => item.to !== '/admin' || user?.role === 'ADMIN'
-  )
+  const navItems = user?.role === 'ADMIN' || user?.role === 'MANAGER' ? ADMIN_NAV_ITEMS : USER_NAV_ITEMS
 
   useEffect(() => {
     localStorage.setItem('tradesense_sidebar_pinned', String(pinned))

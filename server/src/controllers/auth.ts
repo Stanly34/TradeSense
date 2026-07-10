@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import * as authService from '../services/auth.js'
 import { prisma } from '../lib/prisma.js'
 import { sendSuccess, sendError } from '../utils/response.js'
-import { sendPasswordResetEmail } from '../services/email.js'
+import { sendPasswordResetEmail, sendOtpEmail } from '../services/email.js'
 
 export async function checkAvailability(req: Request, res: Response) {
   try {
@@ -21,13 +21,26 @@ export async function checkAvailability(req: Request, res: Response) {
   }
 }
 
-export async function register(req: Request, res: Response) {
+export async function sendOtp(req: Request, res: Response) {
   try {
-    const result = await authService.register(req.body)
+    const otp = await authService.initiateRegistration(req.body)
+    sendOtpEmail(req.body.email, otp).catch(e => console.error('[OTP EMAIL ERROR]', e))
+    return sendSuccess(res, null, 'Verification code sent to your email')
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to send verification code'
+    return sendError(res, message, 409)
+  }
+}
+
+export async function verifyOtp(req: Request, res: Response) {
+  try {
+    const { email, otp } = req.body
+    if (!email || !otp) return sendError(res, 'Email and OTP are required', 400)
+    const result = await authService.verifyOtpAndRegister(email, otp)
     return sendSuccess(res, result, 'Registration successful', 201)
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Registration failed'
-    return sendError(res, message, 409)
+    const message = err instanceof Error ? err.message : 'Verification failed'
+    return sendError(res, message, 400)
   }
 }
 
@@ -98,6 +111,19 @@ export async function verifyEmail(req: Request, res: Response) {
     return sendSuccess(res, null, 'Email verified successfully')
   } catch {
     return sendError(res, 'Verification failed', 500)
+  }
+}
+
+export async function resendOtp(req: Request, res: Response) {
+  try {
+    const { email } = req.body
+    if (!email) return sendError(res, 'Email is required', 400)
+    const otp = await authService.resendOtp(email)
+    sendOtpEmail(email, otp).catch(e => console.error('[OTP EMAIL ERROR]', e))
+    return sendSuccess(res, null, 'Verification code resent')
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to resend code'
+    return sendError(res, message, 400)
   }
 }
 

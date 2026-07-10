@@ -34,6 +34,8 @@ export const env = {
     from: process.env.EMAIL_FROM || 'TradeSense <noreply@tradesense.app>',
   },
 
+
+
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',

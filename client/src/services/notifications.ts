@@ -30,3 +30,23 @@ export async function markAllAsRead(): Promise<void> {
 export async function deleteNotification(id: string): Promise<void> {
   await api.delete(`/notifications/${id}`)
 }
+
+export interface NotificationPreferences {
+  id: string
+  userId: string
+  emailNotifications: boolean
+  weeklyReports: boolean
+  tradeReminders: boolean
+}
+
+export async function getPreferences(): Promise<NotificationPreferences> {
+  const { data } = await api.get('/notifications/preferences')
+  return data.data
+}
+
+export async function updatePreferences(
+  prefs: Partial<Pick<NotificationPreferences, 'emailNotifications' | 'weeklyReports' | 'tradeReminders'>>
+): Promise<NotificationPreferences> {
+  const { data } = await api.patch('/notifications/preferences', prefs)
+  return data.data
+}

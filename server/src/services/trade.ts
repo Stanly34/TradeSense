@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma.js'
 import type { Prisma } from '@prisma/client'
 import { getUserPlan } from './subscription.js'
+import { sendTradeSummary } from './email.js'
 
 const tradeInclude = {
   images: true,
@@ -71,10 +72,14 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
     } : undefined,
   }
 
-  return prisma.trade.create({
+  const trade = await prisma.trade.create({
     data: tradeData,
     include: tradeInclude,
   })
+
+  sendTradeSummary(userId, trade).catch(() => {})
+
+  return trade
 }
 
 export async function getTradeById(userId: string, tradeId: string) {

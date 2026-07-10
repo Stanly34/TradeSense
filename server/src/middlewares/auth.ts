@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { verifyAccessToken, TokenPayload } from '../utils/tokens.js'
+import { prisma } from '../lib/prisma.js'
 import { sendError } from '../utils/response.js'
 
 declare global {
@@ -10,7 +11,7 @@ declare global {
   }
 }
 
-export function authenticate(req: Request, res: Response, next: NextFunction) {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization
   if (!header || !header.startsWith('Bearer ')) {
     return sendError(res, 'Authentication required', 401)
@@ -19,6 +20,10 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   const token = header.split(' ')[1]
   try {
     const decoded = verifyAccessToken(token)
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId }, select: { isActive: true } })
+    if (!user || !user.isActive) {
+      return sendError(res, 'Account is suspended', 403)
+    }
     req.user = decoded
     next()
   } catch {

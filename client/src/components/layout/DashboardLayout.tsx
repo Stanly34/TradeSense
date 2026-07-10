@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { Menu } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { Sidebar } from './Sidebar'
@@ -7,10 +7,6 @@ import { Sidebar } from './Sidebar'
 export function DashboardLayout() {
   const { user } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  if (user && !user.subscription) {
-    return <Navigate to="/choose-plan" replace />
-  }
 
   return (
     <div className="flex h-screen bg-background">

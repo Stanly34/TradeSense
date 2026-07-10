@@ -6,7 +6,7 @@ interface GuestRouteProps {
 }
 
 export function GuestRoute({ children }: GuestRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
 
   if (isLoading) {
     return (
@@ -17,7 +17,8 @@ export function GuestRoute({ children }: GuestRouteProps) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    const redirectTo = user?.role === 'ADMIN' || user?.role === 'MANAGER' ? '/admin' : '/dashboard'
+    return <Navigate to={redirectTo} replace />
   }
 
   return <>{children}</>

@@ -30,6 +30,9 @@ const limiter = rateLimit({
 })
 app.use('/api', limiter)
 
+import { maintenanceCheck } from './middlewares/maintenance.js'
+app.use('/api', maintenanceCheck)
+
 import authRoutes from './routes/auth.js'
 import tradeRoutes from './routes/trade.js'
 import tagRoutes from './routes/tag.js'

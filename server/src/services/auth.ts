@@ -13,33 +13,96 @@ export async function checkAvailability(field: 'username' | 'email', value: stri
   return { available: !user }
 }
 
-export async function register(data: {
+export async function initiateRegistration(data: {
   fullName: string
   username: string
   email: string
   password: string
 }) {
   const existing = await prisma.user.findFirst({
-    where: {
-      OR: [{ email: data.email }, { username: data.username }],
-    },
+    where: { OR: [{ email: data.email }, { username: data.username }] },
   })
   if (existing) {
     if (existing.email === data.email) throw new Error('Email already registered')
     throw new Error('Username already taken')
   }
 
-  const hashedPassword = await bcrypt.hash(data.password, 12)
+  const otp = crypto.randomInt(100000, 999999).toString()
+  const [hashedOtp, hashedPassword] = await Promise.all([
+    bcrypt.hash(otp, 10),
+    bcrypt.hash(data.password, 12),
+  ])
+
+  await prisma.pendingRegistration.upsert({
+    where: { email: data.email },
+    update: {
+      fullName: data.fullName,
+      username: data.username,
+      password: hashedPassword,
+      otp: hashedOtp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+    create: {
+      email: data.email,
+      fullName: data.fullName,
+      username: data.username,
+      password: hashedPassword,
+      otp: hashedOtp,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    },
+  })
+
+  return otp
+}
+
+export async function resendOtp(email: string) {
+  const pending = await prisma.pendingRegistration.findUnique({ where: { email } })
+  if (!pending) throw new Error('No registration found. Please register again.')
+
+  const otp = crypto.randomInt(100000, 999999).toString()
+  const hashedOtp = await bcrypt.hash(otp, 10)
+
+  await prisma.pendingRegistration.update({
+    where: { id: pending.id },
+    data: { otp: hashedOtp, expiresAt: new Date(Date.now() + 5 * 60 * 1000) },
+  })
+
+  return otp
+}
+
+export async function verifyOtpAndRegister(email: string, otp: string) {
+  const pending = await prisma.pendingRegistration.findUnique({ where: { email } })
+  if (!pending) throw new Error('No registration found. Please start over.')
+
+  if (pending.expiresAt < new Date()) {
+    await prisma.pendingRegistration.delete({ where: { id: pending.id } })
+    throw new Error('OTP has expired. Please register again.')
+  }
+
+  const valid = await bcrypt.compare(otp, pending.otp)
+  if (!valid) throw new Error('Invalid OTP')
 
   const user = await prisma.user.create({
     data: {
-      fullName: data.fullName,
-      username: data.username,
-      email: data.email,
-      password: hashedPassword,
+      fullName: pending.fullName,
+      username: pending.username,
+      email: pending.email,
+      password: pending.password,
       isVerified: true,
     },
   })
+
+  const defaultPlan = await prisma.plan.findFirst({
+    where: { isActive: true },
+    orderBy: { price: 'asc' },
+  })
+  if (defaultPlan) {
+    await prisma.subscription.create({
+      data: { userId: user.id, planId: defaultPlan.id, status: 'ACTIVE' },
+    })
+  }
+
+  await prisma.pendingRegistration.delete({ where: { id: pending.id } })
 
   const tokenPayload = { userId: user.id, role: user.role }
   const accessToken = generateAccessToken(tokenPayload)
@@ -53,20 +116,10 @@ export async function register(data: {
     },
   })
 
-  const verificationToken = crypto.randomBytes(32).toString('hex')
-  await prisma.setting.create({
-    data: {
-      key: `verify:${user.id}`,
-      value: verificationToken,
-      category: 'verification',
-    },
-  })
-
   return {
     user: excludePassword(user as unknown as Record<string, unknown>),
     accessToken,
     refreshToken,
-    verificationToken,
   }
 }
 

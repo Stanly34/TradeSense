@@ -13,6 +13,7 @@ interface InstrumentSelectProps {
   groups: InstrumentGroup[]
   favorites?: string[]
   onToggleFavorite?: (value: string) => void
+  error?: string
 }
 
 function normalize(v: string): string {
@@ -34,7 +35,7 @@ function scoreMatch(input: string, item: { value: string; label: string }): numb
   return 0
 }
 
-export function InstrumentSelect({ value, onChange, groups, favorites = [], onToggleFavorite }: InstrumentSelectProps) {
+export function InstrumentSelect({ value, onChange, groups, favorites = [], onToggleFavorite, error }: InstrumentSelectProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState(value)
   const [highlightIdx, setHighlightIdx] = useState(0)
@@ -122,8 +123,11 @@ export function InstrumentSelect({ value, onChange, groups, favorites = [], onTo
         onFocus={() => setOpen(true)}
         onKeyDown={handleKeyDown}
         placeholder="Search or type instrument..."
-        className="block w-full rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all"
+        className={`block w-full rounded-xl border px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none transition-all ${
+          error ? 'border-danger focus:border-danger focus:shadow-[0_0_0_2px_rgba(239,68,68,0.12)]' : 'border-border/80 focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)]'
+        }`}
       />
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
 
       {open && allFiltered.length > 0 && (
         <div className="absolute z-50 top-full mt-1 left-0 w-full bg-glass/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1.5 max-h-72 overflow-y-auto">

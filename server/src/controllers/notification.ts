@@ -46,3 +46,21 @@ export async function deleteNotification(req: Request, res: Response) {
     return sendError(res, err instanceof Error ? err.message : 'Failed to delete notification', 400)
   }
 }
+
+export async function getPreferences(req: Request, res: Response) {
+  try {
+    const prefs = await notificationService.getPreferences(req.user!.userId)
+    return sendSuccess(res, prefs)
+  } catch {
+    return sendError(res, 'Failed to get notification preferences', 500)
+  }
+}
+
+export async function updatePreferences(req: Request, res: Response) {
+  try {
+    const prefs = await notificationService.updatePreferences(req.user!.userId, req.body)
+    return sendSuccess(res, prefs, 'Preferences updated')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to update preferences', 400)
+  }
+}

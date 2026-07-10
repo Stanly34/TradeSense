@@ -14,7 +14,9 @@ import {
 const router = Router()
 
 router.get('/check-availability', authController.checkAvailability)
-router.post('/register', validate(registerSchema), authController.register)
+router.post('/send-otp', validate(registerSchema), authController.sendOtp)
+router.post('/verify-otp', authController.verifyOtp)
+router.post('/resend-otp', authController.resendOtp)
 router.post('/login', validate(loginSchema), authController.login)
 router.post('/refresh', authController.refreshToken)
 router.post('/logout', authController.logout)

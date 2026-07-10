@@ -193,27 +193,47 @@ const ROOTS: { label: string; items: RootDef[] }[] = [
   },
 ]
 
+const FUTURES_ROOTS = new Set(
+  ROOTS.flatMap((g) => g.items.filter((r) => r.cycle).map((r) => r.value))
+)
+
+const SORTED_FUTURES_ROOTS = [...FUTURES_ROOTS].sort((a, b) => b.length - a.length)
+
+function isFuturesRoot(instrument: string): boolean {
+  if (!instrument) return false
+  const stripped = instrument.toUpperCase().trim().replace(CONTRACT_SUFFIX, '').replace(/1!$/, '').trim()
+  return SORTED_FUTURES_ROOTS.some((root) => stripped === root || stripped.startsWith(root))
+}
+
+function getFrontMonth(cycle: CycleKey): string {
+  const now = new Date()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
+  const { months } = CYCLE_MAP[cycle]
+  for (const m of months) {
+    if (m >= currentMonth) {
+      return `${MONTH_CODES[m]}${currentYear}`
+    }
+  }
+  return `${MONTH_CODES[months[0]]}${currentYear + 1}`
+}
+
 function getInstrumentGroups() {
   return ROOTS.map((group) => ({
     label: group.label,
     items: group.items.flatMap((r) => {
-      const base = { value: r.value, label: r.name }
-      if (!r.cycle) return [base]
-      const { months, count } = CYCLE_MAP[r.cycle]
-      const contracts = getContractMonths(months, count)
+      if (!r.cycle) return [{ value: r.value, label: r.name }]
+      const front = getFrontMonth(r.cycle)
       return [
-        base,
-        ...contracts.map((c) => ({
-          value: `${r.value}${c}`,
-          label: `${r.value} ${c}`,
-        })),
+        { value: `${r.value}${front}`, label: `${r.value} ${front}` },
+        { value: `${r.value}1!`, label: `${r.value} 1!` },
       ]
     }),
   }))
 }
 
 function lookupInstrument(raw: string): InstrumentPreset | null {
-  const stripped = raw.toUpperCase().trim().replace(CONTRACT_SUFFIX, '')
+  const stripped = raw.toUpperCase().trim().replace(CONTRACT_SUFFIX, '').replace(/1!$/, '')
   const keys = Object.keys(INSTRUMENT_PRESETS).sort((a, b) => b.length - a.length)
   for (const key of keys) {
     if (stripped === key || stripped.startsWith(key)) return INSTRUMENT_PRESETS[key]
@@ -312,6 +332,8 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const previewRef = useRef<HTMLDivElement>(null)
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [showUploadMenu, setShowUploadMenu] = useState(false)
+  const uploadMenuRef = useRef<HTMLDivElement>(null)
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false)
   const accountDropdownRef = useRef<HTMLDivElement>(null)
 
@@ -345,6 +367,16 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
     if (accountDropdownOpen) document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [accountDropdownOpen])
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (uploadMenuRef.current && !uploadMenuRef.current.contains(e.target as Node)) {
+        setShowUploadMenu(false)
+      }
+    }
+    if (showUploadMenu) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showUploadMenu])
 
   const ZOOM_LEVELS = [1, 1.5, 2]
 
@@ -567,6 +599,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
         reader.onload = () => setPendingPreviews((prev) => [...prev, reader.result as string])
         reader.readAsDataURL(f)
       })
+      setShowUploadMenu(false)
     }
   }
 
@@ -797,8 +830,8 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
             value={form.exitPrice ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, exitPrice: '' })); set('exitPrice', e.target.value ? parseFloat(e.target.value) : undefined) }} />
           {errors.exitPrice && <p className="text-xs text-danger mt-1">{errors.exitPrice}</p>}
         </div>
-        <Input id="quantity" label="Quantity" type="number" min="0" step={selectedTemplate?.type === 'PROP_FIRM' && selectedDV.marketType === 'FUTURES' ? '1' : '0.01'} placeholder={selectedTemplate?.type === 'PROP_FIRM' && selectedDV.marketType === 'FUTURES' ? '1' : '0.01'}
-          value={form.quantity ?? ''} onChange={(e) => set('quantity', e.target.value ? (selectedTemplate?.type === 'PROP_FIRM' && selectedDV.marketType === 'FUTURES' ? parseInt(e.target.value) : parseFloat(e.target.value)) : undefined)} />
+        <Input id="quantity" label="Quantity" type="number" min="0" step={isFuturesRoot(form.instrument) ? '1' : '0.01'} placeholder={isFuturesRoot(form.instrument) ? '1' : '0.01'}
+          value={form.quantity ?? ''} onChange={(e) => set('quantity', e.target.value ? (isFuturesRoot(form.instrument) ? parseInt(e.target.value) : parseFloat(e.target.value)) : undefined)} />
       </div>
 
       <div className="border border-border rounded-xl">
@@ -810,7 +843,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
         {showPartialClose && (
           <div className="px-4 pb-4 space-y-3 border-t border-border pt-3">
             {partialExits.map((pe, i) => {
-              const isFuturesQty = selectedTemplate?.type === 'PROP_FIRM' && selectedDV.marketType === 'FUTURES'
+              const isFuturesQty = isFuturesRoot(form.instrument) || (selectedTemplate?.type === 'PROP_FIRM' && selectedDV.marketType === 'FUTURES')
               return (
               <div key={i} className="p-3 rounded-xl bg-hover space-y-2">
                 <div className="flex items-start gap-3">
@@ -1022,31 +1055,55 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
 
       <div className="space-y-1.5" onPaste={handlePaste}>
         <label className="block text-sm font-medium text-text-secondary">Images</label>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {pendingPreviews.map((src, i) => (
-            <div key={i} className="relative group w-20 h-20 rounded-lg overflow-hidden border border-border">
+            <div key={i} className="relative group aspect-video rounded-xl overflow-hidden border border-border">
               <img src={src} alt="" className="w-full h-full object-cover cursor-pointer"
                 onClick={() => { resetLightbox(); setPreviewIndex(i) }} />
               <button type="button" onClick={() => removePendingFile(i)}
-                className="absolute top-1 right-1 p-1 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80">
-                <Trash2 className="w-3 h-3 text-white" />
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80">
+                <X className="w-4 h-4" />
               </button>
             </div>
           ))}
           {isAtImageLimit && pendingFiles.length + existingImagesCount >= (plan?.imageLimit || 1) ? (
-            <div className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center text-text-muted cursor-not-allowed">
-              <Lock className="w-4 h-4 mb-0.5" />
-              <button type="button" onClick={() => setShowUpgradeDialog(true)} className="text-[9px] text-primary-light underline">Upgrade</button>
+            <div className="aspect-video rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-text-muted cursor-not-allowed">
+              <Lock className="w-5 h-5 mb-1" />
+              <button type="button" onClick={() => setShowUpgradeDialog(true)} className="text-xs text-primary-light underline">Upgrade</button>
             </div>
           ) : (
-            <button type="button" onClick={() => fileInputRef.current?.click()}
-              className="w-20 h-20 rounded-lg border-2 border-dashed border-border hover:border-primary/40 flex items-center justify-center text-text-muted hover:text-primary-light transition-colors">
-              <Upload className="w-5 h-5" />
-            </button>
+            <div className="relative">
+              <div className="aspect-video rounded-xl border-2 border-dashed border-border bg-hover flex items-center justify-center overflow-hidden group cursor-pointer"
+                onClick={() => setShowUploadMenu(true)}>
+                <div className="flex flex-col items-center gap-1 text-text-muted">
+                  <Upload className="w-6 h-6" />
+                  <span className="text-xs">Click to upload</span>
+                </div>
+              </div>
+              {showUploadMenu && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 rounded-xl"
+                  onClick={() => setShowUploadMenu(false)}>
+                  <div ref={uploadMenuRef} className="bg-elevated border border-border rounded-xl shadow-lg py-3 w-52"
+                    onClick={(e) => e.stopPropagation()}>
+                    <button type="button" onClick={() => { setShowUploadMenu(false); fileInputRef.current?.click() }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-hover transition-colors">
+                      <Upload className="w-4 h-4 text-text-muted shrink-0" />
+                      <span>Choose file</span>
+                    </button>
+                    <div className="h-px bg-border mx-3 my-1.5" />
+                    <p className="px-4 pb-2 text-xs text-text-muted/60 flex items-center gap-2">
+                      <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold bg-hover rounded border border-border">Ctrl+V</kbd>
+                      to paste an image
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" {...(!isPro ? {} : { multiple: true })} className="hidden"
           onChange={(e) => { handleFiles(e.target.files); e.target.value = '' }} />
+        <p className="text-[11px] text-text-muted/60">Ctrl+V to paste an image</p>
       </div>
 
     </>

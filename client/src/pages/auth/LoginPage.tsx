@@ -25,8 +25,12 @@ export function LoginPage() {
 
     setIsLoading(true)
     try {
-      await login(form)
-      navigate('/dashboard')
+      const user = await login(form)
+      if (user?.role === 'ADMIN' || user?.role === 'MANAGER') {
+        navigate('/admin')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err

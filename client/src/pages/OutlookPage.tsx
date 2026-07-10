@@ -269,6 +269,9 @@ export function OutlookPage() {
   const longPressTriggeredRef = useRef(false)
   const beforeInputRef = useRef<HTMLInputElement>(null)
   const afterInputRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const pasteTargetRef = useRef<'before' | 'after' | null>(null)
 
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [instrument, setInstrument] = useState('')
@@ -278,6 +281,8 @@ export function OutlookPage() {
   const [beforeFile, setBeforeFile] = useState<File | null>(null)
   const [afterImage, setAfterImage] = useState<string | null>(null)
   const [afterFile, setAfterFile] = useState<File | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [menuTarget, setMenuTarget] = useState<'before' | 'after' | null>(null)
 
   const instrumentGroups = useMemo(() => getInstrumentGroups(), [])
 
@@ -306,6 +311,16 @@ export function OutlookPage() {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuTarget(null)
+      }
+    }
+    if (menuTarget) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [menuTarget])
+
   function resetForm() {
     setWeekStart(getMonday(new Date()))
     setInstrument('')
@@ -317,6 +332,8 @@ export function OutlookPage() {
     setAfterFile(null)
     setEditingId(null)
     setViewingEntry(null)
+    setErrors({})
+    setMenuTarget(null)
   }
 
   function openEdit(entry: WeeklyOutlook) {
@@ -357,9 +374,26 @@ export function OutlookPage() {
     setAfterImage(null)
   }
 
+  function handleFormPaste(e: React.ClipboardEvent) {
+    const file = e.clipboardData.files[0]
+    if (!file || !file.type.startsWith('image/')) return
+    e.preventDefault()
+    if (pasteTargetRef.current === 'before') {
+      setBeforeFile(file)
+      setBeforeImage(URL.createObjectURL(file))
+      setMenuTarget(null)
+    } else if (pasteTargetRef.current === 'after') {
+      setAfterFile(file)
+      setAfterImage(URL.createObjectURL(file))
+      setMenuTarget(null)
+    }
+  }
+
   async function handleSave() {
+    setErrors({})
     if (!instrument.trim()) {
-      toast.error('Instrument is required')
+      setErrors({ instrument: 'Instrument is required' })
+      formRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
     setSaving(true)
@@ -377,8 +411,9 @@ export function OutlookPage() {
       setShowForm(false)
       resetForm()
       await fetchEntries()
-    } catch {
-      toast.error('Failed to save outlook')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save outlook'
+      toast.error(message)
     } finally {
       setSaving(false)
     }
@@ -708,7 +743,7 @@ export function OutlookPage() {
               </button>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div ref={formRef} className="p-6 space-y-5 overflow-y-auto max-h-[70vh]" onPaste={handleFormPaste}>
               <WeekPicker label="Week" value={weekStart.toISOString().slice(0, 10)}
                 onChange={(iso) => setWeekStart(new Date(iso + 'T00:00:00'))} />
 
@@ -737,54 +772,95 @@ export function OutlookPage() {
               </div>
 
               <InstrumentSelect value={instrument}
-                onChange={(v) => setInstrument(v)}
+                onChange={(v) => { setInstrument(v); if (errors.instrument) setErrors({}) }}
+                error={errors.instrument}
                 groups={instrumentGroups}
                 favorites={favoriteInstruments}
                 onToggleFavorite={toggleFavorite} />
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-text-secondary">Before Week</label>
-                <div className="relative aspect-video rounded-xl border-2 border-dashed border-border bg-hover flex items-center justify-center overflow-hidden group cursor-pointer"
-                  onClick={() => beforeInputRef.current?.click()}>
-                  {beforeImage ? (
-                    <>
-                      <img src={beforeImage} alt="Before Week" className="w-full h-full object-cover" />
-                      <button type="button" onClick={(e) => { e.stopPropagation(); removeBefore() }}
-                        className="absolute top-2 right-2 p-1 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1 text-text-muted">
-                      <Upload className="w-6 h-6" />
-                      <span className="text-xs">Click to upload</span>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-text-secondary">Before Week</label>
+                  <div className="relative">
+                    <div className="relative aspect-video rounded-xl border-2 border-dashed border-border bg-hover flex items-center justify-center overflow-hidden group cursor-pointer"
+                      onClick={() => { pasteTargetRef.current = 'before'; if (!beforeImage) setMenuTarget('before') }}>
+                      {beforeImage ? (
+                        <>
+                          <img src={beforeImage} alt="Before Week" className="w-full h-full object-cover" />
+                          <button type="button" onClick={(e) => { e.stopPropagation(); removeBefore() }}
+                            className="absolute top-2 right-2 p-1 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-text-muted">
+                          <Upload className="w-6 h-6" />
+                          <span className="text-xs">Click to upload</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <input ref={beforeInputRef} type="file" accept="image/*" className="hidden" onChange={handleBeforeFile} />
+                    {menuTarget === 'before' && (
+                      <div ref={menuRef} className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 rounded-xl"
+                        onClick={() => setMenuTarget(null)}>
+                        <div className="bg-elevated border border-border rounded-xl shadow-lg py-3 w-52"
+                          onClick={(e) => e.stopPropagation()}>
+                          <button type="button" onClick={() => { setMenuTarget(null); beforeInputRef.current?.click() }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-hover transition-colors">
+                            <Upload className="w-4 h-4 text-text-muted shrink-0" />
+                            <span>Choose file</span>
+                          </button>
+                          <div className="h-px bg-border mx-3 my-1.5" />
+                          <p className="px-4 pb-2 text-xs text-text-muted/60 flex items-center gap-2">
+                            <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold bg-hover rounded border border-border">Ctrl+V</kbd>
+                            to paste an image
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <input ref={beforeInputRef} type="file" accept="image/*" className="hidden" onChange={handleBeforeFile} />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-text-secondary">After Week</label>
-                <div className="relative aspect-video rounded-xl border-2 border-dashed border-border bg-hover flex items-center justify-center overflow-hidden group cursor-pointer"
-                  onClick={() => afterInputRef.current?.click()}>
-                  {afterImage ? (
-                    <>
-                      <img src={afterImage} alt="After Week" className="w-full h-full object-cover" />
-                      <button type="button" onClick={(e) => { e.stopPropagation(); removeAfter() }}
-                        className="absolute top-2 right-2 p-1 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center gap-1 text-text-muted">
-                      <Upload className="w-6 h-6" />
-                      <span className="text-xs">Click to upload</span>
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-text-secondary">After Week</label>
+                  <div className="relative">
+                    <div className="relative aspect-video rounded-xl border-2 border-dashed border-border bg-hover flex items-center justify-center overflow-hidden group cursor-pointer"
+                      onClick={() => { pasteTargetRef.current = 'after'; if (!afterImage) setMenuTarget('after') }}>
+                      {afterImage ? (
+                        <>
+                          <img src={afterImage} alt="After Week" className="w-full h-full object-cover" />
+                          <button type="button" onClick={(e) => { e.stopPropagation(); removeAfter() }}
+                            className="absolute top-2 right-2 p-1 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-text-muted">
+                          <Upload className="w-6 h-6" />
+                          <span className="text-xs">Click to upload</span>
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <input ref={afterInputRef} type="file" accept="image/*" className="hidden" onChange={handleAfterFile} />
+                    {menuTarget === 'after' && (
+                      <div ref={menuRef} className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 rounded-xl"
+                        onClick={() => setMenuTarget(null)}>
+                        <div className="bg-elevated border border-border rounded-xl shadow-lg py-3 w-52"
+                          onClick={(e) => e.stopPropagation()}>
+                          <button type="button" onClick={() => { setMenuTarget(null); afterInputRef.current?.click() }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-hover transition-colors">
+                            <Upload className="w-4 h-4 text-text-muted shrink-0" />
+                            <span>Choose file</span>
+                          </button>
+                          <div className="h-px bg-border mx-3 my-1.5" />
+                          <p className="px-4 pb-2 text-xs text-text-muted/60 flex items-center gap-2">
+                            <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-semibold bg-hover rounded border border-border">Ctrl+V</kbd>
+                            to paste an image
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    <input ref={afterInputRef} type="file" accept="image/*" className="hidden" onChange={handleAfterFile} />
+                  </div>
                 </div>
-              </div>
 
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-text-secondary">Notes</label>

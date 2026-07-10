@@ -1,31 +1,31 @@
-import { useState, useEffect, useRef } from 'react'
-import { User, Bell, Shield, Save, Camera, Mail, Key, Sparkles } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { User, Bell, Save, Camera, Mail, Loader2 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { usePlan } from '../hooks/usePlan'
 import * as authService from '../services/auth'
+import * as notificationService from '../services/notifications'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 
 const tabs = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'notifications', label: 'Notifications', icon: Bell },
-  { id: 'security', label: 'Security', icon: Shield },
 ]
 
 export function SettingsPage() {
   const { user, updateUser } = useAuth()
-  const { planName, isPro, isExpired } = usePlan()
+  const { isPro, isExpired } = usePlan()
   const [activeTab, setActiveTab] = useState('profile')
   const [fullName, setFullName] = useState(user?.fullName || '')
   const [username, setUsername] = useState(user?.username || '')
   const [email, setEmail] = useState(user?.email || '')
   const [isSaving, setIsSaving] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [preferences, setPreferences] = useState<notificationService.NotificationPreferences | null>(null)
+  const [loadingPrefs, setLoadingPrefs] = useState(true)
+  const [savingPref, setSavingPref] = useState<string | null>(null)
 
   useEffect(() => {
     if (user) {
@@ -35,6 +35,27 @@ export function SettingsPage() {
     }
   }, [user])
 
+  useEffect(() => {
+    notificationService.getPreferences().then(setPreferences).catch(() => {})
+    .finally(() => setLoadingPrefs(false))
+  }, [])
+
+  const handleToggle = useCallback(async (key: 'emailNotifications' | 'weeklyReports' | 'tradeReminders') => {
+    if (!preferences) return
+    const newValue = !preferences[key]
+    setPreferences((prev) => prev ? { ...prev, [key]: newValue } : prev)
+    setSavingPref(key)
+    try {
+      const updated = await notificationService.updatePreferences({ [key]: newValue })
+      setPreferences(updated)
+    } catch {
+      setPreferences((prev) => prev ? { ...prev, [key]: !newValue } : prev)
+      toast.error('Failed to update preference')
+    } finally {
+      setSavingPref(null)
+    }
+  }, [preferences])
+
   async function handleProfileSave() {
     setIsSaving(true)
     try {
@@ -43,29 +64,6 @@ export function SettingsPage() {
       toast.success('Profile updated')
     } catch {
       toast.error('Failed to update profile')
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  async function handlePasswordChange() {
-    if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match')
-      return
-    }
-    if (newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters')
-      return
-    }
-    setIsSaving(true)
-    try {
-      await authService.changePassword(currentPassword, newPassword, confirmPassword)
-      toast.success('Password changed')
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-    } catch {
-      toast.error('Failed to change password')
     } finally {
       setIsSaving(false)
     }
@@ -186,83 +184,44 @@ export function SettingsPage() {
       {activeTab === 'notifications' && (
         <div className="card p-6">
           <h2 className="text-lg font-semibold text-text-primary mb-4">Notification Preferences</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-border/50">
-              <div>
-                <p className="text-sm font-medium text-text-primary">Email Notifications</p>
-                <p className="text-xs text-text-muted">Receive trade summaries via email</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
-              </label>
+          {loadingPrefs ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
             </div>
-            <div className="flex items-center justify-between py-3 border-b border-border/50">
-              <div>
-                <p className="text-sm font-medium text-text-primary">Weekly Reports</p>
-                <p className="text-xs text-text-muted">Get a weekly summary of your performance</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
-              </label>
+          ) : (
+            <div className="space-y-4">
+              {([
+                { key: 'emailNotifications' as const, label: 'Email Notifications', desc: 'Receive trade summaries via email' },
+                { key: 'weeklyReports' as const, label: 'Weekly Reports', desc: 'Get a weekly summary of your performance' },
+                { key: 'tradeReminders' as const, label: 'Journal Reminders', desc: 'Reminders to journal your trades daily' },
+              ] as const).map(({ key, label, desc }, i) => (
+                <div key={key} className={`flex items-center justify-between py-3 ${i < 2 ? 'border-b border-border/50' : ''}`}>
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">{label}</p>
+                    <p className="text-xs text-text-muted">{desc}</p>
+                  </div>
+                  <div className="relative">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={preferences?.[key] ?? false}
+                        onChange={() => handleToggle(key)}
+                        disabled={savingPref !== null}
+                      />
+                      <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                    </label>
+                    {savingPref === key && (
+                      <Loader2 className="w-3.5 h-3.5 text-text-muted animate-spin absolute -right-5 top-1/2 -translate-y-1/2" />
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center justify-between py-3">
-              <div>
-                <p className="text-sm font-medium text-text-primary">Trade Reminders</p>
-                <p className="text-xs text-text-muted">Reminders to log your trades daily</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" defaultChecked />
-                <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
-              </label>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
-      {activeTab === 'security' && (
-        <div className="card p-6 space-y-6">
-          <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-            <Key className="w-5 h-5 text-primary-light" />
-            Change Password
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg">
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Current Password</label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-text-primary mb-1.5">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handlePasswordChange} isLoading={isSaving} leftIcon={<Save className="w-4 h-4" />}>
-              Update Password
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

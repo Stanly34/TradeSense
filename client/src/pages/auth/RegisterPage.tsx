@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
 import { AuthLayout } from '../../components/layout/AuthLayout'
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
@@ -10,7 +9,6 @@ import toast from 'react-hot-toast'
 
 export function RegisterPage() {
   const navigate = useNavigate()
-  const { register } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [form, setForm] = useState({
     fullName: '',
@@ -62,9 +60,8 @@ export function RegisterPage() {
     if (Object.keys(newErrors).length) { setErrors(newErrors); return }
     setIsLoading(true)
     try {
-      await register(form)
-      toast.success('Account created! Please check your email to verify.')
-      navigate('/choose-plan')
+      await authService.sendOtp(form)
+      navigate(`/verify-otp?email=${encodeURIComponent(form.email)}`)
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { error?: { message?: string; details?: Array<{ field: string; message: string }> } } } }
       const details = axiosErr.response?.data?.error?.details

@@ -45,3 +45,25 @@ export async function deleteNotification(notificationId: string, userId: string)
   if (!notif) throw new Error('Notification not found')
   await prisma.notification.delete({ where: { id: notificationId } })
 }
+
+export async function getPreferences(userId: string) {
+  let prefs = await prisma.notificationPreference.findUnique({ where: { userId } })
+  if (!prefs) {
+    prefs = await prisma.notificationPreference.create({
+      data: { userId },
+    })
+  }
+  return prefs
+}
+
+export async function updatePreferences(
+  userId: string,
+  data: { emailNotifications?: boolean; weeklyReports?: boolean; tradeReminders?: boolean }
+) {
+  const prefs = await prisma.notificationPreference.upsert({
+    where: { userId },
+    create: { userId, ...data },
+    update: data,
+  })
+  return prefs
+}

@@ -10,6 +10,7 @@ datasource db {
 
 enum UserRole {
   ADMIN
+  MANAGER
   USER
 }
 
@@ -93,12 +94,14 @@ model User {
   aiReviews      AIReview[]
   aiChats        AIChat[]
   notifications      Notification[]
+  notificationPreference NotificationPreference?
   favoriteInstruments FavoriteInstrument[]
   refreshTokens      RefreshToken[]
   couponUsage        CouponUsage[]
   payments           Payment[]
   sessions           Session[]
   outlooks           WeeklyOutlook[]
+  auditLogs          AuditLog[]
 
   @@index([email])
   @@index([username])
@@ -404,6 +407,16 @@ model Notification {
   @@index([userId])
 }
 
+model NotificationPreference {
+  id                  String  @id @default(uuid()) @db.Uuid
+  userId              String  @unique @db.Uuid
+  emailNotifications  Boolean @default(true)
+  weeklyReports       Boolean @default(false)
+  tradeReminders      Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model RefreshToken {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
@@ -468,6 +481,17 @@ model WeeklyOutlook {
   @@index([userId])
 }
 
+model PendingRegistration {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  fullName  String
+  username  String
+  password  String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 model Setting {
   id        String   @id @default(uuid()) @db.Uuid
   key       String   @unique
@@ -476,4 +500,19 @@ model Setting {
   updatedBy String?  @db.Uuid
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  action     String
+  targetType String
+  targetId   String?  @db.Uuid
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([action])
 }

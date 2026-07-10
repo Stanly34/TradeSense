@@ -26,8 +26,12 @@ export async function checkAvailability(field: 'username' | 'email', value: stri
   return data.data
 }
 
-export async function register(input: RegisterInput): Promise<AuthResponse> {
-  const { data } = await api.post('/auth/register', input)
+export async function sendOtp(input: RegisterInput): Promise<void> {
+  await api.post('/auth/send-otp', input)
+}
+
+export async function verifyOtpAndLogin(email: string, otp: string): Promise<AuthResponse> {
+  const { data } = await api.post('/auth/verify-otp', { email, otp })
   const result = data.data
   setAccessToken(result.accessToken)
   localStorage.setItem('refreshToken', result.refreshToken)

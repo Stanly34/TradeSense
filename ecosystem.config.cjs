@@ -4,7 +4,7 @@ module.exports = {
       name: 'tradesense-server',
       cwd: './server',
       script: 'node',
-      args: '--import tsx src/server.ts',
+      args: '--import tsx --env-file=.env src/server.ts',
       exec_mode: 'fork',
       env: {
         PORT: 5000,

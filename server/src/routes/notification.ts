@@ -11,4 +11,7 @@ router.patch('/:id/read', notificationController.markAsRead)
 router.patch('/read-all', notificationController.markAllAsRead)
 router.delete('/:id', notificationController.deleteNotification)
 
+router.get('/preferences', notificationController.getPreferences)
+router.patch('/preferences', notificationController.updatePreferences)
+
 export default router
