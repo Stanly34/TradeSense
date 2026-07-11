@@ -1,6 +1,7 @@
 import app from './app.js'
 import { checkExpiredSubscriptions } from './services/subscription.js'
 import { startCronJobs } from './services/cron.js'
+import { createNotification } from './services/notification.js'
 
 const PORT = process.env.PORT || 5000
 
@@ -12,9 +13,12 @@ app.listen(PORT, () => {
 
 setInterval(async () => {
   try {
-    const count = await checkExpiredSubscriptions()
-    if (count && count > 0) {
-      console.log(`[Cron] Downgraded ${count} expired PRO subscription(s)`)
+    const expired = await checkExpiredSubscriptions()
+    if (expired && expired.length > 0) {
+      for (const sub of expired) {
+        await createNotification(sub.userId, 'Subscription Expired', 'Your PRO plan has expired. You\'ve been moved to the BASIC plan.')
+      }
+      console.log(`[Cron] Downgraded ${expired.length} expired PRO subscription(s)`)
     }
   } catch (err) {
     console.error('[Cron] Subscription expiry check failed:', err)

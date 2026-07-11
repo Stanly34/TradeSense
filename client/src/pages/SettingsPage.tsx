@@ -1,21 +1,28 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { User, Bell, Save, Camera, Mail, Loader2 } from 'lucide-react'
+import { User, Bell, Save, Camera, Mail, Loader2, Shield } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { usePlan } from '../hooks/usePlan'
 import * as authService from '../services/auth'
 import * as notificationService from '../services/notifications'
+import * as adminService from '../services/admin'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 
-const tabs = [
-  { id: 'profile', label: 'Profile', icon: User },
-  { id: 'notifications', label: 'Notifications', icon: Bell },
-]
+function useTabs() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MANAGER'
+  return [
+    { id: 'profile', label: 'Profile', icon: User },
+    ...(isAdmin ? [] : [{ id: 'notifications', label: 'Notifications', icon: Bell }]),
+    ...(isAdmin ? [{ id: 'platform', label: 'Platform', icon: Shield }] : []),
+  ]
+}
 
 export function SettingsPage() {
   const { user, updateUser } = useAuth()
   const { isPro, isExpired } = usePlan()
+  const tabs = useTabs()
   const [activeTab, setActiveTab] = useState('profile')
   const [fullName, setFullName] = useState(user?.fullName || '')
   const [username, setUsername] = useState(user?.username || '')
@@ -26,6 +33,8 @@ export function SettingsPage() {
   const [preferences, setPreferences] = useState<notificationService.NotificationPreferences | null>(null)
   const [loadingPrefs, setLoadingPrefs] = useState(true)
   const [savingPref, setSavingPref] = useState<string | null>(null)
+  const [platformSettings, setPlatformSettings] = useState<adminService.AdminSetting[]>([])
+  const [loadingPlatform, setLoadingPlatform] = useState(true)
 
   useEffect(() => {
     if (user) {
@@ -39,6 +48,13 @@ export function SettingsPage() {
     notificationService.getPreferences().then(setPreferences).catch(() => {})
     .finally(() => setLoadingPrefs(false))
   }, [])
+
+  useEffect(() => {
+    if (user?.role === 'ADMIN' || user?.role === 'MANAGER') {
+      adminService.listSettings().then(setPlatformSettings).catch(() => {})
+      .finally(() => setLoadingPlatform(false))
+    }
+  }, [user?.role])
 
   const handleToggle = useCallback(async (key: 'emailNotifications' | 'weeklyReports' | 'tradeReminders') => {
     if (!preferences) return
@@ -178,6 +194,60 @@ export function SettingsPage() {
               Save Changes
             </Button>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'platform' && (
+        <div className="card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Shield className="w-5 h-5 text-primary-light" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-text-primary">Platform Settings</h2>
+              <p className="text-sm text-text-muted">Manage global platform features</p>
+            </div>
+          </div>
+          {loadingPlatform ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {[
+                { key: 'allow_registration', label: 'Allow Registration', desc: 'Allow new users to sign up' },
+                { key: 'maintenance_mode', label: 'Maintenance Mode', desc: 'Non-admin users see a maintenance page' },
+                { key: 'email_enabled', label: 'Email Delivery', desc: 'Send emails (password reset, OTP, etc.)' },
+                { key: 'free_plan_available', label: 'Free Plan Available', desc: 'Show and allow selection of the free plan' },
+              ].map(({ key, label, desc }, i) => {
+                const setting = platformSettings.find((s) => s.key === key)
+                const value = setting?.value === 'true'
+                return (
+                  <div key={key} className={`flex items-center justify-between py-3 ${i < 3 ? 'border-b border-border/50' : ''}`}>
+                    <div>
+                      <p className="text-sm font-medium text-text-primary">{label}</p>
+                      <p className="text-xs text-text-muted">{desc}</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={value}
+                        onChange={async () => {
+                          const newValue = value ? 'false' : 'true'
+                          await adminService.updateSetting(key, newValue)
+                          setPlatformSettings((prev) =>
+                            prev.map((s) => s.key === key ? { ...s, value: newValue } : s)
+                          )
+                        }}
+                      />
+                      <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                    </label>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

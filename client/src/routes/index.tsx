@@ -29,6 +29,8 @@ import {
   PlansPage,
   OutlookPage,
   ChoosePlanPage,
+  BillingPage,
+  CalendarPage,
 } from '../pages'
 
 export function AppRouter() {
@@ -59,6 +61,8 @@ export function AppRouter() {
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/tags" element={<TagsPage />} />
         <Route path="/plans" element={<PlansPage />} />
+        <Route path="/billing" element={<BillingPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/admin" element={<AdminPage />} />
       </Route>

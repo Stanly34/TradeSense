@@ -6,9 +6,11 @@ interface SelectionBarProps {
   count: number
   onDelete: () => void
   onCancel: () => void
+  allSelected?: boolean
+  onToggleSelectAll?: () => void
 }
 
-export function SelectionBar({ count, onDelete, onCancel }: SelectionBarProps) {
+export function SelectionBar({ count, onDelete, onCancel, allSelected, onToggleSelectAll }: SelectionBarProps) {
   const [mounted, setMounted] = useState(false)
   const [animating, setAnimating] = useState(false)
 
@@ -49,9 +51,14 @@ export function SelectionBar({ count, onDelete, onCancel }: SelectionBarProps) {
         padding: '0 24px',
       }}
     >
-      <span className="text-sm font-medium text-white whitespace-nowrap shrink-0"
-        style={{ fontWeight: 600, fontSize: '16px', width: '144px' }}>
+      <span className="text-sm font-medium text-white whitespace-nowrap shrink-0 flex items-center gap-2"
+        style={{ fontWeight: 600, fontSize: '16px' }}>
         {count} {count === 1 ? 'item' : 'items'} selected
+        {onToggleSelectAll && (
+          <button onClick={onToggleSelectAll} className="text-xs font-normal text-zinc-400 hover:text-white transition-colors">
+            {allSelected ? 'Deselect all' : 'Select all'}
+          </button>
+        )}
       </span>
 
       <div className="mx-8 h-6 w-px shrink-0" style={{ background: 'rgba(255,255,255,.08)' }} />
@@ -68,7 +75,7 @@ export function SelectionBar({ count, onDelete, onCancel }: SelectionBarProps) {
         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
       >
         <Trash2 className="w-4 h-4" />
-        Delete
+        Deactivate
       </button>
 
       <button

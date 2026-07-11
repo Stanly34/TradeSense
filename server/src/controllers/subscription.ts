@@ -13,12 +13,22 @@ export async function getPlan(req: Request, res: Response) {
   }
 }
 
+export async function listPlans(req: Request, res: Response) {
+  try {
+    const plans = await prisma.plan.findMany({
+      where: { isActive: true },
+      orderBy: { price: 'asc' },
+    })
+    return sendSuccess(res, plans)
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to list plans', 500)
+  }
+}
+
 export async function selectPlan(req: Request, res: Response) {
   try {
     const { planName } = req.body
-    if (!planName || !['BASIC', 'PRO'].includes(planName)) {
-      return sendError(res, 'Invalid plan name', 400)
-    }
+    if (!planName) return sendError(res, 'Plan name is required', 400)
     await subscriptionService.selectPlan(req.user!.userId, planName)
     return sendSuccess(res, null, `Subscribed to ${planName} plan`)
   } catch (err) {
@@ -37,13 +47,23 @@ export async function upgradeToPro(req: Request, res: Response) {
 
 export async function createCheckout(req: Request, res: Response) {
   try {
+    const { planName } = req.body
+    if (!planName) return sendError(res, 'planName is required', 400)
+
+    const plan = await prisma.plan.findFirst({ where: { name: planName, isActive: true } })
+    if (!plan) return sendError(res, 'Plan not found', 404)
+    if (plan.price <= 0) return sendError(res, 'Free plans cannot be checked out', 400)
+
     if (!env.stripe.secretKey) {
       return sendSuccess(res, {
         testMode: true,
         url: null,
-        message: 'Stripe not configured. Use dev upgrade endpoint.',
+        message: 'Stripe not configured.',
       })
     }
+
+    const priceId = plan.stripePriceId || env.stripe.priceId
+    if (!priceId) return sendError(res, 'No Stripe price ID configured for this plan', 400)
 
     const stripe = await import('stripe')
     const client = new stripe.default(env.stripe.secretKey)
@@ -54,9 +74,10 @@ export async function createCheckout(req: Request, res: Response) {
     const session = await client.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
-      line_items: [{ price: env.stripe.priceId, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       customer_email: user.email,
       client_reference_id: user.id,
+      metadata: { planName },
       success_url: `${env.clientUrl}/plans?upgrade=success`,
       cancel_url: `${env.clientUrl}/plans?upgrade=cancelled`,
     })
@@ -64,6 +85,21 @@ export async function createCheckout(req: Request, res: Response) {
     return sendSuccess(res, { testMode: false, url: session.url })
   } catch (err) {
     return sendError(res, err instanceof Error ? err.message : 'Checkout creation failed', 500)
+  }
+}
+
+export async function listPayments(req: Request, res: Response) {
+  try {
+    const payments = await prisma.payment.findMany({
+      where: { userId: req.user!.userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        subscription: { include: { plan: { select: { name: true } } } },
+      },
+    })
+    return sendSuccess(res, payments)
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to list payments', 500)
   }
 }
 

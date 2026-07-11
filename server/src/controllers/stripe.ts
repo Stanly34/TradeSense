@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { env } from '../config/env.js'
-import { upgradeToPro } from '../services/subscription.js'
+import { selectPlan } from '../services/subscription.js'
 
 export async function handleWebhook(req: Request, res: Response) {
   if (!env.stripe.webhookSecret || !env.stripe.secretKey) {
@@ -19,9 +19,10 @@ export async function handleWebhook(req: Request, res: Response) {
     )
 
     if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as { client_reference_id: string }
+      const session = event.data.object as { client_reference_id: string; metadata: Record<string, string> }
       if (session.client_reference_id) {
-        await upgradeToPro(session.client_reference_id)
+        const planName = session.metadata?.planName || 'PRO'
+        await selectPlan(session.client_reference_id, planName)
       }
     }
 

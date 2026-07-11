@@ -198,6 +198,15 @@ export async function listAllTrades(page = 1, limit = 20, query: Record<string, 
   if (query.userId) where.userId = query.userId
   if (query.status) where.status = query.status
   if (query.result) where.result = query.result
+  if (query.search) {
+    where.user = {
+      OR: [
+        { fullName: { contains: query.search, mode: 'insensitive' } },
+        { email: { contains: query.search, mode: 'insensitive' } },
+        { username: { contains: query.search, mode: 'insensitive' } },
+      ],
+    }
+  }
 
   const [trades, total] = await Promise.all([
     prisma.trade.findMany({

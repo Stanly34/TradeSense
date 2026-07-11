@@ -1,5 +1,20 @@
 import api from './api'
 
+export interface PublicPlan {
+  id: string
+  name: string
+  price: number
+  journalLimit: number | null
+  imageLimit: number | null
+  accountLimit: number | null
+  checklistLimit: number | null
+  monthlyTradeLimit: number | null
+  dailyTradeLimit: number | null
+  weeklyOutlook: boolean
+  aiEnabled: boolean
+  isActive: boolean
+}
+
 export interface UserPlan {
   plan: {
     id: string
@@ -23,6 +38,11 @@ export interface UserPlan {
   }
 }
 
+export async function listPlans(): Promise<PublicPlan[]> {
+  const { data } = await api.get('/subscriptions/plans')
+  return data.data
+}
+
 export async function getPlan(): Promise<UserPlan> {
   const { data } = await api.get('/subscriptions/plan')
   return data.data
@@ -38,8 +58,24 @@ export async function upgradeToPro() {
   return data
 }
 
-export async function createCheckout(): Promise<{ testMode: boolean; url: string | null }> {
-  const { data } = await api.post('/subscriptions/create-checkout')
+export async function createCheckout(planName: string): Promise<{ testMode: boolean; url: string | null }> {
+  const { data } = await api.post('/subscriptions/create-checkout', { planName })
+  return data.data
+}
+
+export interface Payment {
+  id: string
+  amount: number
+  couponId: string | null
+  provider: string | null
+  transactionId: string | null
+  status: string
+  createdAt: string
+  subscription: { plan: { name: string } }
+}
+
+export async function listPayments(): Promise<Payment[]> {
+  const { data } = await api.get('/subscriptions/payments')
   return data.data
 }
 

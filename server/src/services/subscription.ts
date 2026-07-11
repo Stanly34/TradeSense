@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma.js'
+import { createNotification } from './notification.js'
 
 export async function getUserPlan(userId: string) {
   const user = await prisma.user.findUnique({
@@ -74,7 +75,7 @@ export async function getUserPlan(userId: string) {
 }
 
 export async function selectPlan(userId: string, planName: string) {
-  const plan = await prisma.plan.findUnique({ where: { name: planName } })
+  const plan = await prisma.plan.findFirst({ where: { name: planName, isActive: true } })
   if (!plan) throw new Error('Plan not found')
 
   const existing = await prisma.subscription.findUnique({ where: { userId } })
@@ -105,13 +106,25 @@ export async function selectPlan(userId: string, planName: string) {
     where: { id: userId },
     data: { subscriptionId: subId },
   })
+
+  if (plan.price > 0) {
+    await prisma.payment.create({
+      data: {
+        userId,
+        subscriptionId: subId,
+        amount: plan.price,
+        status: 'PAID',
+      },
+    })
+    await createNotification(userId, 'Payment Confirmed', `Subscribed to ${plan.name} plan — $${plan.price.toFixed(2)}`)
+  }
 }
 
 export async function upgradeToPro(userId: string) {
   const plan = await prisma.plan.findUnique({ where: { name: 'PRO' } })
   if (!plan) throw new Error('PRO plan not found')
 
-  await prisma.subscription.upsert({
+  const sub = await prisma.subscription.upsert({
     where: { userId },
     update: {
       planId: plan.id,
@@ -127,6 +140,16 @@ export async function upgradeToPro(userId: string) {
       autoRenew: true,
     },
   })
+
+  await prisma.payment.create({
+    data: {
+      userId,
+      subscriptionId: sub.id,
+      amount: plan.price,
+      status: 'PAID',
+    },
+  })
+  await createNotification(userId, 'Payment Confirmed', `Upgraded to PRO plan — $${plan.price.toFixed(2)}`)
 }
 
 export async function cancelAutoRenew(userId: string) {
@@ -145,7 +168,7 @@ export async function reactivateAutoRenew(userId: string) {
 
 export async function checkExpiredSubscriptions() {
   const basicPlan = await prisma.plan.findUnique({ where: { name: 'BASIC' } })
-  if (!basicPlan) return
+  if (!basicPlan) return []
 
   const expired = await prisma.subscription.findMany({
     where: {
@@ -166,5 +189,5 @@ export async function checkExpiredSubscriptions() {
     console.log(`[Subscription] Downgraded user ${sub.userId} from PRO to BASIC (expired)`)
   }
 
-  return expired.length
+  return expired
 }

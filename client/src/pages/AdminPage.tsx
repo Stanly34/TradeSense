@@ -1,24 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Shield, X, Plus, Search, User, Mail, Calendar, Activity, Zap, Clock, ChevronRight, CreditCard, Sparkles, Check, Pencil, Trash2, FileText, Image, Tags, Trophy, Brain, CalendarCheck, AlertTriangle } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import * as adminService from '../services/admin'
 import type { AdminUser, AdminPlan, AdminTrade, AdminJournal, AdminCoupon, AuditLogEntry } from '../services/admin'
 import { Input } from '../components/ui/Input'
+import toast from 'react-hot-toast'
 import { Select } from '../components/ui/Select'
-
-const FEATURE_LABELS: Record<string, string> = {
-  allow_registration: 'Allow Registration',
-  maintenance_mode: 'Maintenance Mode',
-  email_enabled: 'Email Delivery',
-  free_plan_available: 'Free Plan Available',
-}
-
-const FEATURE_DESCRIPTIONS: Record<string, string> = {
-  allow_registration: 'Allow new users to sign up',
-  maintenance_mode: 'Non-admin users see a maintenance page',
-  email_enabled: 'Send emails (password reset, OTP, etc.)',
-  free_plan_available: 'Show and allow selection of the free plan',
-}
+import { SelectionBar } from '../components/ui/SelectionBar'
+import { DateTimePicker } from '../components/ui/DateTimePicker'
 
 const ACTION_LABELS: Record<string, string> = {
   USER_ROLE_CHANGED: 'Role Changed',
@@ -52,8 +41,8 @@ function AdminPanel({ role }: { role: string }) {
   const isAdmin = role === 'ADMIN'
   const [users, setUsers] = useState<AdminUser[]>([])
   const [plans, setPlans] = useState<AdminPlan[]>([])
-  const [settings, setSettings] = useState<adminService.AdminSetting[]>([])
-  const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'journals' | 'coupons' | 'activity' | 'settings'>('users')
+
+  const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'journals' | 'coupons' | 'activity'>('users')
   const [isLoading, setIsLoading] = useState(true)
   const [planModal, setPlanModal] = useState<{ mode: 'create' | 'edit'; plan?: AdminPlan } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'user' | 'plan'; id: string; name: string } | null>(null)
@@ -65,7 +54,6 @@ function AdminPanel({ role }: { role: string }) {
     { key: 'journals' as const, label: 'Journals' },
     ...(isAdmin ? [{ key: 'coupons' as const, label: 'Coupons' }] : []),
     { key: 'activity' as const, label: 'Activity Log' },
-    ...(isAdmin ? [{ key: 'settings' as const, label: 'Settings' }] : []),
   ]
 
   async function loadCore() {
@@ -77,12 +65,19 @@ function AdminPanel({ role }: { role: string }) {
       ])
       setUsers(u.users)
       setPlans(p)
-      if (isAdmin) {
-        const set = await adminService.listSettings()
-        setSettings(set)
-      }
     } catch {}
     setIsLoading(false)
+  }
+
+  async function refreshCore() {
+    try {
+      const [u, p] = await Promise.all([
+        adminService.listUsers(1, 50),
+        adminService.listPlans(),
+      ])
+      setUsers(u.users)
+      setPlans(p)
+    } catch {}
   }
 
   useEffect(() => { loadCore() }, [])
@@ -124,9 +119,9 @@ function AdminPanel({ role }: { role: string }) {
               users={users}
               plans={plans}
               isAdmin={isAdmin}
-              onUpdate={async (id, data) => { await adminService.updateUser(id, data); loadCore() }}
-              onChangePlan={isAdmin ? async (id, planId) => { await adminService.changeUserPlan(id, planId); loadCore() } : undefined}
-              onRefresh={loadCore}
+              onUpdate={async (id, data) => { await adminService.updateUser(id, data); refreshCore() }}
+              onChangePlan={isAdmin ? async (id, planId) => { await adminService.changeUserPlan(id, planId); refreshCore() } : undefined}
+              onRefresh={refreshCore}
             />
           )}
 
@@ -136,6 +131,7 @@ function AdminPanel({ role }: { role: string }) {
               onCreate={isAdmin ? () => setPlanModal({ mode: 'create' }) : undefined}
               onEdit={isAdmin ? (plan) => setPlanModal({ mode: 'edit', plan }) : undefined}
               onDelete={isAdmin ? (id, name) => setConfirmDelete({ type: 'plan', id, name }) : undefined}
+              onRefresh={refreshCore}
             />
           )}
 
@@ -143,7 +139,6 @@ function AdminPanel({ role }: { role: string }) {
           {tab === 'journals' && <AdminJournalsTab />}
           {tab === 'coupons' && isAdmin && <CouponsTab />}
           {tab === 'activity' && <ActivityLogTab />}
-          {tab === 'settings' && isAdmin && <SettingsTab settings={settings} onToggle={async (key, value) => { await adminService.updateSetting(key, value); const set = await adminService.listSettings(); setSettings(set) }} />}
         </>
       )}
 
@@ -156,7 +151,7 @@ function AdminPanel({ role }: { role: string }) {
             if (planModal.mode === 'create') await adminService.createPlan(data)
             else if (planModal.plan) await adminService.updatePlan(planModal.plan.id, data)
             setPlanModal(null)
-            loadCore()
+            refreshCore()
           }}
         />
       )}
@@ -170,7 +165,7 @@ function AdminPanel({ role }: { role: string }) {
             if (confirmDelete.type === 'user') await adminService.deactivateUser(confirmDelete.id)
             else await adminService.deactivatePlan(confirmDelete.id)
             setConfirmDelete(null)
-            loadCore()
+            refreshCore()
           }}
         />
       )}
@@ -530,114 +525,261 @@ const PLAN_FEATURES = [
   { key: 'dailyTradeLimit' as const, label: 'Daily Trades', icon: Clock },
 ] as const
 
-function PlansTab({ plans, onCreate, onEdit, onDelete }: {
+function PlansTab({ plans, onCreate, onEdit, onDelete, onRefresh }: {
   plans: AdminPlan[]
   onCreate?: () => void
   onEdit?: (plan: AdminPlan) => void
   onDelete?: (id: string, name: string) => void
+  onRefresh?: () => Promise<void>
 }) {
   const activeCount = plans.filter((p) => p.isActive).length
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set())
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressTarget = useRef<string | null>(null)
+  const wasLongPress = useRef(false)
+
+  useEffect(() => {
+    if (selectMode && selectedPlans.size === 0) {
+      setSelectMode(false)
+    }
+  }, [selectedPlans, selectMode])
+
+  function toggleSelect(id: string) {
+    if (!selectMode) return
+    const plan = plans.find((p) => p.id === id)
+    if (!plan || !plan.isActive) return
+    setSelectedPlans((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    const activeIds = plans.filter((p) => p.isActive).map((p) => p.id)
+    if (activeIds.every((id) => selectedPlans.has(id))) {
+      setSelectedPlans(new Set())
+    } else {
+      setSelectedPlans(new Set(activeIds))
+    }
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelectedPlans(new Set())
+  }
+
+  async function handleBulkDelete() {
+    setBulkLoading(true)
+    try {
+      const activeSelected = plans.filter((p) => p.isActive && selectedPlans.has(p.id))
+      if (activeSelected.length === 0) {
+        toast.error('No active plans selected')
+        setShowBulkConfirm(false)
+        setBulkLoading(false)
+        return
+      }
+      await Promise.all(activeSelected.map((p) => adminService.deactivatePlan(p.id)))
+      toast.success(`${activeSelected.length} plan${activeSelected.length !== 1 ? 's' : ''} deactivated`)
+      exitSelectMode()
+      setShowBulkConfirm(false)
+      await onRefresh?.()
+    } catch {
+      toast.error('Failed to deactivate some plans')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  function startLongPress(id: string) {
+    if (selectMode) return
+    const plan = plans.find((p) => p.id === id)
+    if (!plan || !plan.isActive) return
+    longPressTarget.current = id
+    wasLongPress.current = false
+    longPressTimer.current = setTimeout(() => {
+      if (longPressTarget.current) {
+        wasLongPress.current = true
+        setSelectMode(true)
+        setSelectedPlans(new Set([longPressTarget.current]))
+        longPressTarget.current = null
+      }
+    }, 500)
+  }
+
+  function cancelLongPress() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    longPressTarget.current = null
+  }
+
+  function handleCardClick(id: string) {
+    if (wasLongPress.current) {
+      wasLongPress.current = false
+      return
+    }
+    if (selectMode) toggleSelect(id)
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
           <p className="text-sm text-text-secondary">{plans.length} plan{plans.length !== 1 ? 's' : ''} &bull; {activeCount} active</p>
         </div>
-        {onCreate && (
-          <button onClick={onCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
-            <Plus className="w-4 h-4" />
-            Create Plan
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {onCreate && (
+            <button onClick={onCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+              <Plus className="w-4 h-4" />
+              Create Plan
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((plan) => (
-          <div key={plan.id} className={`bg-elevated rounded-2xl border-2 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 flex flex-col overflow-hidden ${
-            plan.isActive ? 'border-border' : 'border-danger/30 opacity-70'
-          }`}>
-            {!plan.isActive && (
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-danger text-text-inverse text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
-                Inactive
-              </div>
-            )}
-
-            {/* Header gradient */}
-            <div className={`px-6 pt-6 pb-4 ${plan.isActive ? 'bg-gradient-to-br from-primary/10 via-transparent to-transparent' : ''}`}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-text-primary">{plan.name}</h3>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-text-primary">${plan.price.toFixed(2)}</span>
-                    <span className="text-text-muted text-xs">/month</span>
-                  </div>
+        {[...plans].sort((a, b) => a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1).map((plan) => {
+          const isSelected = selectedPlans.has(plan.id)
+          return (
+            <div
+              key={plan.id}
+              onMouseDown={() => startLongPress(plan.id)}
+              onMouseUp={cancelLongPress}
+              onMouseLeave={cancelLongPress}
+              onTouchStart={() => startLongPress(plan.id)}
+              onTouchEnd={cancelLongPress}
+              onTouchMove={cancelLongPress}
+              onClick={() => handleCardClick(plan.id)}
+              className={`bg-elevated rounded-2xl border-2 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 flex flex-col overflow-hidden ${
+                isSelected ? 'border-primary ring-2 ring-primary/20' : plan.isActive ? 'border-border' : 'border-danger/30 opacity-70'
+              } ${selectMode ? 'cursor-pointer' : ''}`}>
+              {!plan.isActive && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-danger text-text-inverse text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Inactive
                 </div>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${plan.isActive ? 'bg-primary/15' : 'bg-hover'}`}>
-                  <Sparkles className={`w-5 h-5 ${plan.isActive ? 'text-primary' : 'text-text-muted'}`} />
-                </div>
-              </div>
-            </div>
+              )}
 
-            {/* Feature list */}
-            <div className="px-6 pb-6 flex-1">
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 mt-2">Limits</p>
-              <div className="space-y-2.5">
-                {PLAN_FEATURES.map(({ key, label, icon: Icon }) => {
-                  const val = plan[key]
-                  return (
-                    <div key={key} className="flex items-center gap-2.5 text-sm">
-                      <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
-                        <Icon className="w-3.5 h-3.5 text-text-muted" />
-                      </div>
-                      <span className="text-text-secondary">{label}</span>
-                      <span className="ml-auto text-text-primary font-medium tabular-nums">
-                        {val !== null ? val : <span className="text-text-muted font-normal">Unlimited</span>}
-                      </span>
+              {/* Header gradient */}
+              <div className={`px-6 pt-6 pb-4 ${plan.isActive ? 'bg-gradient-to-br from-primary/10 via-transparent to-transparent' : ''}`}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-text-primary">{plan.name}</h3>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-text-primary">${plan.price.toFixed(2)}</span>
+                      <span className="text-text-muted text-xs">/month</span>
                     </div>
-                  )
-                })}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectMode && plan.isActive && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleSelect(plan.id) }}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                          isSelected ? 'bg-primary border-primary' : 'border-border hover:border-primary'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5 text-text-inverse" />}
+                      </button>
+                    )}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${plan.isActive ? 'bg-primary/15' : 'bg-hover'}`}>
+                      <Sparkles className={`w-5 h-5 ${plan.isActive ? 'text-primary' : 'text-text-muted'}`} />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-border/50 space-y-2.5">
-                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Features</p>
-                <div className="flex items-center gap-2.5 text-sm">
-                  <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
-                    <CalendarCheck className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <span className="text-text-secondary">Weekly Outlook</span>
-                  <span className="ml-auto">{plan.weeklyOutlook ? <Check className="w-4 h-4 text-success" /> : <X className="w-4 h-4 text-text-muted" />}</span>
+              {/* Feature list */}
+              <div className="px-6 pb-6 flex-1">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 mt-2">Limits</p>
+                <div className="space-y-2.5">
+                  {PLAN_FEATURES.map(({ key, label, icon: Icon }) => {
+                    const val = plan[key]
+                    return (
+                      <div key={key} className="flex items-center gap-2.5 text-sm">
+                        <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
+                          <Icon className="w-3.5 h-3.5 text-text-muted" />
+                        </div>
+                        <span className="text-text-secondary">{label}</span>
+                        <span className="ml-auto text-text-primary font-medium tabular-nums">
+                          {val !== null ? val : <span className="text-text-muted font-normal">Unlimited</span>}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
-                <div className="flex items-center gap-2.5 text-sm">
-                  <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
-                    <Brain className="w-3.5 h-3.5 text-text-muted" />
+
+                <div className="mt-4 pt-4 border-t border-border/50 space-y-2.5">
+                  <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Features</p>
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
+                      <CalendarCheck className="w-3.5 h-3.5 text-text-muted" />
+                    </div>
+                    <span className="text-text-secondary">Weekly Outlook</span>
+                    <span className="ml-auto">{plan.weeklyOutlook ? <Check className="w-4 h-4 text-success" /> : <X className="w-4 h-4 text-text-muted" />}</span>
                   </div>
-                  <span className="text-text-secondary">AI Analysis</span>
-                  <span className="ml-auto">{plan.aiEnabled ? <Check className="w-4 h-4 text-success" /> : <X className="w-4 h-4 text-text-muted" />}</span>
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
+                      <Brain className="w-3.5 h-3.5 text-text-muted" />
+                    </div>
+                    <span className="text-text-secondary">AI Analysis</span>
+                    <span className="ml-auto">{plan.aiEnabled ? <Check className="w-4 h-4 text-success" /> : <X className="w-4 h-4 text-text-muted" />}</span>
+                  </div>
                 </div>
               </div>
+
+              {plan.isActive && (onEdit || onDelete) && (
+                <div className="px-6 pb-5 flex items-center gap-2 border-t border-border/50 pt-4 mt-auto">
+                  {onEdit && (
+                    <button onClick={(e) => { e.stopPropagation(); onEdit(plan) }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors">
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(plan.id, plan.name) }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Deactivate
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-
-            {(onEdit || onDelete) && (
-              <div className="px-6 pb-5 flex items-center gap-2 border-t border-border/50 pt-4 mt-auto">
-                {onEdit && (
-                  <button onClick={() => onEdit(plan)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors">
-                    <Pencil className="w-3.5 h-3.5" />
-                    Edit
-                  </button>
-                )}
-                {onDelete && (
-                  <button onClick={() => onDelete(plan.id, plan.name)} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Deactivate
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
+
+      {showBulkConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6">
+            <h2 className="text-lg font-semibold text-text-primary">Deactivate Plans</h2>
+            <p className="text-sm text-text-secondary mt-2">
+              Deactivate <strong>{selectedPlans.size}</strong> plan{selectedPlans.size !== 1 ? 's' : ''}? Users on these plans will be affected.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowBulkConfirm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
+              <button onClick={handleBulkDelete} disabled={bulkLoading} className="px-4 py-2 bg-danger text-text-inverse rounded-lg text-sm font-medium hover:bg-danger/80 transition-colors disabled:opacity-50">
+                {bulkLoading ? 'Deactivating...' : `Deactivate ${selectedPlans.size}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!showBulkConfirm && (
+        <SelectionBar
+          count={selectedPlans.size}
+          onDelete={() => setShowBulkConfirm(true)}
+          onCancel={exitSelectMode}
+          allSelected={selectedPlans.size === plans.filter((p) => p.isActive).length}
+          onToggleSelectAll={toggleSelectAll}
+        />
+      )}
     </div>
   )
 }
@@ -648,26 +790,55 @@ function PlanModal({ mode, plan, onClose, onSave }: {
   onClose: () => void
   onSave: (data: Record<string, unknown>) => Promise<void>
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [form, setForm] = useState({
     name: plan?.name ?? '',
-    price: plan?.price ?? 0,
-    journalLimit: plan?.journalLimit ?? null,
-    imageLimit: plan?.imageLimit ?? null,
-    accountLimit: plan?.accountLimit ?? null,
-    checklistLimit: plan?.checklistLimit ?? null,
-    monthlyTradeLimit: plan?.monthlyTradeLimit ?? null,
-    dailyTradeLimit: plan?.dailyTradeLimit ?? null,
+    price: plan?.price ?? '',
+    journalLimit: plan?.journalLimit,
+    imageLimit: plan?.imageLimit,
+    accountLimit: plan?.accountLimit,
+    checklistLimit: plan?.checklistLimit,
+    monthlyTradeLimit: plan?.monthlyTradeLimit,
+    dailyTradeLimit: plan?.dailyTradeLimit,
     weeklyOutlook: plan?.weeklyOutlook ?? false,
     aiEnabled: plan?.aiEnabled ?? false,
     isActive: plan?.isActive ?? true,
   })
+  const limitFields = ['journalLimit', 'imageLimit', 'accountLimit', 'checklistLimit', 'monthlyTradeLimit', 'dailyTradeLimit'] as const
+  const [unlimited, setUnlimited] = useState<Record<string, boolean>>(() => {
+    const init: Record<string, boolean> = {}
+    for (const key of limitFields) {
+      init[key] = plan ? plan[key] === null : false
+    }
+    return init
+  })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const newErrors: Record<string, string> = {}
+    if (!form.name.trim()) newErrors.name = 'Name is required'
+    if (form.price === '' || form.price <= 0) newErrors.price = 'Price must be greater than 0'
+    for (const key of limitFields) {
+      if (!unlimited[key] && (form[key] === null || form[key] === undefined)) {
+        newErrors[key] = 'Set a limit or toggle ∞'
+      }
+    }
+    if (Object.keys(newErrors).length) { setErrors(newErrors); scrollRef.current?.scrollTo(0,0); return }
+    setErrors({})
     setSaving(true)
-    await onSave(form as unknown as Record<string, unknown>)
-    setSaving(false)
+    try {
+      const data = { ...form }
+      for (const key of limitFields) {
+        data[key] = unlimited[key] ? null : form[key]
+      }
+      await onSave(data as unknown as Record<string, unknown>)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to save plan'
+      toast.error(msg)
+      setSaving(false)
+    }
   }
 
   function set(field: string, value: unknown) {
@@ -675,24 +846,46 @@ function PlanModal({ mode, plan, onClose, onSave }: {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto" onClick={onClose}>
+    <div ref={scrollRef} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto" onClick={onClose}>
       <div className="bg-elevated rounded-2xl border border-border w-full max-w-lg my-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-elevated z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold text-text-primary">{mode === 'create' ? 'Create Plan' : 'Edit Plan'}</h2>
           <button onClick={onClose} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <Input label="Name" value={form.name} onChange={(e) => set('name', e.target.value)} required />
+              <Input label="Name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
             </div>
-            <Input label="Price" type="number" step="0.01" value={form.price} onChange={(e) => set('price', parseFloat(e.target.value) || 0)} required />
-            <Input label="Journal Limit" type="number" value={form.journalLimit ?? ''} onChange={(e) => set('journalLimit', e.target.value ? parseInt(e.target.value) : null)} />
-            <Input label="Image Limit" type="number" value={form.imageLimit ?? ''} onChange={(e) => set('imageLimit', e.target.value ? parseInt(e.target.value) : null)} />
-            <Input label="Account Limit" type="number" value={form.accountLimit ?? ''} onChange={(e) => set('accountLimit', e.target.value ? parseInt(e.target.value) : null)} />
-            <Input label="Checklist Limit" type="number" value={form.checklistLimit ?? ''} onChange={(e) => set('checklistLimit', e.target.value ? parseInt(e.target.value) : null)} />
-            <Input label="Monthly Trade Limit" type="number" value={form.monthlyTradeLimit ?? ''} onChange={(e) => set('monthlyTradeLimit', e.target.value ? parseInt(e.target.value) : null)} />
-            <Input label="Daily Trade Limit" type="number" value={form.dailyTradeLimit ?? ''} onChange={(e) => set('dailyTradeLimit', e.target.value ? parseInt(e.target.value) : null)} />
+            <Input label="Price" type="number" step="0.01" value={form.price} onChange={(e) => set('price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)} error={errors.price} endAdornment={<span className="text-text-muted">$</span>} />
+            {limitFields.map((key) => (
+              <div key={key} className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Input
+                    label={key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}
+                    type="number"
+                    value={unlimited[key] ? '' : (form[key] ?? '')}
+                    onChange={(e) => set(key, e.target.value ? parseInt(e.target.value) : (unlimited[key] ? null : null))}
+                    error={errors[key]}
+                    disabled={unlimited[key]}
+                    placeholder={unlimited[key] ? 'Unlimited' : ''}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUnlimited((prev) => ({ ...prev, [key]: !prev[key] }))
+                    if (!unlimited[key]) set(key, null)
+                  }}
+                  className={`mb-0.5 px-2.5 py-2 rounded-lg text-sm font-mono transition-colors ${
+                    unlimited[key] ? 'bg-primary text-text-primary' : 'bg-card text-text-muted hover:text-text-primary border border-border'
+                  }`}
+                  title="Toggle unlimited"
+                >
+                  ∞
+                </button>
+              </div>
+            ))}
           </div>
           <div className="flex items-center gap-6 pt-2">
             <label className="flex items-center gap-2 text-sm text-text-secondary cursor-pointer">
@@ -716,30 +909,6 @@ function PlanModal({ mode, plan, onClose, onSave }: {
           </div>
         </form>
       </div>
-    </div>
-  )
-}
-
-function SettingsTab({ settings, onToggle }: {
-  settings: adminService.AdminSetting[]
-  onToggle: (key: string, value: string) => Promise<void>
-}) {
-  return (
-    <div className="space-y-3">
-      {settings.map((s) => (
-        <div key={s.key} className="card p-5 flex items-center justify-between">
-          <div>
-            <p className="font-medium text-text-primary">{FEATURE_LABELS[s.key] || s.key}</p>
-            <p className="text-xs text-text-muted mt-0.5">{FEATURE_DESCRIPTIONS[s.key] || ''}</p>
-          </div>
-          <button
-            onClick={() => onToggle(s.key, s.value === 'true' ? 'false' : 'true')}
-            className={`relative w-11 h-6 rounded-full transition-colors ${s.value === 'true' ? 'bg-primary' : 'bg-border'}`}
-          >
-            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${s.value === 'true' ? 'translate-x-5' : ''}`} />
-          </button>
-        </div>
-      ))}
     </div>
   )
 }
@@ -780,7 +949,7 @@ function AdminTradesTab() {
     setIsLoading(true)
     try {
       const params: Record<string, string> = {}
-      if (search) params.instrument = search
+      if (search) params.search = search
       const result = await adminService.listAllTrades(pageNum, 20, params)
       setTrades(result.trades)
       setTotalPages(result.totalPages)
@@ -800,7 +969,7 @@ function AdminTradesTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') load(1) }}
-            placeholder="Search by instrument..."
+            placeholder="Search by user..."
             className="w-full bg-card border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
@@ -924,6 +1093,13 @@ function AdminJournalsTab() {
 function CouponsTab() {
   const [coupons, setCoupons] = useState<AdminCoupon[]>([])
   const [modal, setModal] = useState<{ mode: 'create' | 'edit'; coupon?: AdminCoupon } | null>(null)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedCoupons, setSelectedCoupons] = useState<Set<string>>(new Set())
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false)
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const longPressTarget = useRef<string | null>(null)
+  const wasLongPress = useRef(false)
 
   async function load() {
     try {
@@ -934,99 +1110,243 @@ function CouponsTab() {
 
   useEffect(() => { load() }, [])
 
+  useEffect(() => {
+    if (selectMode && selectedCoupons.size === 0) {
+      setSelectMode(false)
+    }
+  }, [selectedCoupons, selectMode])
+
+  function toggleSelect(id: string) {
+    if (!selectMode) return
+    const c = coupons.find((c) => c.id === id)
+    if (!c || !c.isActive) return
+    setSelectedCoupons((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    const activeIds = coupons.filter((c) => c.isActive).map((c) => c.id)
+    if (activeIds.every((id) => selectedCoupons.has(id))) {
+      setSelectedCoupons(new Set())
+    } else {
+      setSelectedCoupons(new Set(activeIds))
+    }
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelectedCoupons(new Set())
+  }
+
+  function startLongPress(id: string) {
+    if (selectMode) return
+    const c = coupons.find((c) => c.id === id)
+    if (!c || !c.isActive) return
+    longPressTarget.current = id
+    wasLongPress.current = false
+    longPressTimer.current = setTimeout(() => {
+      if (longPressTarget.current) {
+        wasLongPress.current = true
+        setSelectMode(true)
+        setSelectedCoupons(new Set([longPressTarget.current]))
+        longPressTarget.current = null
+      }
+    }, 500)
+  }
+
+  function cancelLongPress() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = null
+    }
+    longPressTarget.current = null
+  }
+
+  function handleCardClick(id: string) {
+    if (wasLongPress.current) {
+      wasLongPress.current = false
+      return
+    }
+    if (selectMode) toggleSelect(id)
+  }
+
+  async function handleBulkDeactivate() {
+    setBulkLoading(true)
+    try {
+      const activeSelected = coupons.filter((c) => c.isActive && selectedCoupons.has(c.id))
+      if (activeSelected.length === 0) {
+        toast.error('No active coupons selected')
+        setShowBulkConfirm(false)
+        setBulkLoading(false)
+        return
+      }
+      await Promise.all(activeSelected.map((c) => adminService.deactivateCoupon(c.id)))
+      toast.success(`${activeSelected.length} coupon${activeSelected.length !== 1 ? 's' : ''} deactivated`)
+      exitSelectMode()
+      setShowBulkConfirm(false)
+      await load()
+    } catch {
+      toast.error('Failed to deactivate some coupons')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
           <p className="text-sm text-text-secondary">{coupons.length} coupon{coupons.length !== 1 ? 's' : ''} &bull; {coupons.filter((c) => c.isActive).length} active</p>
         </div>
-        <button onClick={() => setModal({ mode: 'create' })} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
-          <Plus className="w-4 h-4" />
-          Create Coupon
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setModal({ mode: 'create' })} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+            <Plus className="w-4 h-4" />
+            Create Coupon
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {coupons.map((c) => (
-          <div key={c.id} className={`bg-elevated rounded-2xl border-2 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 flex flex-col overflow-hidden ${
-            c.isActive ? 'border-border' : 'border-danger/30 opacity-70'
-          }`}>
-            {!c.isActive && (
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-danger text-text-inverse text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" />
-                Inactive
-              </div>
-            )}
+        {[...coupons].sort((a, b) => a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1).map((c) => {
+          const isSelected = selectedCoupons.has(c.id)
+          return (
+            <div
+              key={c.id}
+              onMouseDown={() => startLongPress(c.id)}
+              onMouseUp={cancelLongPress}
+              onMouseLeave={cancelLongPress}
+              onTouchStart={() => startLongPress(c.id)}
+              onTouchEnd={cancelLongPress}
+              onTouchMove={cancelLongPress}
+              onClick={() => handleCardClick(c.id)}
+              className={`bg-elevated rounded-2xl border-2 relative transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 flex flex-col overflow-hidden ${
+                isSelected ? 'border-primary ring-2 ring-primary/20' : c.isActive ? 'border-border' : 'border-danger/30 opacity-70'
+              } ${selectMode ? 'cursor-pointer' : ''}`}
+            >
+              {!c.isActive && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-danger text-text-inverse text-[10px] font-bold px-3 py-0.5 rounded-full flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Inactive
+                </div>
+              )}
 
-            {/* Header gradient */}
-            <div className={`px-6 pt-6 pb-4 ${c.isActive ? 'bg-gradient-to-br from-primary/10 via-transparent to-transparent' : ''}`}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-text-primary">{c.code}</h3>
-                  <p className="text-sm text-text-muted mt-1">{c.description || 'No description'}</p>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-text-primary">
-                      {c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : `$${c.discountValue.toFixed(2)}`}
+              {/* Header gradient */}
+              <div className={`px-6 pt-6 pb-4 ${c.isActive ? 'bg-gradient-to-br from-primary/10 via-transparent to-transparent' : ''}`}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-text-primary">{c.code}</h3>
+                    <p className="text-sm text-text-muted mt-1">{c.description || 'No description'}</p>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-text-primary">
+                        {c.discountType === 'PERCENTAGE' ? `${c.discountValue}%` : `$${c.discountValue.toFixed(2)}`}
+                      </span>
+                      <span className="text-text-muted text-xs">off</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectMode && c.isActive && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); toggleSelect(c.id) }}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                          isSelected ? 'bg-primary border-primary' : 'border-border hover:border-primary'
+                        }`}
+                      >
+                        {isSelected && <Check className="w-3.5 h-3.5 text-text-inverse" />}
+                      </button>
+                    )}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.isActive ? 'bg-primary/15' : 'bg-hover'}`}>
+                      <Sparkles className={`w-5 h-5 ${c.isActive ? 'text-primary' : 'text-text-muted'}`} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Details section */}
+              <div className="px-6 pb-6 flex-1">
+                <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 mt-2">Usage</p>
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
+                      <Zap className="w-3.5 h-3.5 text-text-muted" />
+                    </div>
+                    <span className="text-text-secondary">Used</span>
+                    <span className="ml-auto text-text-primary font-medium tabular-nums">
+                      {c.usedCount}{c.maxUsage ? ` / ${c.maxUsage}` : ''}
                     </span>
-                    <span className="text-text-muted text-xs">{c.discountType === 'PERCENTAGE' ? 'off' : 'off'}</span>
                   </div>
-                </div>
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.isActive ? 'bg-primary/15' : 'bg-hover'}`}>
-                  <Sparkles className={`w-5 h-5 ${c.isActive ? 'text-primary' : 'text-text-muted'}`} />
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
+                      <Calendar className="w-3.5 h-3.5 text-text-muted" />
+                    </div>
+                    <span className="text-text-secondary">Expires</span>
+                    <span className="ml-auto text-text-primary font-medium tabular-nums">
+                      {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : <span className="text-text-muted font-normal">Never</span>}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 text-sm">
+                    <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
+                      <Shield className="w-3.5 h-3.5 text-text-muted" />
+                    </div>
+                    <span className="text-text-secondary">Discount</span>
+                    <span className="ml-auto text-text-primary font-medium tabular-nums">
+                      {c.discountType === 'PERCENTAGE' ? 'Percentage' : 'Fixed'}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Details section */}
-            <div className="px-6 pb-6 flex-1">
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3 mt-2">Usage</p>
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-2.5 text-sm">
-                  <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
-                    <Zap className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <span className="text-text-secondary">Used</span>
-                  <span className="ml-auto text-text-primary font-medium tabular-nums">
-                    {c.usedCount}{c.maxUsage ? ` / ${c.maxUsage}` : ''}
-                  </span>
+              {/* Actions */}
+              {!selectMode && (
+                <div className="px-6 pb-5 flex items-center gap-2 border-t border-border/50 pt-4">
+                  {c.isActive && (
+                    <button onClick={(e) => { e.stopPropagation(); setModal({ mode: 'edit', coupon: c }) }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors">
+                      <Pencil className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+                  )}
+                  {c.isActive && (
+                    <button onClick={(e) => { e.stopPropagation(); adminService.deactivateCoupon(c.id).then(() => load()) }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Deactivate
+                    </button>
+                  )}
                 </div>
-                <div className="flex items-center gap-2.5 text-sm">
-                  <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
-                    <Calendar className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <span className="text-text-secondary">Expires</span>
-                  <span className="ml-auto text-text-primary font-medium tabular-nums">
-                    {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : <span className="text-text-muted font-normal">Never</span>}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm">
-                  <div className="w-7 h-7 rounded-lg bg-card flex items-center justify-center shrink-0">
-                    <Shield className="w-3.5 h-3.5 text-text-muted" />
-                  </div>
-                  <span className="text-text-secondary">Discount</span>
-                  <span className="ml-auto text-text-primary font-medium tabular-nums">
-                    {c.discountType === 'PERCENTAGE' ? 'Percentage' : 'Fixed'}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="px-6 pb-5 flex items-center gap-2 border-t border-border/50 pt-4">
-              <button onClick={() => setModal({ mode: 'edit', coupon: c })} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors">
-                <Pencil className="w-3.5 h-3.5" />
-                Edit
-              </button>
-              {c.isActive && (
-                <button onClick={async () => { await adminService.deactivateCoupon(c.id); load() }} className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Deactivate
-                </button>
               )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
+
+      {showBulkConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6">
+            <h2 className="text-lg font-semibold text-text-primary">Deactivate Coupons</h2>
+            <p className="text-sm text-text-secondary mt-2">
+              Deactivate <strong>{selectedCoupons.size}</strong> coupon{selectedCoupons.size !== 1 ? 's' : ''}?
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setShowBulkConfirm(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
+              <button onClick={handleBulkDeactivate} disabled={bulkLoading} className="px-4 py-2 bg-danger text-text-inverse rounded-lg text-sm font-medium hover:bg-danger/80 transition-colors disabled:opacity-50">
+                {bulkLoading ? 'Deactivating...' : `Deactivate ${selectedCoupons.size}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!showBulkConfirm && (
+        <SelectionBar
+          count={selectedCoupons.size}
+          onDelete={() => setShowBulkConfirm(true)}
+          onCancel={exitSelectMode}
+          allSelected={selectedCoupons.size === coupons.filter((c) => c.isActive).length}
+          onToggleSelectAll={toggleSelectAll}
+        />
+      )}
 
       {modal && (
         <CouponModal
@@ -1034,8 +1354,10 @@ function CouponsTab() {
           coupon={modal.coupon}
           onClose={() => setModal(null)}
           onSave={async (data) => {
-            if (modal.mode === 'create') await adminService.createCoupon(data)
-            else if (modal.coupon) await adminService.updateCoupon(modal.coupon.id, data)
+            try {
+              if (modal.mode === 'create') await adminService.createCoupon(data)
+              else if (modal.coupon) await adminService.updateCoupon(modal.coupon.id, data)
+            } catch {}
             setModal(null)
             load()
           }}
@@ -1060,18 +1382,26 @@ function CouponModal({ mode, coupon, onClose, onSave }: {
   onClose: () => void
   onSave: (data: CouponFormData) => Promise<void>
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [form, setForm] = useState({
     code: coupon?.code ?? '',
     description: coupon?.description ?? '',
     discountType: coupon?.discountType ?? 'PERCENTAGE',
-    discountValue: coupon?.discountValue ?? 0,
+    discountValue: coupon?.discountValue ?? '',
     maxUsage: coupon?.maxUsage ?? null,
     expiresAt: coupon?.expiresAt ?? '',
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const newErrors: Record<string, string> = {}
+    if (!form.code.trim()) newErrors.code = 'Code is required'
+    if (!form.discountValue || form.discountValue <= 0) newErrors.discountValue = 'Value must be greater than 0'
+    else if (form.discountType === 'PERCENTAGE' && form.discountValue > 100) newErrors.discountValue = 'Percentage cannot exceed 100'
+    if (Object.keys(newErrors).length) { setErrors(newErrors); scrollRef.current?.scrollTo(0,0); return }
+    setErrors({})
     setSaving(true)
     const data: CouponFormData = {
       ...form,
@@ -1079,29 +1409,38 @@ function CouponModal({ mode, coupon, onClose, onSave }: {
       maxUsage: form.maxUsage || null,
     }
     if (mode === 'edit') delete (data as Record<string, unknown>).code
-    await onSave(data)
-    setSaving(false)
+    try {
+      await onSave(data)
+    } catch {
+      setSaving(false)
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto" onClick={onClose}>
+    <div ref={scrollRef} className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-20 overflow-y-auto" onClick={onClose}>
       <div className="bg-elevated rounded-2xl border border-border w-full max-w-lg my-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-elevated z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <h2 className="text-lg font-semibold text-text-primary">{mode === 'create' ? 'Create Coupon' : 'Edit Coupon'}</h2>
           <button onClick={onClose} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <Input label="Code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} required disabled={mode === 'edit'} />
+          <Input label="Code" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} error={errors.code} disabled={mode === 'edit'} />
           <Input label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           <div className="grid grid-cols-2 gap-4">
             <Select label="Discount Type" value={form.discountType} onChange={(v) => setForm({ ...form, discountType: v as 'PERCENTAGE' | 'FIXED' })} options={[
               { value: 'PERCENTAGE', label: 'Percentage' },
               { value: 'FIXED', label: 'Fixed' },
             ]} />
-            <Input label="Value" type="number" step="0.01" value={form.discountValue} onChange={(e) => setForm({ ...form, discountValue: parseFloat(e.target.value) || 0 })} required />
+            <Input label="Value" type="number" step="0.01" min={form.discountType === 'PERCENTAGE' ? 1 : 0} max={form.discountType === 'PERCENTAGE' ? 100 : undefined} value={form.discountValue} onChange={(e) => {
+              const raw = e.target.value
+              if (raw === '') { setForm({ ...form, discountValue: '' }); return }
+              const val = parseFloat(raw) || 0
+              if (form.discountType === 'PERCENTAGE' && val > 100) return
+              setForm({ ...form, discountValue: val })
+            }} error={errors.discountValue} startAdornment={form.discountType === 'FIXED' ? <span className="text-text-muted">$</span> : undefined} endAdornment={form.discountType === 'PERCENTAGE' ? <span className="text-text-muted">%</span> : undefined} />
           </div>
           <Input label="Max Uses" type="number" value={form.maxUsage ?? ''} onChange={(e) => setForm({ ...form, maxUsage: e.target.value ? parseInt(e.target.value) : null })} />
-          <Input label="Expires At" type="date" value={form.expiresAt ? form.expiresAt.substring(0, 10) : ''} onChange={(e) => setForm({ ...form, expiresAt: e.target.value })} className="[color-scheme:dark]" />
+          <DateTimePicker label="Expires At" value={form.expiresAt || undefined} onChange={(iso) => setForm({ ...form, expiresAt: iso })} disableFuture={false} />
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
             <button type="submit" disabled={saving} className="px-4 py-2 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all disabled:opacity-50">
@@ -1121,11 +1460,11 @@ function ActivityLogTab() {
   const [isLoading, setIsLoading] = useState(true)
   const [actionFilter, setActionFilter] = useState('')
 
-  async function load(pageNum: number) {
+  async function load(pageNum: number, filter?: string) {
     setIsLoading(true)
     try {
       const params: { action?: string } = {}
-      if (actionFilter) params.action = actionFilter
+      if (filter) params.action = filter
       const result = await adminService.listAuditLogs(pageNum, 30, params)
       setLogs(result.logs)
       setTotalPages(result.totalPages)
@@ -1134,21 +1473,23 @@ function ActivityLogTab() {
     setIsLoading(false)
   }
 
-  useEffect(() => { load(1) }, [])
+  useEffect(() => { load(1, actionFilter) }, [actionFilter])
 
   const actions = Object.keys(ACTION_LABELS)
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <select
+        <Select
           value={actionFilter}
-          onChange={(e) => { setActionFilter(e.target.value); load(1) }}
-          className="bg-card border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-        >
-          <option value="">All actions</option>
-          {actions.map((a) => <option key={a} value={a}>{ACTION_LABELS[a]}</option>)}
-        </select>
+          onChange={setActionFilter}
+          options={[
+            { value: '', label: 'All actions' },
+            ...actions.map((a) => ({ value: a, label: ACTION_LABELS[a] })),
+          ]}
+          placeholder="All actions"
+          className="text-sm py-2"
+        />
       </div>
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">

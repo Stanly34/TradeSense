@@ -1,6 +1,7 @@
 import cron from 'node-cron'
 import { prisma } from '../lib/prisma.js'
 import { sendEmail } from './email.js'
+import { createNotification } from './notification.js'
 
 const UTC5_OFFSET = -5 * 60 * 60 * 1000
 const DAY_MS = 86400000
@@ -37,6 +38,8 @@ async function sendWeeklyReports() {
         entryTime: { gte: weekStart },
       },
     })
+
+    await createNotification(user.id, 'Weekly Trade Report', trades.length === 0 ? 'No trades were logged this week.' : `You logged ${trades.length} trades this week.`)
 
     if (trades.length === 0) {
       await sendEmail(
@@ -140,6 +143,8 @@ async function sendTradeReminders() {
     })
 
     if (tradeCount > 0) continue
+
+    await createNotification(user.id, 'Trade Reminder', "Don't forget to log your trades today.")
 
     await sendEmail(
       user.email,

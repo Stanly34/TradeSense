@@ -16,20 +16,25 @@ import {
   Pin,
   PinOff,
   CalendarCheck,
+  CalendarDays,
   CreditCard,
+  Receipt,
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import * as notificationService from '../../services/notifications'
 import type { Notification } from '../../services/notifications'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
 
 const USER_NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/outlook', label: 'Outlook', icon: CalendarCheck },
   { to: '/trades', label: 'Journals', icon: TrendingUp },
+  { to: '/outlook', label: 'Outlook', icon: CalendarCheck },
   { to: '/templates', label: 'Accounts', icon: FileText },
   { to: '/tags', label: 'Checklist', icon: Tags },
+  { to: '/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/plans', label: 'Plans', icon: CreditCard },
+  { to: '/billing', label: 'Billing', icon: Receipt },
   { to: '/settings', label: 'Settings', icon: Settings },
 ] as const
 
@@ -48,6 +53,8 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const [pinned, setPinned] = useState(() => localStorage.getItem('tradesense_sidebar_pinned') === 'true')
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showNotifs, setShowNotifs] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [logoutLoading, setLogoutLoading] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const { user, logout } = useAuth()
@@ -71,8 +78,19 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   }, [])
 
   useEffect(() => {
-    notificationService.getUnreadCount().then(setUnreadCount).catch(() => {})
-    notificationService.listNotifications().then(setNotifications).catch(() => {})
+    async function fetchNotifs() {
+      try {
+        const [count, list] = await Promise.all([
+          notificationService.getUnreadCount(),
+          notificationService.listNotifications(),
+        ])
+        setUnreadCount(count)
+        setNotifications(list)
+      } catch {}
+    }
+    fetchNotifs()
+    const interval = setInterval(fetchNotifs, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   async function handleMarkAllRead() {
@@ -93,13 +111,16 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
     setUnreadCount((prev) => Math.max(0, prev - 1))
   }
 
-  async function handleLogout() {
+  async function handleConfirmLogout() {
+    setLogoutLoading(true)
     try {
       await logout()
+      navigate('/login')
     } catch {
-      // proceed with client-side logout even if server call fails
+      navigate('/login')
     }
-    navigate('/login')
+    setLogoutLoading(false)
+    setShowLogoutConfirm(false)
   }
 
   const expanded = pinned || isHovered
@@ -287,7 +308,7 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
                 </button>
                 <hr className="my-1 border-border" />
                 <button
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutConfirm(true)}
                   className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-danger hover:bg-danger/10 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
@@ -299,6 +320,16 @@ export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         </div>
 
       </aside>
+
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleConfirmLogout}
+        title="Sign out"
+        message="Are you sure you want to sign out?"
+        confirmLabel="Sign out"
+        isLoading={logoutLoading}
+      />
     </>
   )
 }

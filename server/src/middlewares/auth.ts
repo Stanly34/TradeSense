@@ -32,11 +32,12 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 }
 
 export function authorize(...roles: string[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return sendError(res, 'Authentication required', 401)
     }
-    if (!roles.includes(req.user.role)) {
+    const user = await prisma.user.findUnique({ where: { id: req.user.userId }, select: { role: true } })
+    if (!user || !roles.includes(user.role)) {
       return sendError(res, 'Insufficient permissions', 403)
     }
     next()
