@@ -95,7 +95,7 @@ export async function getAllProgressStatuses(userId: string) {
     const maxTotalDrawdown = (dv.maxTotalDrawdown as number) || 0
     const maxDailyDrawdown = (dv.maxDailyDrawdown as number) || 0
     const marketType = (dv.marketType as string) || 'FOREX'
-    const startBalance = (dv.currentAccountSize as number) || (dv.accountSize as number) || 0
+    const startBalance = (dv.accountSize as number) || (dv.currentAccountSize as number) || 0
 
     let totalPnl = 0
     let peakPnl = 0
@@ -172,7 +172,7 @@ export async function getChallengeProgress(userId: string, templateId: string) {
   }
 
   const marketType = (dv.marketType as string) || 'FOREX'
-  const startBalance = (dv.currentAccountSize as number) || (dv.accountSize as number) || 0
+  const startBalance = (dv.accountSize as number) || (dv.currentAccountSize as number) || 0
   const targetProfit = (dv.targetProfit as number) || 0
   const maxDailyDrawdown = (dv.maxDailyDrawdown as number) || 0
   const maxTotalDrawdown = (dv.maxTotalDrawdown as number) || 0

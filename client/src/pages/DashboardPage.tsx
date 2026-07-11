@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { TrendingUp, Target, DollarSign, BarChart3, Activity, ExternalLink, Star, ChevronDown, TrendingDown } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
 import * as dashboardService from '../services/dashboard'
 import * as templateService from '../services/templates'
@@ -94,6 +94,7 @@ export function DashboardPage() {
   const { user } = useAuth()
   const { activeTheme } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [monthly, setMonthly] = useState<MonthlyPerformance[]>([])
@@ -105,6 +106,7 @@ export function DashboardPage() {
   const [todayStats, setTodayStats] = useState<DashboardStats | null>(null)
   const [accounts, setAccounts] = useState<Template[]>([])
   const [colors, setColors] = useState(getChartColors)
+  const [refreshKey, setRefreshKey] = useState(0)
   const [selectedAccountId, setSelectedAccountId] = useState<string>(() => {
     return localStorage.getItem(STORAGE_KEY) || ''
   })
@@ -160,10 +162,17 @@ export function DashboardPage() {
   }, [selectedAccountId])
 
   useEffect(() => {
+    setRefreshKey((k) => k + 1)
+    const onFocus = () => setRefreshKey((k) => k + 1)
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [location.key])
+
+  useEffect(() => {
     templateService.listTemplates().then((all) => {
       setAccounts(all.filter((t) => t.type === 'PROP_FIRM' || t.type === 'PERSONAL_ACCOUNT'))
     }).catch(() => {})
-  }, [])
+  }, [refreshKey])
 
   useEffect(() => {
     setColors(getChartColors())
@@ -192,14 +201,14 @@ export function DashboardPage() {
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
-  }, [selectedAccountId, sd, ed])
+  }, [selectedAccountId, sd, ed, refreshKey])
 
   useEffect(() => {
     if (!selectedAccountId) { setOverallStats(null); return }
     dashboardService.getStats(selectedAccountId)
       .then(setOverallStats)
       .catch(() => setOverallStats(null))
-  }, [selectedAccountId])
+  }, [selectedAccountId, refreshKey])
 
   useEffect(() => {
     if (!selectedAccountId) { setTodayStats(null); return }
@@ -211,7 +220,7 @@ export function DashboardPage() {
     dashboardService.getStats(selectedAccountId, dayStart, dayEnd)
       .then(setTodayStats)
       .catch(() => setTodayStats(null))
-  }, [selectedAccountId])
+  }, [selectedAccountId, refreshKey])
 
   useEffect(() => {
     if (timePeriod === 'CUSTOM' && customStart) {
@@ -253,7 +262,6 @@ export function DashboardPage() {
     { label: 'Total Trades', value: stats?.total ?? '--', icon: BarChart3, suffix: '' },
     { label: 'Win Rate', value: stats ? `${stats.winRate}%` : '--', icon: Target, suffix: '' },
     { label: 'P&L', value: totalPnL >= 0 ? `+$${totalPnL.toFixed(0)}` : `-$${Math.abs(totalPnL).toFixed(0)}`, icon: DollarSign, suffix: '', positive: totalPnL >= 0 },
-    { label: 'Avg Return', value: stats ? `$${stats.avgReturn.toFixed(2)}` : '--', icon: TrendingUp, suffix: '' },
     { label: 'Best Day', value: stats?.bestDay ? formatDateLabel(stats.bestDay.date) : '-', sub: stats?.bestDay ? `+$${stats.bestDay.pnl.toFixed(0)}` : '-', icon: TrendingUp, suffix: '', positive: true as const },
     { label: 'Worst Day', value: stats?.worstDay ? formatDateLabel(stats.worstDay.date) : '-', sub: stats?.worstDay ? `-$${Math.abs(stats.worstDay.pnl).toFixed(0)}` : '-', icon: TrendingUp, suffix: '', positive: false as const },
   ]
@@ -383,6 +391,18 @@ export function DashboardPage() {
           </div>
         ))}
 
+        {selectedAccountId && selectedAccount?.defaultValues?.currentAccountSize && (
+          <div className="card p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Current Balance</p>
+              <DollarSign className="w-4 h-4 text-success" />
+            </div>
+            <p className="mt-3 text-3xl font-bold text-text-primary">
+              ${(selectedAccount.defaultValues.currentAccountSize as number).toLocaleString()}
+            </p>
+          </div>
+        )}
+
         {stats && (
           <div className="card p-5">
             <div className="flex items-center justify-between">
@@ -417,7 +437,10 @@ export function DashboardPage() {
                 <span style={{ background: '#222734', padding: '8px 16px', borderRadius: '999px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
-                    return limit ? `$${limit.toLocaleString()}` : '—'
+                    const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
+                    if (!limit) return '—'
+                    const pct = accountSize > 0 ? ` (${((limit / accountSize) * 100).toFixed(1)}%)` : ''
+                    return `$${limit.toLocaleString()}${pct}`
                   })()}
                 </span>
               </div>
@@ -465,7 +488,10 @@ export function DashboardPage() {
                 <span style={{ background: '#222734', padding: '8px 16px', borderRadius: '999px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxTotalDrawdown as number) || 0
-                    return limit ? `$${limit.toLocaleString()}` : '—'
+                    const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
+                    if (!limit) return '—'
+                    const pct = accountSize > 0 ? ` (${((limit / accountSize) * 100).toFixed(1)}%)` : ''
+                    return `$${limit.toLocaleString()}${pct}`
                   })()}
                 </span>
               </div>
@@ -512,45 +538,78 @@ export function DashboardPage() {
             <div className="flex items-center justify-between mb-1">
               <p style={{ fontSize: '14px', fontWeight: 600, color: '#B8C0D4' }}>Target Profit</p>
               <span style={{ background: '#222734', padding: '8px 16px', borderRadius: '999px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>
-                {(() => {
-                  const limit = (selectedAccount.defaultValues?.targetProfit as number) || 0
-                  return limit ? `$${limit.toLocaleString()}` : '—'
-                })()}
-              </span>
-            </div>
-            <div className="flex items-end gap-2 mt-1">
-              <span style={{ fontSize: '58px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
-                {(() => {
-                  const limit = (selectedAccount.defaultValues?.targetProfit as number) || 0
-                  const pnl = overallStats.pnl || 0
-                  if (!limit) return '—'
-                  const rem = Math.max(0, limit - Math.max(0, pnl))
-                  return `$${rem.toLocaleString()}`
-                })()}
-              </span>
-              {selectedAccount.defaultValues?.targetProfit && (
-                <span style={{ fontSize: '22px', fontWeight: 500, color: '#D5D8DF', lineHeight: '58px' }}>left</span>
-              )}
-            </div>
-            <div className="mt-[30px]">
-              <div style={{ height: '22px', background: '#252A35', borderRadius: '999px', overflow: 'hidden', position: 'relative' }}>
-                <div style={{
-                  height: '100%', background: '#22C55E', borderRadius: '999px',
-                  transition: 'width .4s ease',
-                  width: `${(() => {
+                  {(() => {
                     const limit = (selectedAccount.defaultValues?.targetProfit as number) || 0
+                    const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
+                    if (!limit) return '—'
+                    const pct = accountSize > 0 ? ` (${((limit / accountSize) * 100).toFixed(0)}%)` : ''
+                    return `+$${limit.toLocaleString()}${pct}`
+                  })()}
+                </span>
+              </div>
+              <div className="flex items-end gap-2 mt-1">
+                <span style={{ fontSize: '58px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                  {(() => {
+                    const dv = selectedAccount.defaultValues || {}
+                    const limit = (dv.targetProfit as number) || 0
+                    const accountSize = (dv.accountSize as number) || 0
+                    const currentBalance = (dv.currentAccountSize as number) || 0
                     const pnl = overallStats.pnl || 0
-                    return limit ? (Math.max(0, pnl) / limit) * 100 : 0
-                  })()}%`,
-                }} />
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
-                  <span>0%</span><span>100%</span>
+                    if (!limit) return '—'
+                    const progress = currentBalance > 0 && accountSize > 0
+                      ? Math.max(0, currentBalance - accountSize)
+                      : Math.max(0, pnl)
+                    const rem = Math.max(0, limit - progress)
+                    return `$${rem.toLocaleString()}`
+                  })()}
+                </span>
+                {(() => {
+                  const dv = selectedAccount.defaultValues || {}
+                  const limit = (dv.targetProfit as number) || 0
+                  const accountSize = (dv.accountSize as number) || 0
+                  const currentBalance = (dv.currentAccountSize as number) || 0
+                  const pnl = overallStats.pnl || 0
+                  if (!limit) return null
+                  const progress = currentBalance > 0 && accountSize > 0
+                    ? Math.max(0, currentBalance - accountSize)
+                    : Math.max(0, pnl)
+                  const pct = limit > 0 ? Math.min(100, (progress / limit) * 100) : 0
+                  return (
+                    <>
+                      <span style={{ fontSize: '22px', fontWeight: 500, color: '#D5D8DF', lineHeight: '58px' }}>left</span>
+                      <span style={{ fontSize: '16px', fontWeight: 600, color: '#22C55E', lineHeight: '58px', marginLeft: '8px' }}>
+                        ({Math.round(pct)}%)
+                      </span>
+                    </>
+                  )
+                })()}
+              </div>
+              <div className="mt-[30px]">
+                <div style={{ height: '22px', background: '#252A35', borderRadius: '999px', overflow: 'hidden', position: 'relative' }}>
+                  <div style={{
+                    height: '100%', background: '#22C55E', borderRadius: '999px',
+                    transition: 'width .4s ease',
+                    width: `${(() => {
+                      const dv = selectedAccount.defaultValues || {}
+                      const limit = (dv.targetProfit as number) || 0
+                      const accountSize = (dv.accountSize as number) || 0
+                      const currentBalance = (dv.currentAccountSize as number) || 0
+                      const pnl = overallStats.pnl || 0
+                      if (!limit) return 0
+                      const progress = currentBalance > 0 && accountSize > 0
+                        ? Math.max(0, currentBalance - accountSize)
+                        : Math.max(0, pnl)
+                      return Math.min(100, (progress / limit) * 100)
+                    })()}%`,
+                  }} />
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                    <span>0%</span><span>100%</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       {!selectedAccountId && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

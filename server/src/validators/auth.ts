@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const registerSchema = z.object({
   fullName: z.string().min(2).max(100),
-  username: z.string().min(3).max(30).regex(/^[a-zA-Z0-9_]+$/, 'Username must be alphanumeric'),
+  username: z.string().min(3).max(30).regex(/^(?=.*[0-9_])[a-zA-Z0-9_]+$/, 'Must include at least one number or underscore'),
   email: z.string().email(),
   password: z
     .string()

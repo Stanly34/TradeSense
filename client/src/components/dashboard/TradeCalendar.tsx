@@ -76,6 +76,7 @@ export function TradeCalendar({ selectedAccountId, startDate, endDate, year: con
   }
 
   function nextMonth() {
+    if (year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)) return
     if (month === 12) handleMonthChange(year + 1, 1)
     else handleMonthChange(year, month + 1)
   }
@@ -100,7 +101,7 @@ export function TradeCalendar({ selectedAccountId, startDate, endDate, year: con
                     <ChevronsLeft className="w-4 h-4" />
                   </button>
                   <span className="text-sm font-semibold text-text-primary">{year}</span>
-                  <button type="button" onClick={() => handleMonthChange(year + 1, month)} className="p-1 text-text-muted hover:text-text-primary rounded-lg hover:bg-card transition-colors">
+                  <button type="button" disabled={year >= now.getFullYear()} onClick={() => handleMonthChange(year + 1, month)} className={`p-1 rounded-lg transition-colors ${year >= now.getFullYear() ? 'text-text-muted/30 cursor-not-allowed' : 'text-text-muted hover:text-text-primary hover:bg-card'}`}>
                     <ChevronsRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -117,21 +118,27 @@ export function TradeCalendar({ selectedAccountId, startDate, endDate, year: con
                   ))}
                 </div>
                 <div className="grid grid-cols-3 gap-1 pt-2 border-t border-border/50">
-                  {MONTHS.map((m, i) => (
-                    <button key={m} type="button" onClick={() => { handleMonthChange(year, i + 1); setShowYearPicker(false) }}
-                      className={`text-xs py-1.5 rounded-lg font-medium transition-colors ${
-                        i + 1 === month
-                          ? 'bg-primary/20 text-primary-light'
-                          : 'text-text-secondary hover:bg-card'
-                      }`}>
-                      {m.slice(0, 3)}
-                    </button>
-                  ))}
+                  {MONTHS.map((m, i) => {
+                    const isFuture = year === now.getFullYear() && i + 1 > now.getMonth() + 1
+                    return (
+                      <button key={m} type="button" disabled={isFuture} onClick={() => { if (!isFuture) { handleMonthChange(year, i + 1); setShowYearPicker(false) } }}
+                        className={`text-xs py-1.5 rounded-lg font-medium transition-colors ${
+                          isFuture ? 'text-text-muted/30 cursor-not-allowed' : i + 1 === month ? 'bg-primary/20 text-primary-light' : 'text-text-secondary hover:bg-card'
+                        }`}>
+                        {m.slice(0, 3)}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
           </div>
-          <button onClick={nextMonth} className="p-2 text-text-muted hover:text-text-primary hover:bg-glass rounded-lg transition-colors">
+          <button onClick={nextMonth} disabled={year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)}
+            className={`p-2 rounded-lg transition-colors ${
+              year > now.getFullYear() || (year === now.getFullYear() && month >= now.getMonth() + 1)
+                ? 'text-text-muted/30 cursor-not-allowed'
+                : 'text-text-muted hover:text-text-primary hover:bg-glass'
+            }`}>
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

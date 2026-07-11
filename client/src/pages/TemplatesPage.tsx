@@ -76,6 +76,7 @@ export function TemplatesPage() {
   const [statusEditId, setStatusEditId] = useState<string | null>(null)
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
 
+  const formRef = useRef<HTMLDivElement>(null)
   const longTimerRef = useRef<ReturnType<typeof setTimeout>>()
   const longPressTriggeredRef = useRef(false)
 
@@ -149,6 +150,9 @@ export function TemplatesPage() {
       if (!platform) errs.platform = 'Platform is required'
     }
     setErrors(errs)
+    if (Object.keys(errs).length > 0) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
     return Object.keys(errs).length === 0
   }
 
@@ -320,7 +324,7 @@ export function TemplatesPage() {
       </div>
 
       {showForm && (
-        <div className="card p-5 space-y-4">
+        <div ref={formRef} className="card p-5 space-y-4">
           <div className="flex gap-2">
             {(['PROP_FIRM', 'PERSONAL_ACCOUNT'] as const).map((type) => (
               <button key={type} onClick={() => { setTemplateType(type); setErrors({}) }}
@@ -409,15 +413,15 @@ export function TemplatesPage() {
                     { value: 'FUNDED', label: 'Funded' },
                   ]} />
                 {phase !== 'FUNDED' && (
-                  <Input id="target-profit" label="Target Profit ($)" type="number" placeholder="e.g., 5000"
+                  <Input id="target-profit" label="Target Profit" type="text" placeholder="e.g., 5000 or 10%"
                     value={targetProfit} onChange={(e) => setTargetProfit(e.target.value)} />
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-text-secondary">Max Daily Drawdown ($)</label>
+                  <label className="block text-sm font-medium text-text-secondary">Max Daily Drawdown</label>
                   <div className="flex items-center gap-3">
-                    <Input id="daily-dd" type="number" placeholder="e.g., 1000"
+                    <Input id="daily-dd" type="text" placeholder="e.g., 1000 or 2%"
                       value={noDailyDrawdown ? '' : maxDailyDrawdown}
                       onChange={(e) => setMaxDailyDrawdown(e.target.value)}
                       disabled={noDailyDrawdown}
@@ -430,7 +434,7 @@ export function TemplatesPage() {
                     </label>
                   </div>
                 </div>
-                <Input id="total-dd" label="Max Total Drawdown ($)" type="number" placeholder="e.g., 2500"
+                <Input id="total-dd" label="Max Total Drawdown" type="text" placeholder="e.g., 2500 or 5%"
                   value={maxTotalDrawdown} onChange={(e) => setMaxTotalDrawdown(e.target.value)} />
               </div>
             </>
@@ -468,7 +472,9 @@ export function TemplatesPage() {
             const progress = progressMap[tpl.id]
             const target = dv.targetProfit as number || 0
             const totalDrawdown = dv.maxTotalDrawdown as number || 0
-            const progressPercent = target > 0 ? Math.min(100, Math.max(0, ((progress?.totalPnl || 0) / target) * 100)) : 0
+            const accountSizeVal = dv.accountSize as number || 0
+            const currentBalanceVal = dv.currentAccountSize as number || (accountSizeVal + (progress?.totalPnl || 0))
+            const progressPercent = target > 0 && accountSizeVal > 0 ? Math.min(100, Math.max(0, ((currentBalanceVal - accountSizeVal) / target) * 100)) : 0
             const drawdownPercent = totalDrawdown > 0 ? Math.min(100, Math.max(0, ((progress?.maxDrawdown || 0) / totalDrawdown) * 100)) : 0
 
             return (
@@ -538,12 +544,12 @@ export function TemplatesPage() {
                       </div>
                     )}
 
-                    {target > 0 && (
+                    {target > 0 && accountSizeVal > 0 && (
                       <>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-text-muted flex items-center gap-1"><Target className="w-3 h-3" /> Target: ${target.toLocaleString()}</span>
-                          <span className={progress && progress.totalPnl >= 0 ? 'text-success' : 'text-danger'}>
-                            ${progress?.totalPnl.toLocaleString() || '0'}
+                          <span className="text-text-muted flex items-center gap-1"><Target className="w-3 h-3" /> ${(accountSizeVal + target).toLocaleString()} (+${target.toLocaleString()})</span>
+                          <span className={`text-xs ${currentBalanceVal >= accountSizeVal + target ? 'text-success' : 'text-text-muted'}`}>
+                            {Math.round(progressPercent)}%
                           </span>
                         </div>
                         <div className="h-1.5 bg-glass rounded-full overflow-hidden">
@@ -557,8 +563,8 @@ export function TemplatesPage() {
                       <>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-text-muted flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Drawdown: ${totalDrawdown.toLocaleString()}</span>
-                          <span className={progress && progress.maxDrawdown > 0 ? 'text-danger' : 'text-text-muted'}>
-                            ${progress?.maxDrawdown.toLocaleString() || '0'}
+                          <span className={`text-xs ${drawdownPercent >= 100 ? 'text-danger' : 'text-text-muted'}`}>
+                            ${progress?.maxDrawdown?.toLocaleString() || '0'} ({Math.round(drawdownPercent)}%)
                           </span>
                         </div>
                         <div className="h-1.5 bg-glass rounded-full overflow-hidden">
@@ -690,7 +696,9 @@ export function TemplatesPage() {
                 const progress = progressMap[selectedAccount.id]
                 const target = dv.targetProfit as number || 0
                 const totalDrawdown = dv.maxTotalDrawdown as number || 0
-                const progressPercent = target > 0 ? Math.min(100, Math.max(0, ((progress?.totalPnl || 0) / target) * 100)) : 0
+                const accountSizeVal = dv.accountSize as number || 0
+                const currentBalanceVal = dv.currentAccountSize as number || (accountSizeVal + (progress?.totalPnl || 0))
+                const progressPercent = target > 0 && accountSizeVal > 0 ? Math.min(100, Math.max(0, ((currentBalanceVal - accountSizeVal) / target) * 100)) : 0
                 const drawdownPercent = totalDrawdown > 0 ? Math.min(100, Math.max(0, ((progress?.maxDrawdown || 0) / totalDrawdown) * 100)) : 0
 
                 function tradePnL(t: Trade) {
@@ -824,13 +832,13 @@ export function TemplatesPage() {
                           </div>
                         </div>
 
-                        {selectedAccount.type === 'PROP_FIRM' && target > 0 && (
+                        {selectedAccount.type === 'PROP_FIRM' && target > 0 && accountSizeVal > 0 && (
                           <div className="space-y-3">
                             <div>
                               <div className="flex items-center justify-between text-xs mb-1">
-                                <span className="text-text-muted">Target Progress</span>
-                                <span className={progress && progress.totalPnl >= 0 ? 'text-success' : 'text-danger'}>
-                                  ${progress?.totalPnl?.toLocaleString() || '0'} / ${target.toLocaleString()}
+                                <span className="text-text-muted">Target: ${(accountSizeVal + target).toLocaleString()} (+${target.toLocaleString()})</span>
+                                <span className={currentBalanceVal >= accountSizeVal + target ? 'text-success' : 'text-text-muted'}>
+                                  {Math.round(progressPercent)}% · ${(currentBalanceVal - accountSizeVal).toLocaleString()} / ${target.toLocaleString()}
                                 </span>
                               </div>
                               <div className="h-2 bg-glass rounded-full overflow-hidden">
@@ -842,8 +850,8 @@ export function TemplatesPage() {
                               <div>
                                 <div className="flex items-center justify-between text-xs mb-1">
                                   <span className="text-text-muted">Drawdown</span>
-                                  <span className={progress && progress.maxDrawdown > 0 ? 'text-danger' : 'text-text-muted'}>
-                                    ${progress?.maxDrawdown?.toLocaleString() || '0'} / ${totalDrawdown.toLocaleString()}
+                                  <span className={drawdownPercent >= 100 ? 'text-danger' : 'text-text-muted'}>
+                                    ${progress?.maxDrawdown?.toLocaleString() || '0'} / ${totalDrawdown.toLocaleString()} ({Math.round(drawdownPercent)}%)
                                   </span>
                                 </div>
                                 <div className="h-2 bg-glass rounded-full overflow-hidden">

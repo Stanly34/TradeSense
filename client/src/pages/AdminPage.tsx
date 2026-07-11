@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Shield, X, Plus, Search, User, Mail, Calendar, Activity, Zap, Clock, ChevronRight, CreditCard, Sparkles, Check, Pencil, Trash2, FileText, Image, Tags, Trophy, Brain, CalendarCheck, AlertTriangle } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { Shield, X, Plus, Search, User, Mail, Calendar, Activity, Zap, Clock, ChevronRight, CreditCard, Sparkles, Check, Pencil, Trash2, FileText, Image, Tags, Trophy, Brain, CalendarCheck, AlertTriangle, ChevronDown } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import * as adminService from '../services/admin'
 import type { AdminUser, AdminPlan, AdminTrade, AdminJournal, AdminCoupon, AuditLogEntry } from '../services/admin'
@@ -229,6 +230,53 @@ function UsersTab({ users, plans, isAdmin, onUpdate, onChangePlan, onRefresh }: 
   )
 }
 
+function Dropdown({ value, options, onChange, small }: {
+  value: string
+  options: { value: string; label: string }[]
+  onChange: (value: string) => void
+  small?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 120 })
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (btnRef.current && !btnRef.current.contains(e.target as Node) &&
+          menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+  const selected = options.find(o => o.value === value)
+  return (
+    <>
+      <button ref={btnRef} type="button" onClick={() => {
+        const r = btnRef.current!.getBoundingClientRect()
+        setPos({ top: r.bottom + 4, left: r.left, width: Math.max(r.width, 120) })
+        setOpen(o => !o)
+      }}
+        className={`flex items-center gap-1.5 ${small ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} rounded-lg border border-border/80 bg-input/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/40 ${open ? 'border-primary shadow-[0_0_0_2px_rgba(124,58,237,0.12)]' : ''}`}>
+        <span className="text-text-primary">{selected ? selected.label : value}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && createPortal(
+        <div ref={menuRef} style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
+          className="bg-glass/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1">
+          {options.map((opt) => (
+            <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false) }}
+              className={`w-full text-left px-3 py-2 ${small ? 'text-xs' : 'text-sm'} transition-colors ${opt.value === value ? 'bg-primary/15 text-primary-light' : 'text-text-secondary hover:bg-card'}`}>
+              {opt.label}
+            </button>
+          ))}
+        </div>,
+        document.body
+      )}
+    </>
+  )
+}
+
 function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: {
   user: AdminUser
   plans: AdminPlan[]
@@ -264,7 +312,7 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
   }
 
   async function handlePlanConfirm() {
-    if (!pendingPlanId || !onChangePlan) return
+    if (!onChangePlan) return
     setSaving(true)
     await onChangePlan(u.id, pendingPlanId)
     setPlanId(pendingPlanId)
@@ -279,31 +327,15 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
       <tr className="hover:bg-hover cursor-pointer" onClick={onSelect}>
         <td className="px-4 py-3 font-medium text-text-primary hover:text-primary-light transition-colors">{u.fullName}</td>
         <td className="px-4 py-3 text-text-secondary">{u.email}</td>
-        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-          <select
-            value={role}
-            onChange={(e) => setConfirmChange(e.target.value)}
-            className="text-xs bg-card border border-border rounded px-2 py-1 text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            {roleOptions.map((r) => <option key={r} value={r}>{r}</option>)}
-          </select>
+        <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
+          <Dropdown value={role} options={roleOptions.map(r => ({ value: r, label: r }))} onChange={(v) => setConfirmChange(v)} small />
         </td>
         {isAdmin && (
-          <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-            <select
-              value={planId}
-              onChange={(e) => { setPendingPlanId(e.target.value); setConfirmPlan(true) }}
-              className="text-xs bg-card border border-border rounded px-2 py-1 text-text-primary focus:outline-none focus:ring-1 focus:ring-primary max-w-[130px]"
-            >
-              {u.subscription ? (
-                <option value={u.subscription.plan.id}>{u.subscription.plan.name}</option>
-              ) : (
-                <option value="">No plan</option>
-              )}
-              {plans.filter((p) => p.isActive && p.id !== u.subscription?.plan?.id).map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+          <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
+            <Dropdown value={planId} options={[
+              { value: '', label: 'No plan' },
+              ...plans.filter((p) => p.isActive).map(p => ({ value: p.id, label: p.name }))
+            ]} onChange={(v) => { setPendingPlanId(v); setConfirmPlan(true) }} small />
           </td>
         )}
         <td className="px-4 py-3 text-text-secondary">{u._count.trades}</td>

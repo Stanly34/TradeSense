@@ -23,6 +23,42 @@ function stripPartialExitsForUpdate(data: Record<string, unknown>) {
   return rest as Prisma.TradeUncheckedUpdateInput
 }
 
+async function syncAccountBalance(userId: string, templateId: string | null) {
+  if (!templateId) { console.log('[syncAccountBalance] no templateId'); return }
+  const template = await prisma.template.findUnique({ where: { id: templateId } })
+  if (!template || template.type !== 'PROP_FIRM') { console.log('[syncAccountBalance] not found or not PROP_FIRM'); return }
+
+  const dv = (template.defaultValues || {}) as Record<string, unknown>
+  const accountSize = (dv.accountSize as number) || 0
+  if (!accountSize) { console.log('[syncAccountBalance] no accountSize'); return }
+
+  const trades = await prisma.trade.findMany({
+    where: { userId, templateId, isDeleted: false, status: 'COMPLETED' },
+    select: { entryPrice: true, exitPrice: true, direction: true, fees: true, quantity: true, pipSize: true, pipValue: true },
+  })
+
+  let totalPnl = 0
+  for (const t of trades) {
+    if (!t.entryPrice || !t.exitPrice) continue
+    const rawDiff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
+    const diff = (t.pipSize && t.pipSize !== 0) ? rawDiff / t.pipSize : rawDiff
+    const tradePnl = diff * (t.pipValue || 1) * (t.quantity || 1) - (t.fees || 0)
+    totalPnl += tradePnl
+    console.log(`[syncAccountBalance] trade: rawDiff=${rawDiff} pipSize=${t.pipSize} diff=${diff} pipValue=${t.pipValue} qty=${t.quantity} fees=${t.fees} tradePnl=${tradePnl}`)
+  }
+
+  const newBalance = Math.round((accountSize + totalPnl) * 100) / 100
+  console.log(`[syncAccountBalance] totalPnl=${totalPnl} accountSize=${accountSize} newBalance=${newBalance} oldBalance=${dv.currentAccountSize}`)
+  if (dv.currentAccountSize === newBalance) { console.log('[syncAccountBalance] no change'); return }
+
+  dv.currentAccountSize = newBalance
+  await prisma.template.update({
+    where: { id: templateId },
+    data: { defaultValues: dv as never },
+  })
+  console.log('[syncAccountBalance] updated!')
+}
+
 export async function createTrade(userId: string, data: Record<string, unknown>) {
   const plan = await getUserPlan(userId)
   if (plan.plan.dailyTradeLimit !== null) {
@@ -78,6 +114,7 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
   })
 
   sendTradeSummary(userId, trade).catch(() => {})
+  syncAccountBalance(userId, trade.templateId).catch(() => {})
 
   return trade
 }
@@ -157,11 +194,14 @@ export async function updateTrade(userId: string, tradeId: string, data: Record<
     }
   }
 
-  return prisma.trade.update({
+  const updated = await prisma.trade.update({
     where: { id: tradeId },
     data: stripPartialExitsForUpdate(data),
     include: tradeInclude,
   })
+
+  syncAccountBalance(userId, updated.templateId).catch(() => {})
+  return updated
 }
 
 export async function deleteTrade(userId: string, tradeId: string) {
@@ -170,16 +210,19 @@ export async function deleteTrade(userId: string, tradeId: string) {
   })
   if (!trade) throw new Error('Trade not found')
 
-  return prisma.trade.update({
+  const deleted = await prisma.trade.update({
     where: { id: tradeId },
     data: { isDeleted: true, deletedAt: new Date() },
   })
+
+  syncAccountBalance(userId, deleted.templateId).catch(() => {})
+  return deleted
 }
 
 export async function batchDeleteTrades(userId: string, tradeIds: string[]) {
   const trades = await prisma.trade.findMany({
     where: { id: { in: tradeIds }, userId, isDeleted: false },
-    select: { id: true },
+    select: { id: true, templateId: true },
   })
   if (trades.length !== tradeIds.length) throw new Error('Some trades not found')
 
@@ -187,6 +230,11 @@ export async function batchDeleteTrades(userId: string, tradeIds: string[]) {
     where: { id: { in: tradeIds }, userId },
     data: { isDeleted: true, deletedAt: new Date() },
   })
+
+  const affectedTemplates = new Set(trades.map(t => t.templateId).filter(Boolean))
+  for (const templateId of affectedTemplates) {
+    syncAccountBalance(userId, templateId).catch(() => {})
+  }
 }
 
 export async function addTagsToTrade(userId: string, tradeId: string, tagIds: string[]) {

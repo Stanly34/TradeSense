@@ -35,6 +35,8 @@ export function SettingsPage() {
   const [savingPref, setSavingPref] = useState<string | null>(null)
   const [platformSettings, setPlatformSettings] = useState<adminService.AdminSetting[]>([])
   const [loadingPlatform, setLoadingPlatform] = useState(true)
+  const [usernameError, setUsernameError] = useState('')
+  const USERNAME_PATTERN = /^(?=.*[0-9_])[a-zA-Z0-9_]+$/
 
   useEffect(() => {
     if (user) {
@@ -48,6 +50,15 @@ export function SettingsPage() {
     notificationService.getPreferences().then(setPreferences).catch(() => {})
     .finally(() => setLoadingPrefs(false))
   }, [])
+
+  useEffect(() => {
+    if (!username.trim() || user?.role !== 'ADMIN') { setUsernameError(''); return }
+    if (!USERNAME_PATTERN.test(username)) {
+      setUsernameError('Must include at least one number or underscore')
+    } else {
+      setUsernameError('')
+    }
+  }, [username, user?.role])
 
   useEffect(() => {
     if (user?.role === 'ADMIN' || user?.role === 'MANAGER') {
@@ -73,13 +84,17 @@ export function SettingsPage() {
   }, [preferences])
 
   async function handleProfileSave() {
+    if (usernameError) { toast.error(usernameError); return }
     setIsSaving(true)
     try {
       const { data } = await api.patch('/auth/profile', { fullName, username })
       if (data.data) updateUser(data.data as never)
       toast.success('Profile updated')
-    } catch {
-      toast.error('Failed to update profile')
+    } catch (err: unknown) {
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as { response: { data: { error: { message: string } } } }).response?.data?.error?.message
+        : 'Failed to update profile'
+      toast.error(msg)
     } finally {
       setIsSaving(false)
     }
@@ -172,11 +187,12 @@ export function SettingsPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={user?.role !== 'ADMIN'}
-                className={`w-full px-3 py-2 text-sm bg-input border border-border rounded-lg placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all ${
-                  user?.role !== 'ADMIN' ? 'text-text-muted cursor-not-allowed' : 'text-text-primary'
+                className={`w-full px-3 py-2 text-sm bg-input border rounded-lg placeholder:text-text-muted focus:outline-none transition-all ${
+                  user?.role !== 'ADMIN' ? 'text-text-muted cursor-not-allowed border-border' : usernameError ? 'text-text-primary border-danger' : 'text-text-primary border-border focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)]'
                 }`}
               />
               {user?.role !== 'ADMIN' && <p className="text-xs text-text-muted mt-1">Username cannot be changed</p>}
+              {usernameError && <p className="text-xs text-danger mt-1">{usernameError}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-text-primary mb-1.5">Email</label>

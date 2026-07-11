@@ -23,9 +23,16 @@ export function RegisterPage() {
   const usernameTimer = useRef<ReturnType<typeof setTimeout>>()
   const emailTimer = useRef<ReturnType<typeof setTimeout>>()
 
+  const USERNAME_PATTERN = /^(?=.*[0-9_])[a-zA-Z0-9_]+$/
+
   useEffect(() => {
     if (usernameTimer.current) clearTimeout(usernameTimer.current)
-    if (!form.username.trim()) { setErrors((p) => { const { username: _, ...rest } = p; return rest }); return }
+    const val = form.username.trim()
+    if (!val) { setErrors((p) => { const { username: _, ...rest } = p; return rest }); return }
+    if (!USERNAME_PATTERN.test(val)) {
+      setErrors((p) => ({ ...p, username: 'Must include at least one number or underscore' }))
+      return
+    }
     usernameTimer.current = setTimeout(async () => {
       try {
         const { available } = await authService.checkAvailability('username', form.username)
