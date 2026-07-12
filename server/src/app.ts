@@ -6,11 +6,11 @@ import helmet from 'helmet'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
 import rateLimit from 'express-rate-limit'
-import { handleWebhook } from './controllers/stripe.js'
+import { handleRazorpayWebhook } from './controllers/razorpay.js'
 
 const app = express()
 
-app.post('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }), handleWebhook)
+app.post('/api/v1/razorpay/webhook', express.raw({ type: 'application/json' }), handleRazorpayWebhook)
 
 app.use(helmet())
 app.use(cors({

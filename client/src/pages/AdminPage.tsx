@@ -1,14 +1,16 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Component, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Shield, X, Plus, Search, User, Mail, Calendar, Activity, Zap, Clock, ChevronRight, CreditCard, Sparkles, Check, Pencil, Trash2, FileText, Image, Tags, Trophy, Brain, CalendarCheck, AlertTriangle, ChevronDown } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import * as adminService from '../services/admin'
-import type { AdminUser, AdminPlan, AdminTrade, AdminJournal, AdminCoupon, AuditLogEntry } from '../services/admin'
+import type { AdminUser, AdminPlan, AdminTrade, AdminCoupon, AuditLogEntry } from '../services/admin'
 import { Input } from '../components/ui/Input'
 import toast from 'react-hot-toast'
 import { Select } from '../components/ui/Select'
 import { SelectionBar } from '../components/ui/SelectionBar'
 import { DateTimePicker } from '../components/ui/DateTimePicker'
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import { getCurrencySymbol, SUPPORTED_CURRENCIES } from '../lib/currency'
 
 const ACTION_LABELS: Record<string, string> = {
   USER_ROLE_CHANGED: 'Role Changed',
@@ -21,6 +23,9 @@ const ACTION_LABELS: Record<string, string> = {
   COUPON_CREATED: 'Coupon Created',
   COUPON_EDITED: 'Coupon Edited',
   COUPON_DEACTIVATED: 'Coupon Deactivated',
+  PLATFORM_CREATED: 'Platform Created',
+  PLATFORM_EDITED: 'Platform Edited',
+  PLATFORM_DELETED: 'Platform Deleted',
 }
 
 export function AdminPage() {
@@ -31,8 +36,8 @@ export function AdminPage() {
       <div className="p-8">
         <h1 className="text-2xl font-bold text-text-primary">Access Denied</h1>
         <p className="text-text-secondary mt-1">You do not have permission to view this page.</p>
-      </div>
-    )
+    </div>
+  )
   }
 
   return <AdminPanel role={user!.role} />
@@ -43,7 +48,7 @@ function AdminPanel({ role }: { role: string }) {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [plans, setPlans] = useState<AdminPlan[]>([])
 
-  const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'journals' | 'coupons' | 'activity'>('users')
+  const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'platforms' | 'coupons' | 'activity'>('users')
   const [isLoading, setIsLoading] = useState(true)
   const [planModal, setPlanModal] = useState<{ mode: 'create' | 'edit'; plan?: AdminPlan } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'user' | 'plan'; id: string; name: string } | null>(null)
@@ -52,9 +57,9 @@ function AdminPanel({ role }: { role: string }) {
     { key: 'users' as const, label: 'Users' },
     { key: 'plans' as const, label: 'Plans' },
     { key: 'trades' as const, label: 'Trades' },
-    { key: 'journals' as const, label: 'Journals' },
-    ...(isAdmin ? [{ key: 'coupons' as const, label: 'Coupons' }] : []),
     { key: 'activity' as const, label: 'Activity Log' },
+    ...(isAdmin ? [{ key: 'platforms' as const, label: 'Platforms' }] : []),
+    ...(isAdmin ? [{ key: 'coupons' as const, label: 'Coupons' }] : []),
   ]
 
   async function loadCore() {
@@ -115,7 +120,7 @@ function AdminPanel({ role }: { role: string }) {
             ))}
           </div>
 
-          {tab === 'users' && (
+          <div className={tab === 'users' ? '' : 'hidden'}>
             <UsersTab
               users={users}
               plans={plans}
@@ -124,9 +129,9 @@ function AdminPanel({ role }: { role: string }) {
               onChangePlan={isAdmin ? async (id, planId) => { await adminService.changeUserPlan(id, planId); refreshCore() } : undefined}
               onRefresh={refreshCore}
             />
-          )}
+          </div>
 
-          {tab === 'plans' && (
+          <div className={tab === 'plans' ? '' : 'hidden'}>
             <PlansTab
               plans={plans}
               onCreate={isAdmin ? () => setPlanModal({ mode: 'create' }) : undefined}
@@ -134,12 +139,13 @@ function AdminPanel({ role }: { role: string }) {
               onDelete={isAdmin ? (id, name) => setConfirmDelete({ type: 'plan', id, name }) : undefined}
               onRefresh={refreshCore}
             />
-          )}
+          </div>
 
-          {tab === 'trades' && <AdminTradesTab />}
-          {tab === 'journals' && <AdminJournalsTab />}
-          {tab === 'coupons' && isAdmin && <CouponsTab />}
-          {tab === 'activity' && <ActivityLogTab />}
+          <div className={tab === 'trades' ? '' : 'hidden'}><AdminTradesTab /></div>
+
+          {isAdmin && <div className={tab === 'platforms' ? '' : 'hidden'}><ErrorBoundary><PlatformsTab /></ErrorBoundary></div>}
+          {isAdmin && <div className={tab === 'coupons' ? '' : 'hidden'}><CouponsTab /></div>}
+          <div className={tab === 'activity' ? '' : 'hidden'}><ActivityLogTab /></div>
         </>
       )}
 
@@ -254,19 +260,19 @@ function Dropdown({ value, options, onChange, small }: {
     <>
       <button ref={btnRef} type="button" onClick={() => {
         const r = btnRef.current!.getBoundingClientRect()
-        setPos({ top: r.bottom + 4, left: r.left, width: Math.max(r.width, 120) })
+        setPos({ top: r.bottom + 6, left: r.left, width: r.width })
         setOpen(o => !o)
       }}
-        className={`flex items-center gap-1.5 ${small ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} rounded-lg border border-border/80 bg-input/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/40 ${open ? 'border-primary shadow-[0_0_0_2px_rgba(124,58,237,0.12)]' : ''}`}>
+        className={`flex items-center gap-1.5 ${small ? 'px-2.5 py-1 text-xs' : 'px-3 py-2 text-sm'} rounded-lg border border-border/80 bg-input/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/40 ${open ? 'border-primary shadow-[0_0_0_2px_rgba(124,58,237,0.12)]' : ''}`}>
         <span className="text-text-primary">{selected ? selected.label : value}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && createPortal(
-        <div ref={menuRef} style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
-          className="bg-glass/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1">
+        <div ref={menuRef} style={{ position: 'fixed', top: pos.top, left: pos.left - 1, minWidth: Math.max(pos.width + 6, 130), zIndex: 9999 }}
+          className="bg-elevated border border-border rounded-xl shadow-2xl shadow-black/30 py-1 overflow-hidden">
           {options.map((opt) => (
             <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false) }}
-              className={`w-full text-left px-3 py-2 ${small ? 'text-xs' : 'text-sm'} transition-colors ${opt.value === value ? 'bg-primary/15 text-primary-light' : 'text-text-secondary hover:bg-card'}`}>
+              className={`w-full text-left px-3.5 py-2.5 ${small ? 'text-xs' : 'text-sm'} transition-colors ${opt.value === value ? 'bg-primary/15 text-primary-light font-semibold' : 'text-text-secondary hover:bg-card'}`}>
               {opt.label}
             </button>
           ))}
@@ -333,7 +339,6 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
         {isAdmin && (
           <td className="px-4 py-3 relative" onClick={(e) => e.stopPropagation()}>
             <Dropdown value={planId} options={[
-              { value: '', label: 'No plan' },
               ...plans.filter((p) => p.isActive).map(p => ({ value: p.id, label: p.name }))
             ]} onChange={(v) => { setPendingPlanId(v); setConfirmPlan(true) }} small />
           </td>
@@ -341,18 +346,16 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
         <td className="px-4 py-3 text-text-secondary">{u._count.trades}</td>
         <td className="px-4 py-3 text-text-muted text-xs">{new Date(u.createdAt).toLocaleDateString()}</td>
         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-          <button
-            onClick={() => setConfirmToggle(true)}
-            className={`relative w-9 h-5 rounded-full transition-colors ${isActive ? 'bg-primary' : 'bg-border'}`}
-          >
-            <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isActive ? 'translate-x-4' : ''}`} />
-          </button>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" checked={isActive} onChange={() => setConfirmToggle(true)} className="sr-only peer" />
+            <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+          </label>
         </td>
       </tr>
 
-      {confirmChange && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6">
+      {confirmChange && createPortal(
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6 mx-4">
             <h2 className="text-lg font-semibold text-text-primary">Confirm Role Change</h2>
             <p className="text-sm text-text-secondary mt-2">
               Change <strong>{u.fullName}</strong>'s role to <strong>{confirmChange}</strong>?
@@ -364,12 +367,13 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {confirmToggle && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6">
+      {confirmToggle && createPortal(
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6 mx-4">
             <h2 className="text-lg font-semibold text-text-primary">{isActive ? 'Deactivate' : 'Activate'} User</h2>
             <p className="text-sm text-text-secondary mt-2">
               {isActive
@@ -387,12 +391,13 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {confirmPlan && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6">
+      {confirmPlan && createPortal(
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6 mx-4">
             <h2 className="text-lg font-semibold text-text-primary">Change Plan</h2>
             <p className="text-sm text-text-secondary mt-2">
               Change <strong>{u.fullName}</strong>'s plan to <strong>{plans.find((p) => p.id === pendingPlanId)?.name || 'No plan'}</strong>?
@@ -404,7 +409,8 @@ function UserRow({ user: u, plans, isAdmin, onUpdate, onChangePlan, onSelect }: 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )
@@ -419,8 +425,8 @@ function UserDetailModal({ user: u, onClose }: { user: AdminUser; onClose: () =>
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-elevated rounded-2xl border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border sticky top-0 bg-elevated z-10">
+      <div className="bg-elevated rounded-2xl ring-1 ring-border w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-full flex items-center justify-center">
               <User className="w-5 h-5 text-text-inverse" />
@@ -433,7 +439,8 @@ function UserDetailModal({ user: u, onClose }: { user: AdminUser; onClose: () =>
           <button onClick={onClose} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="p-6 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-card rounded-xl p-4 border border-border/50">
               <div className="flex items-center gap-2 text-xs text-text-muted mb-1">
@@ -545,6 +552,7 @@ function UserDetailModal({ user: u, onClose }: { user: AdminUser; onClose: () =>
         </div>
       </div>
     </div>
+    </div>
   )
 }
 
@@ -569,6 +577,9 @@ function PlansTab({ plans, onCreate, onEdit, onDelete, onRefresh }: {
   const [selectedPlans, setSelectedPlans] = useState<Set<string>>(new Set())
   const [bulkLoading, setBulkLoading] = useState(false)
   const [showBulkConfirm, setShowBulkConfirm] = useState(false)
+  const [defaultCurrency, setDefaultCurrency] = useState('INR')
+  const [currencyOpen, setCurrencyOpen] = useState(false)
+  const currencyRef = useRef<HTMLDivElement>(null)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const longPressTarget = useRef<string | null>(null)
   const wasLongPress = useRef(false)
@@ -578,6 +589,21 @@ function PlansTab({ plans, onCreate, onEdit, onDelete, onRefresh }: {
       setSelectMode(false)
     }
   }, [selectedPlans, selectMode])
+
+  useEffect(() => {
+    adminService.listSettings().then((settings) => {
+      const c = settings.find((s) => s.key === 'default_currency')
+      if (c) setDefaultCurrency(c.value)
+    }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) setCurrencyOpen(false)
+    }
+    if (currencyOpen) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [currencyOpen])
 
   function toggleSelect(id: string) {
     if (!selectMode) return
@@ -666,6 +692,33 @@ function PlansTab({ plans, onCreate, onEdit, onDelete, onRefresh }: {
           <p className="text-sm text-text-secondary">{plans.length} plan{plans.length !== 1 ? 's' : ''} &bull; {activeCount} active</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="relative" ref={currencyRef}>
+            <button type="button" onClick={() => setCurrencyOpen(!currencyOpen)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm border border-border/80 bg-input/60 hover:border-primary/40 transition-all">
+              <span className="text-text-muted text-xs">Currency:</span>
+              <span className="font-medium text-text-primary">{getCurrencySymbol(defaultCurrency)}</span>
+              <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${currencyOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {currencyOpen && (
+              <div className="absolute right-0 top-full mt-1 z-50 bg-elevated border border-border/50 rounded-xl shadow-2xl py-1 w-36">
+                {SUPPORTED_CURRENCIES.map((c) => (
+                  <button key={c} type="button"
+                    onClick={async () => {
+                      setDefaultCurrency(c)
+                      setCurrencyOpen(false)
+                      await adminService.updateSetting('default_currency', c)
+                      onRefresh?.()
+                    }}
+                    className={`w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center gap-2 ${
+                      c === defaultCurrency ? 'bg-primary/15 text-primary-light' : 'text-text-secondary hover:bg-card'
+                    }`}>
+                    <span className="w-5 text-center">{getCurrencySymbol(c)}</span>
+                    <span>{c}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           {onCreate && (
             <button onClick={onCreate} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
               <Plus className="w-4 h-4" />
@@ -704,7 +757,7 @@ function PlansTab({ plans, onCreate, onEdit, onDelete, onRefresh }: {
                   <div>
                     <h3 className="text-lg font-bold text-text-primary">{plan.name}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-text-primary">${plan.price.toFixed(2)}</span>
+                      <span className="text-3xl font-bold text-text-primary">{getCurrencySymbol(plan.currency)}{plan.price.toFixed(2)}</span>
                       <span className="text-text-muted text-xs">/month</span>
                     </div>
                   </div>
@@ -889,7 +942,7 @@ function PlanModal({ mode, plan, onClose, onSave }: {
             <div className="col-span-2">
               <Input label="Name" value={form.name} onChange={(e) => set('name', e.target.value)} error={errors.name} />
             </div>
-            <Input label="Price" type="number" step="0.01" value={form.price} onChange={(e) => set('price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)} error={errors.price} endAdornment={<span className="text-text-muted">$</span>} />
+            <Input label="Price" type="number" step="0.01" value={form.price} onChange={(e) => set('price', e.target.value === '' ? '' : parseFloat(e.target.value) || 0)} error={errors.price} endAdornment={<span className="text-text-muted">{getCurrencySymbol('INR')}</span>} />
             {limitFields.map((key) => (
               <div key={key} className="flex items-end gap-2">
                 <div className="flex-1">
@@ -1058,66 +1111,187 @@ function AdminTradesTab() {
   )
 }
 
-function AdminJournalsTab() {
-  const [journals, setJournals] = useState<AdminJournal[]>([])
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
 
-  async function load(pageNum: number) {
+function PlatformsTab() {
+  const [platforms, setPlatforms] = useState<AdminPlatform[]>([])
+  const [modal, setModal] = useState<{ mode: 'create' | 'edit'; platform?: AdminPlatform } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [confirmDelete, setConfirmDelete] = useState<AdminPlatform | null>(null)
+
+  async function load() {
     setIsLoading(true)
     try {
-      const result = await adminService.listAllJournals(pageNum, 20)
-      setJournals(result.journals)
-      setTotalPages(result.totalPages)
-      setPage(pageNum)
+      const p = await adminService.listPlatforms()
+      setPlatforms(p)
     } catch {}
     setIsLoading(false)
   }
 
-  useEffect(() => { load(1) }, [])
+  useEffect(() => { load() }, [])
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-text-secondary">{platforms.length} platform{platforms.length !== 1 ? 's' : ''} &bull; {platforms.filter((p) => p.isActive).length} active</p>
+        <button onClick={() => setModal({ mode: 'create' })} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+          <Plus className="w-4 h-4" />
+          Add Platform
+        </button>
+      </div>
+
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-sidebar/50">
-              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">User</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Trade</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Content</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Name</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Market Type</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Active</th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
             {isLoading ? (
               <tr><td colSpan={4} className="px-4 py-8 text-center text-text-muted">Loading...</td></tr>
-            ) : journals.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-8 text-center text-text-muted">No journals found</td></tr>
-            ) : journals.map((j) => (
-              <tr key={j.id} className="hover:bg-hover">
-                <td className="px-4 py-3 font-medium text-text-primary">{j.user.fullName}</td>
-                <td className="px-4 py-3 text-text-secondary">{j.trade.instrument} ({j.trade.direction})</td>
-                <td className="px-4 py-3 text-text-secondary max-w-xs truncate">{j.content}</td>
-                <td className="px-4 py-3 text-text-muted text-xs">{new Date(j.createdAt).toLocaleDateString()}</td>
+            ) : platforms.length === 0 ? (
+              <tr><td colSpan={4} className="px-4 py-8 text-center text-text-muted">No platforms found</td></tr>
+            ) : platforms.map((p) => (
+              <tr key={p.id} className="hover:bg-hover">
+                <td className="px-4 py-3 font-medium text-text-primary">{p.name}</td>
+                <td className="px-4 py-3">
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                    p.marketType === 'FUTURES' ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'
+                  }`}>
+                    {p.marketType}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={p.isActive} onChange={(e) => {
+                      e.stopPropagation()
+                      const prev = p.isActive
+                      setPlatforms((prevList) => prevList.map((x) => x.id === p.id ? { ...x, isActive: !prev } : x))
+                      adminService.updatePlatform(p.id, { isActive: !prev }).catch(() => {
+                        setPlatforms((prevList) => prevList.map((x) => x.id === p.id ? { ...x, isActive: prev } : x))
+                      })
+                    }} className="sr-only peer" />
+                    <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                  </label>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2 justify-end">
+                    <button onClick={() => setModal({ mode: 'edit', platform: p })} className="p-1.5 text-text-muted hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setConfirmDelete(p)} className="p-1.5 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => load(p)}
-              className={`px-3 py-1 text-sm rounded-md ${p === page ? 'bg-primary text-text-primary' : 'bg-card text-text-secondary hover:text-text-primary'}`}
-            >
-              {p}
-            </button>
-          ))}
+
+      {modal && (
+        <PlatformModal
+          mode={modal.mode}
+          platform={modal.platform}
+          onClose={() => setModal(null)}
+          onSave={async (data) => {
+            try {
+              if (modal.mode === 'create') await adminService.createPlatform(data)
+              else if (modal.platform) await adminService.updatePlatform(modal.platform.id, data)
+              setModal(null)
+              load()
+            } catch (err: any) {
+              const errorObj = err?.response?.data?.error
+              const msg = typeof errorObj === 'string' ? errorObj : (errorObj?.message || err?.message || 'Failed to save platform')
+              toast.error(msg)
+            }
+          }}
+        />
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)}>
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-text-primary">Delete Platform</h2>
+            <p className="text-sm text-text-secondary mt-2">
+              Are you sure you want to delete <strong>{confirmDelete.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
+              <button onClick={async () => {
+                await adminService.deletePlatform(confirmDelete.id)
+                setConfirmDelete(null)
+                load()
+              }} className="px-4 py-2 bg-danger text-text-inverse rounded-lg text-sm font-medium hover:bg-danger/80 transition-colors">
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function PlatformModal({ mode, platform, onClose, onSave }: {
+  mode: 'create' | 'edit'
+  platform?: AdminPlatform
+  onClose: () => void
+  onSave: (data: { name: string; marketType: string }) => Promise<void>
+}) {
+  const [name, setName] = useState(platform?.name ?? '')
+  const [marketType, setMarketType] = useState(platform?.marketType ?? 'FOREX')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = 'Name is required'
+    if (Object.keys(newErrors).length) { setErrors(newErrors); return }
+    setErrors({})
+    setSaving(true)
+    await onSave({ name: name.trim(), marketType })
+    setSaving(false)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-elevated rounded-2xl border border-border w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-text-primary">{mode === 'create' ? 'Add Platform' : 'Edit Platform'}</h2>
+          <button onClick={onClose} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} placeholder="e.g., FTMO" />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text-secondary">Market Type</label>
+            <div className="flex gap-2">
+              {(['FOREX', 'FUTURES'] as const).map((type) => (
+                <button key={type} type="button" onClick={() => setMarketType(type)}
+                  className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
+                    marketType === type
+                      ? type === 'FOREX' ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                        : 'bg-orange-500/10 border-orange-500/30 text-orange-400'
+                      : 'bg-input border-border text-text-secondary hover:bg-hover'
+                  }`}>
+                  {type === 'FOREX' ? 'Forex' : 'Futures'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all disabled:opacity-50">
+              {saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

@@ -24,6 +24,7 @@ export interface AdminPlan {
   id: string
   name: string
   price: number
+  currency: string
   journalLimit: number | null
   imageLimit: number | null
   accountLimit: number | null
@@ -32,7 +33,7 @@ export interface AdminPlan {
   dailyTradeLimit: number | null
   weeklyOutlook: boolean
   aiEnabled: boolean
-  stripePriceId: string | null
+  razorpayPlanId: string | null
   isActive: boolean
 }
 
@@ -93,6 +94,14 @@ export interface AdminJournal {
   createdAt: string
   user: { id: string; fullName: string; email: string }
   trade: { id: string; instrument: string; direction: string }
+}
+
+export interface AdminPlatform {
+  id: string
+  name: string
+  marketType: string
+  isActive: boolean
+  createdAt: string
 }
 
 export interface AdminCoupon {
@@ -221,6 +230,24 @@ export async function updateCoupon(id: string, input: Partial<{
 
 export async function deactivateCoupon(id: string): Promise<void> {
   await api.delete(`/admin/coupons/${id}`)
+}
+
+export async function listPlatforms(): Promise<AdminPlatform[]> {
+  const { data } = await api.get('/admin/platforms')
+  return data.data
+}
+
+export async function createPlatform(input: { name: string; marketType: string }): Promise<AdminPlatform> {
+  const { data } = await api.post('/admin/platforms', input)
+  return data.data
+}
+
+export async function updatePlatform(id: string, input: Partial<{ name: string; marketType: string; isActive: boolean }>): Promise<void> {
+  await api.patch(`/admin/platforms/${id}`, input)
+}
+
+export async function deletePlatform(id: string): Promise<void> {
+  await api.delete(`/admin/platforms/${id}`)
 }
 
 export async function listAuditLogs(page = 1, limit = 50, params?: { action?: string; userId?: string }): Promise<{ logs: AuditLogEntry[]; total: number; totalPages: number }> {

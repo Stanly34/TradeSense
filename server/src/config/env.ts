@@ -36,9 +36,11 @@ export const env = {
 
 
 
-  stripe: {
-    secretKey: process.env.STRIPE_SECRET_KEY || '',
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-    priceId: process.env.STRIPE_PRICE_ID || '',
+  razorpay: {
+    keyId: process.env.RAZORPAY_KEY_ID || '',
+    keySecret: process.env.RAZORPAY_KEY_SECRET || '',
+    webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
   },
+
+  defaultCurrency: process.env.DEFAULT_CURRENCY || 'INR',
 }

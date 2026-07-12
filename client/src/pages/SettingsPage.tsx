@@ -127,7 +127,7 @@ export function SettingsPage() {
         })}
       </div>
 
-      {activeTab === 'profile' && (
+      <div className={activeTab === 'profile' ? '' : 'hidden'}>
         <div className="card p-6 space-y-6">
           <div className="flex items-center gap-6">
             <div className="relative">
@@ -211,9 +211,9 @@ export function SettingsPage() {
             </Button>
           </div>
         </div>
-      )}
+      </div>
 
-      {activeTab === 'platform' && (
+      <div className={activeTab === 'platform' ? '' : 'hidden'}>
         <div className="card p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -265,9 +265,9 @@ export function SettingsPage() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      {activeTab === 'notifications' && (
+      <div className={activeTab === 'notifications' ? '' : 'hidden'}>
         <div className="card p-6">
           <h2 className="text-lg font-semibold text-text-primary mb-4">Notification Preferences</h2>
           {loadingPrefs ? (
@@ -306,7 +306,7 @@ export function SettingsPage() {
             </div>
           )}
         </div>
-      )}
+      </div>
 
     </div>
   )

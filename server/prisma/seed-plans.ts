@@ -34,7 +34,7 @@ async function main() {
   const pro = await prisma.plan.upsert({
     where: { name: 'PRO' },
     update: {
-      price: 20,
+      price: 1700,
       accountLimit: null,
       imageLimit: null,
       checklistLimit: null,
@@ -47,7 +47,7 @@ async function main() {
     },
     create: {
       name: 'PRO',
-      price: 20,
+      price: 1700,
       accountLimit: null,
       imageLimit: null,
       checklistLimit: null,

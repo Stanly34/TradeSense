@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { Check, X, Sparkles, RotateCcw, Trophy, FileText, Image, Zap, Tags, Clock, CalendarCheck, Brain } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import * as subscriptionService from '../services/subscriptions'
 import type { PublicPlan } from '../services/subscriptions'
 import { Button } from '../components/ui/Button'
+import { loadRazorpayScript } from '../lib/razorpay'
+import { getCurrencySymbol } from '../lib/currency'
 import toast from 'react-hot-toast'
 
 interface PlanField {
@@ -24,19 +25,14 @@ const PLAN_FIELDS: PlanField[] = [
 ]
 
 export function PlansPage() {
-  const { refreshUser } = useAuth()
-  const [searchParams] = useSearchParams()
+  const { refreshUser, user: authUser } = useAuth()
   const [plans, setPlans] = useState<PublicPlan[]>([])
   const [planData, setPlanData] = useState<subscriptionService.UserPlan | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (searchParams.get('upgrade') === 'success') {
-      toast.success('Welcome to Pro!')
-      refreshUser()
-    }
-  }, [searchParams, refreshUser])
+  const [couponCode, setCouponCode] = useState('')
+  const [couponApplied, setCouponApplied] = useState<(subscriptionService.CouponValidation & { currency: string }) | null>(null)
+  const [couponLoading, setCouponLoading] = useState(false)
 
   useEffect(() => {
     Promise.all([
@@ -48,18 +44,73 @@ export function PlansPage() {
       .finally(() => setIsLoading(false))
   }, [])
 
+  async function handleApplyCoupon(planName: string) {
+    if (!couponCode.trim()) return
+    setCouponLoading(true)
+    try {
+      const plan = plans.find((p) => p.name === planName)
+      const result = await subscriptionService.validateCoupon(couponCode, planName)
+      setCouponApplied({ ...result, currency: plan?.currency || 'INR' })
+      toast.success(`${result.discountPercent}% discount applied!`)
+    } catch (err: unknown) {
+      setCouponApplied(null)
+      const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
+      toast.error(axiosErr.response?.data?.error?.message || 'Invalid coupon')
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
   async function handleUpgrade(planName: string) {
     setActionLoading(planName)
     try {
-      const result = await subscriptionService.createCheckout(planName)
-      if (result.testMode || !result.url) {
-        toast.error('Stripe not configured. Use dev upgrade instead.')
+      if (couponApplied && couponApplied.finalAmount <= 0) {
+        await subscriptionService.redeemCoupon(couponCode, planName)
+        toast.success('Coupon redeemed! Plan activated.')
+        await refreshUser()
+        const updated = await subscriptionService.getPlan()
+        setPlanData(updated)
+        setCouponApplied(null)
+        setCouponCode('')
+        setActionLoading(null)
         return
       }
-      window.location.href = result.url
+
+      const order = await subscriptionService.createRazorpayOrder(planName, couponCode || undefined)
+
+      await loadRazorpayScript()
+
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        name: 'TradeSense',
+        description: `${planName} Plan`,
+        subscription_id: order.subscriptionId,
+        prefill: { name: authUser?.fullName || '', email: authUser?.email || '', contact: '9999999999' },
+        handler: async (response) => {
+          try {
+            await subscriptionService.verifyRazorpayPayment({
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySubscriptionId: response.razorpay_subscription_id,
+              planName,
+              couponId: order.couponId,
+              amount: order.amount,
+            })
+            toast.success('Welcome to Pro!')
+            await refreshUser()
+            const updated = await subscriptionService.getPlan()
+            setPlanData(updated)
+          } catch {
+            toast.error('Payment verification failed. Please contact support.')
+          }
+        },
+        modal: {
+          ondismiss: () => setActionLoading(null),
+        },
+      })
+
+      rzp.open()
     } catch {
       toast.error('Failed to start checkout')
-    } finally {
       setActionLoading(null)
     }
   }
@@ -156,7 +207,7 @@ export function PlansPage() {
                   <div>
                     <h3 className="text-lg font-bold text-text-primary">{plan.name}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-text-primary">${plan.price}</span>
+                      <span className="text-3xl font-bold text-text-primary">{getCurrencySymbol(plan.currency)}{plan.price}</span>
                       <span className="text-text-muted text-xs">/month</span>
                     </div>
                   </div>
@@ -258,9 +309,44 @@ export function PlansPage() {
                   </>
                 )}
                 {!isCurrent && isPaid && (
-                  <Button className="w-full" onClick={() => handleUpgrade(plan.name)} isLoading={actionLoading === plan.name}>
-                    Upgrade
-                  </Button>
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Coupon code"
+                        value={couponCode}
+                        onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponApplied(null) }}
+                        className="flex-1 px-3 py-2 text-sm bg-card border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      />
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleApplyCoupon(plan.name)}
+                        isLoading={couponLoading}
+                        disabled={!couponCode.trim()}
+                      >
+                        Apply
+                      </Button>
+                    </div>
+                    {couponApplied && (
+                      <div className="bg-success/10 border border-success/20 rounded-lg px-4 py-3 space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-text-secondary">Plan price</span>
+                          <span className="text-text-primary font-medium">{getCurrencySymbol(couponApplied.currency)}{couponApplied.originalAmount}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-text-secondary">Discount ({couponApplied.discountPercent}%)</span>
+                          <span className="text-success font-medium">-{getCurrencySymbol(couponApplied.currency)}{Math.round(couponApplied.originalAmount - couponApplied.finalAmount)}</span>
+                        </div>
+                        <div className="border-t border-success/20 pt-1 flex justify-between text-sm font-semibold">
+                          <span className="text-text-primary">You pay</span>
+                          <span className="text-text-primary">{getCurrencySymbol(couponApplied.currency)}{couponApplied.finalAmount}<span className="text-text-muted font-normal text-xs"> /month</span></span>
+                        </div>
+                      </div>
+                    )}
+                    <Button className="w-full" onClick={() => handleUpgrade(plan.name)} isLoading={actionLoading === plan.name}>
+                      {couponApplied && couponApplied.finalAmount <= 0 ? 'Activate Free' : couponApplied ? `Pay ${getCurrencySymbol(couponApplied.currency)}${couponApplied.finalAmount}` : 'Upgrade'}
+                    </Button>
+                  </>
                 )}
                 {subExpired && isCurrent && (
                   <Button className="w-full" onClick={handleResubscribe}>

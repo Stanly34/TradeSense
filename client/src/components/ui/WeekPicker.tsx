@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, CalendarCheck } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CalendarCheck, ChevronDown } from 'lucide-react'
 
 function getMonday(d: Date): Date {
   const date = new Date(d)
@@ -21,7 +21,10 @@ function formatDateLong(d: Date): string {
 }
 
 function toISODate(d: Date): string {
-  return d.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function getMonthGrid(year: number, month: number): (Date | null)[][] {
@@ -131,28 +134,29 @@ export function WeekPicker({ label, value, onChange }: WeekPickerProps) {
     <div className="space-y-1.5" ref={ref}>
       {label && <label className="block text-sm font-medium text-text-secondary">{label}</label>}
       <div className="relative">
-        <div className="flex items-center gap-2.5 w-full rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary hover:border-primary/40 transition-all duration-200 cursor-pointer"
+        <div className="flex items-center gap-1.5 w-full rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary hover:border-primary/40 transition-all duration-200"
           onClick={() => setOpen(true)}>
-          <div className="p-1.5 rounded-lg bg-primary/10 text-primary-light transition-colors">
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary-light transition-colors shrink-0">
             <CalendarCheck className="w-4 h-4" />
           </div>
           <button type="button" onClick={prevWeek}
-            className="p-1 text-text-muted hover:text-text-primary hover:bg-hover rounded-lg transition-colors">
+            className="p-1 text-text-muted hover:text-text-primary hover:bg-hover rounded-lg transition-colors shrink-0" title="Previous week">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className="flex-1 flex items-center gap-3 cursor-pointer" onClick={() => setOpen(true)}>
+          <div className="flex-1 flex items-center gap-3 cursor-pointer min-w-0" onClick={(e) => { e.stopPropagation(); setOpen(true) }}>
             <div className="flex flex-col">
               <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">From</span>
-              <span className="text-sm font-semibold text-text-primary">{formatDateLong(monday)}</span>
+              <span className="text-sm font-semibold text-text-primary whitespace-nowrap">{formatDateLong(monday)}</span>
             </div>
-            <span className="text-text-muted text-lg font-light">→</span>
+            <span className="text-text-muted text-lg font-light shrink-0">→</span>
             <div className="flex flex-col">
               <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">To</span>
-              <span className="text-sm font-semibold text-text-primary">{formatDateLong(fri)}</span>
+              <span className="text-sm font-semibold text-text-primary whitespace-nowrap">{formatDateLong(fri)}</span>
             </div>
+            <ChevronDown className="w-3.5 h-3.5 text-text-muted shrink-0 opacity-60" />
           </div>
           <button type="button" onClick={nextWeek}
-            className="p-1 text-text-muted hover:text-text-primary hover:bg-hover rounded-lg transition-colors">
+            className="p-1 text-text-muted hover:text-text-primary hover:bg-hover rounded-lg transition-colors shrink-0" title="Next week">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CreditCard, DollarSign, CalendarDays, CheckCircle, XCircle, Receipt } from 'lucide-react'
+import { CreditCard, CalendarDays, CheckCircle, XCircle, Receipt } from 'lucide-react'
 import * as subscriptionsService from '../services/subscriptions'
 import type { Payment } from '../services/subscriptions'
 import toast from 'react-hot-toast'
@@ -50,8 +50,8 @@ export function BillingPage() {
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Date</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Plan</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Amount</th>
+                  <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Payment ID</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Provider</th>
-                  <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Transaction</th>
                   <th className="text-left text-xs font-semibold text-text-muted uppercase tracking-wider px-6 py-4">Status</th>
                 </tr>
               </thead>
@@ -73,15 +73,18 @@ export function BillingPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1 text-sm font-semibold text-text-primary">
-                        <DollarSign className="w-3.5 h-3.5 text-text-muted" />
-                        {payment.amount.toFixed(2)}
+                        {payment.amount}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary capitalize">{payment.provider || '—'}</td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-text-muted font-mono text-xs">
-                        {payment.transactionId ? payment.transactionId.slice(0, 12) + '...' : '—'}
-                      </span>
+                    <td className="px-6 py-4 text-sm text-text-secondary capitalize">
+                      {payment.razorpayPaymentId ? (
+                        <span className="text-text-muted font-mono text-xs">
+                          {payment.razorpayPaymentId.slice(0, 12)}...
+                        </span>
+                      ) : '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary capitalize">
+                      Razorpay
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5">

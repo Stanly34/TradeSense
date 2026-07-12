@@ -84,8 +84,12 @@ export async function saveOutlook(req: Request, res: Response) {
         where: { id },
         data,
       })
+    } else if (existing) {
+      return sendError(res, 'An outlook for this pair and week already exists', 409)
     } else {
-      entry = await outlookService.upsert(req.user!.userId, date, instrument, data)
+      entry = await prisma.weeklyOutlook.create({
+        data: { userId: req.user!.userId, weekStart: date, instrument, ...data },
+      })
     }
     return sendSuccess(res, entry, 'Outlook saved')
   } catch (err) {

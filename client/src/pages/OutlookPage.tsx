@@ -242,11 +242,13 @@ function getMonday(d: Date): Date {
   return date
 }
 
-function formatWeekRange(mon: Date): string {
+function formatWeekRange(weekStart: string): string {
+  const parts = weekStart.slice(0, 10).split('-').map(Number)
+  const mon = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]))
   const fri = new Date(mon)
-  fri.setDate(fri.getDate() + 4)
-  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
-  return `${mon.toLocaleDateString('en-US', opts)} - ${fri.toLocaleDateString('en-US', opts)}, ${fri.getFullYear()}`
+  fri.setUTCDate(fri.getUTCDate() + 4)
+  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', timeZone: 'UTC' }
+  return `${mon.toLocaleDateString('en-US', opts)} - ${fri.toLocaleDateString('en-US', opts)}, ${fri.getUTCFullYear()}`
 }
 
 export function OutlookPage() {
@@ -273,7 +275,13 @@ export function OutlookPage() {
   const menuRef = useRef<HTMLDivElement>(null)
   const pasteTargetRef = useRef<'before' | 'after' | null>(null)
 
-  const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
+  const [weekStart, setWeekStart] = useState(() => {
+    const d = getMonday(new Date())
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
+  })
   const [instrument, setInstrument] = useState('')
   const [direction, setDirection] = useState('buy')
   const [notes, setNotes] = useState('')
@@ -322,7 +330,8 @@ export function OutlookPage() {
   }, [menuTarget])
 
   function resetForm() {
-    setWeekStart(getMonday(new Date()))
+    const d = getMonday(new Date())
+    setWeekStart(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`)
     setInstrument('')
     setDirection('buy')
     setNotes('')
@@ -339,7 +348,7 @@ export function OutlookPage() {
   function openEdit(entry: WeeklyOutlook) {
     setViewingEntry(null)
     setEditingId(entry.id)
-    setWeekStart(new Date(entry.weekStart))
+    setWeekStart(entry.weekStart.slice(0, 10))
     setInstrument(entry.instrument)
     setDirection(entry.direction || 'buy')
     setNotes(entry.notes || '')
@@ -398,6 +407,14 @@ export function OutlookPage() {
     }
     setSaving(true)
     try {
+      if (!editingId) {
+        const existing = await outlookService.getOutlook(weekStart, instrument.trim())
+        if (existing?.id) {
+          toast.error('An outlook for this pair and week already exists')
+          setSaving(false)
+          return
+        }
+      }
       const fd = new FormData()
       if (editingId) fd.append('id', editingId)
       if (notes) fd.append('notes', notes)
@@ -406,7 +423,7 @@ export function OutlookPage() {
       if (afterFile) fd.append('afterImage', afterFile)
       fd.append('clearBeforeImage', beforeImage === null && !beforeFile ? 'true' : 'false')
       fd.append('clearAfterImage', afterImage === null && !afterFile ? 'true' : 'false')
-      await outlookService.saveOutlook(weekStart.toISOString().slice(0, 10), instrument.trim(), fd)
+      await outlookService.saveOutlook(weekStart, instrument.trim(), fd)
       toast.success('Outlook saved')
       setShowForm(false)
       resetForm()
@@ -545,6 +562,7 @@ export function OutlookPage() {
             count={selectedIds.size}
             onCancel={cancelSelect}
             onDelete={() => setBatchDeleteCount(selectedIds.size)}
+            deleteLabel="Delete"
           />
           <div className="card overflow-hidden">
             <div className="overflow-x-auto">
@@ -582,7 +600,7 @@ export function OutlookPage() {
                           </td>
                         )}
                         <td className="px-4 py-3 font-medium text-text-primary whitespace-nowrap">
-                          {formatWeekRange(new Date(entry.weekStart))}
+                          {formatWeekRange(entry.weekStart)}
                         </td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${
@@ -668,7 +686,7 @@ export function OutlookPage() {
                 <div>
                   <label className="block text-xs font-medium text-text-muted mb-1">Week</label>
                   <p className="text-sm text-text-primary font-medium">
-                    {formatWeekRange(new Date(viewingEntry.weekStart))}
+                    {formatWeekRange(viewingEntry.weekStart)}
                   </p>
                 </div>
                 <div>
@@ -734,7 +752,7 @@ export function OutlookPage() {
       )}
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 pt-20 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 pt-20 overflow-y-auto">
           <div className="bg-elevated rounded-2xl border border-border w-full max-w-2xl my-auto shadow-[0_6px_25px_rgba(0,0,0,0.08)]">
             <div className="flex items-center justify-between p-6 border-b border-border">
               <h2 className="text-lg font-semibold text-text-primary">{editingId ? 'Edit Outlook' : 'New Outlook'}</h2>
@@ -743,9 +761,9 @@ export function OutlookPage() {
               </button>
             </div>
 
-            <div ref={formRef} className="p-6 space-y-5 overflow-y-auto max-h-[70vh]" onPaste={handleFormPaste}>
-              <WeekPicker label="Week" value={weekStart.toISOString().slice(0, 10)}
-                onChange={(iso) => setWeekStart(new Date(iso + 'T00:00:00'))} />
+            <div ref={formRef} className="p-6 space-y-5" onPaste={handleFormPaste}>
+              <WeekPicker label="Week" value={weekStart}
+                onChange={(iso) => setWeekStart(iso)} />
 
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-text-secondary">Direction</label>

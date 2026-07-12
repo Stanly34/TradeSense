@@ -1,5 +1,7 @@
 import { prisma } from '../lib/prisma.js'
 import { createNotification } from './notification.js'
+import * as razorpayService from './razorpay.js'
+import { env } from '../config/env.js'
 
 export async function getUserPlan(userId: string) {
   const user = await prisma.user.findUnique({
@@ -14,6 +16,9 @@ export async function getUserPlan(userId: string) {
 
   const sub = user.subscription
   const plan = sub?.plan || await prisma.plan.findUnique({ where: { name: 'BASIC' } })
+
+  const currencySetting = await prisma.setting.findUnique({ where: { key: 'default_currency' } })
+  const defaultCurrency = currencySetting?.value || 'INR'
 
   const startOfMonth = new Date()
   startOfMonth.setDate(1)
@@ -54,6 +59,7 @@ export async function getUserPlan(userId: string) {
       id: plan!.id,
       name: plan!.name,
       price: plan!.price,
+      currency: defaultCurrency,
       accountLimit: plan!.accountLimit,
       imageLimit: plan!.imageLimit,
       checklistLimit: plan!.checklistLimit,
@@ -74,7 +80,7 @@ export async function getUserPlan(userId: string) {
   }
 }
 
-export async function selectPlan(userId: string, planName: string) {
+export async function selectPlan(userId: string, planName: string, couponId?: string) {
   const plan = await prisma.plan.findFirst({ where: { name: planName, isActive: true } })
   if (!plan) throw new Error('Plan not found')
 
@@ -112,11 +118,27 @@ export async function selectPlan(userId: string, planName: string) {
       data: {
         userId,
         subscriptionId: subId,
-        amount: plan.price,
+        amount: couponId ? 0 : plan.price,
         status: 'PAID',
       },
     })
-    await createNotification(userId, 'Payment Confirmed', `Subscribed to ${plan.name} plan — $${plan.price.toFixed(2)}`)
+
+    if (couponId) {
+      await prisma.couponUsage.create({
+        data: {
+          couponId,
+          userId,
+          subscriptionId: subId,
+          discountApplied: plan.price,
+        },
+      })
+      await prisma.coupon.update({
+        where: { id: couponId },
+        data: { usedCount: { increment: 1 } },
+      })
+    }
+
+    await createNotification(userId, 'Payment Confirmed', `Subscribed to ${plan.name} plan — ${couponId ? 'Redeemed with coupon' : `₹${plan.price}`}`)
   }
 }
 
@@ -149,10 +171,21 @@ export async function upgradeToPro(userId: string) {
       status: 'PAID',
     },
   })
-  await createNotification(userId, 'Payment Confirmed', `Upgraded to PRO plan — $${plan.price.toFixed(2)}`)
+  await createNotification(userId, 'Payment Confirmed', `Upgraded to PRO plan — ₹${plan.price}`)
 }
 
 export async function cancelAutoRenew(userId: string) {
+  const sub = await prisma.subscription.findUnique({ where: { userId } })
+  if (!sub) throw new Error('No active subscription found')
+
+  if (sub.razorpaySubscriptionId && razorpayService.isConfigured()) {
+    try {
+      await razorpayService.pauseSubscription(sub.razorpaySubscriptionId)
+    } catch (err) {
+      console.error('[Razorpay] Failed to pause subscription:', err)
+    }
+  }
+
   await prisma.subscription.update({
     where: { userId },
     data: { autoRenew: false },
@@ -160,6 +193,17 @@ export async function cancelAutoRenew(userId: string) {
 }
 
 export async function reactivateAutoRenew(userId: string) {
+  const sub = await prisma.subscription.findUnique({ where: { userId } })
+  if (!sub) throw new Error('No active subscription found')
+
+  if (sub.razorpaySubscriptionId && razorpayService.isConfigured()) {
+    try {
+      await razorpayService.resumeSubscription(sub.razorpaySubscriptionId)
+    } catch (err) {
+      console.error('[Razorpay] Failed to resume subscription:', err)
+    }
+  }
+
   await prisma.subscription.update({
     where: { userId },
     data: { autoRenew: true },

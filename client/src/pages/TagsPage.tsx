@@ -188,6 +188,7 @@ export function TagsPage() {
             count={selectedIds.size}
             onCancel={cancelSelect}
             onDelete={() => setBatchDeleteCount(selectedIds.size)}
+            deleteLabel="Delete"
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {tags.map((tag) => {

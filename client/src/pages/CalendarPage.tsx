@@ -238,6 +238,7 @@ export function CalendarPage() {
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-glass" /> Flat</span>
               <span className="flex items-center gap-1.5 ml-auto"><span className="w-3 h-3 rounded-sm border border-primary" /> Today</span>
             </div>
+
           </>
         )}
       </div>

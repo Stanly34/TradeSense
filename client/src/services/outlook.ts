@@ -18,7 +18,7 @@ export async function listOutlooks(): Promise<WeeklyOutlook[]> {
     headers: { Authorization: `Bearer ${token}` },
   })
   const json = await res.json()
-  if (!json.success) throw new Error(json.message || 'Failed to list outlooks')
+  if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to list outlooks')
   return json.data
 }
 
@@ -28,7 +28,7 @@ export async function getOutlook(weekStart: string, instrument: string): Promise
     headers: { Authorization: `Bearer ${token}` },
   })
   const json = await res.json()
-  if (!json.success) throw new Error(json.message || 'Failed to get outlook')
+  if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to get outlook')
   return json.data
 }
 
@@ -42,7 +42,7 @@ export async function saveOutlook(weekStart: string, instrument: string, formDat
     body: formData,
   })
   const json = await res.json()
-  if (!json.success) throw new Error(json.message || 'Failed to save outlook')
+  if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to save outlook')
 }
 
 export async function deleteOutlook(id: string): Promise<void> {
@@ -52,7 +52,7 @@ export async function deleteOutlook(id: string): Promise<void> {
     headers: { Authorization: `Bearer ${token}` },
   })
   const json = await res.json()
-  if (!json.success) throw new Error(json.message || 'Failed to delete outlook')
+  if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to delete outlook')
 }
 
 export async function batchDeleteOutlooks(ids: string[]): Promise<void> {
@@ -63,5 +63,5 @@ export async function batchDeleteOutlooks(ids: string[]): Promise<void> {
     body: JSON.stringify({ ids }),
   })
   const json = await res.json()
-  if (!json.success) throw new Error(json.message || 'Failed to delete outlooks')
+  if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to delete outlooks')
 }

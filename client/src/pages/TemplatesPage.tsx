@@ -11,32 +11,11 @@ import { UpgradeDialog } from '../components/ui/UpgradeDialog'
 import { usePlan } from '../hooks/usePlan'
 import * as templateService from '../services/templates'
 import * as tradeService from '../services/trades'
-import type { Template, ChallengeProgress } from '../services/templates'
+import type { Template, ChallengeProgress, Platform } from '../services/templates'
 import type { Trade } from '../types/trade'
 
-const FOREX_PLATFORMS = [
-  'FTMO',
-  'FundedNext',
-  'The5ers',
-  'FundingPips',
-  'Alpha Capital Group',
-  'Blue Guardian',
-  'E8 Markets',
-  'Funded Trading Plus',
-  'Goat Funded Trader',
-]
-
-const FUTURES_PLATFORMS = [
-  'Topstep',
-  'Apex Trader Funding',
-  'My Funded Futures (MFFU)',
-  'Tradeify',
-  'Goat Funded Futures',
-  'Lucid Trading',
-]
-
 const FOREX_ACCOUNT_SIZE_PRESETS = [5000, 10000, 25000, 50000, 100000]
-const FUTURES_ACCOUNT_SIZE_PRESETS = [25000, 50000, 100000, 150000, 200000]
+const FUTURES_ACCOUNT_SIZE_PRESETS = [25000, 50000, 100000, 150000]
 
 export function TemplatesPage() {
   const navigate = useNavigate()
@@ -72,9 +51,30 @@ export function TemplatesPage() {
   const [selectedAccount, setSelectedAccount] = useState<Template | null>(null)
   const [accountTrades, setAccountTrades] = useState<Trade[]>([])
   const [accountTradesLoading, setAccountTradesLoading] = useState(false)
+  const [platforms, setPlatforms] = useState<Platform[]>([])
   const [progressMap, setProgressMap] = useState<Record<string, ChallengeProgress>>({})
   const [statusEditId, setStatusEditId] = useState<string | null>(null)
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [customSizes, setCustomSizes] = useState<Record<string, number[]>>({})
+
+  function parseSizeInput(val: string): number {
+    const trimmed = val.trim().toUpperCase()
+    if (trimmed.endsWith('K')) {
+      const num = parseFloat(trimmed.slice(0, -1))
+      return isNaN(num) ? NaN : num * 1000
+    }
+    return parseFloat(trimmed)
+  }
+
+  function saveCustomSize(size: number) {
+    if (!size || size <= 0 || isNaN(size)) return
+    const key = marketType
+    const existing = customSizes[key] || []
+    const presets = key === 'FUTURES' ? FUTURES_ACCOUNT_SIZE_PRESETS : FOREX_ACCOUNT_SIZE_PRESETS
+    if (presets.includes(size) || existing.includes(size)) return
+    const next = { ...customSizes, [key]: [...existing, size].sort((a, b) => a - b) }
+    setCustomSizes(next)
+  }
 
   const formRef = useRef<HTMLDivElement>(null)
   const longTimerRef = useRef<ReturnType<typeof setTimeout>>()
@@ -90,9 +90,12 @@ export function TemplatesPage() {
   }, [])
 
   useEffect(() => {
-    templateService.listTemplates()
-      .then(setTemplates)
-      .catch(() => setTemplates([]))
+    Promise.all([
+      templateService.listTemplates(),
+      templateService.listPlatforms(),
+    ])
+      .then(([t, p]) => { setTemplates(t); setPlatforms(p) })
+      .catch(() => { setTemplates([]); setPlatforms([]) })
       .finally(() => setIsLoading(false))
   }, [])
 
@@ -176,7 +179,7 @@ export function TemplatesPage() {
     try {
       let defaultValues: Record<string, unknown> | undefined
       if (templateType === 'PROP_FIRM') {
-        const finalAccountSize = accountSize === 'custom' ? parseFloat(accountSizeCustom) : parseFloat(accountSize)
+        const finalAccountSize = accountSize === 'custom' ? parseSizeInput(accountSizeCustom) : parseFloat(accountSize)
         defaultValues = {
           marketType,
           platform,
@@ -192,6 +195,10 @@ export function TemplatesPage() {
       }
       const t = await templateService.createTemplate({ name: name.trim(), type: templateType, defaultValues })
       setTemplates((prev) => [t, ...prev])
+      if (templateType === 'PROP_FIRM' && accountSize === 'custom' && accountSizeCustom) {
+        const size = parseSizeInput(accountSizeCustom)
+        if (!isNaN(size) && size > 0) saveCustomSize(size)
+      }
       resetForm()
       setShowForm(false)
     } catch (err) {
@@ -368,20 +375,24 @@ export function TemplatesPage() {
                 <Select label="Platform" value={platform} onChange={(v) => { setPlatform(v); clearError('platform') }}
                   placeholder="Select platform"
                   error={errors.platform}
-                  options={(marketType === 'FOREX' ? FOREX_PLATFORMS : FUTURES_PLATFORMS).map((p) => ({ value: p, label: p }))} />
+                  options={platforms.filter((p) => p.isActive && p.marketType === marketType).map((p) => ({ value: p.name, label: p.name }))} />
                 <div className="space-y-1.5">
                    <label className="block text-sm font-medium text-text-secondary">Account Size</label>
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {(marketType === 'FUTURES' ? FUTURES_ACCOUNT_SIZE_PRESETS : FOREX_ACCOUNT_SIZE_PRESETS).map((size) => (
-                      <button key={size} type="button" onClick={() => { setAccountSize(size.toString()); setAccountSizeCustom('') }}
-                        className={`text-sm font-medium px-4 py-2 rounded-lg border transition-colors ${
-                          accountSize === size.toString()
-                            ? 'bg-primary/10 border-primary/30 text-primary-light'
-                            : 'bg-input border-border text-text-muted hover:bg-hover'
-                        }`}>
-                        ${(size / 1000).toFixed(0)}k
-                      </button>
-                    ))}
+                    {(() => {
+                      const presets = marketType === 'FUTURES' ? FUTURES_ACCOUNT_SIZE_PRESETS : FOREX_ACCOUNT_SIZE_PRESETS
+                      const allSizes = [...new Set([...presets, ...(customSizes[marketType] || [])])].filter((s) => s > 0)
+                      return allSizes.map((size) => (
+                        <button key={size} type="button" onClick={() => { setAccountSize(size.toString()); setAccountSizeCustom('') }}
+                          className={`text-sm font-medium px-4 py-2 rounded-lg border transition-colors ${
+                            accountSize === size.toString()
+                              ? 'bg-primary/10 border-primary/30 text-primary-light'
+                              : 'bg-input border-border text-text-muted hover:bg-hover'
+                          }`}>
+                          ${(size / 1000).toFixed(0)}k
+                        </button>
+                      ))
+                    })()}
                     <button type="button" onClick={() => setAccountSize('custom')}
                       className={`text-sm font-medium px-4 py-2 rounded-lg border transition-colors ${
                         accountSize === 'custom'
@@ -392,8 +403,22 @@ export function TemplatesPage() {
                     </button>
                   </div>
                   {accountSize === 'custom' && (
-                    <Input id="account-size-custom" type="number" placeholder="Enter custom size"
-                      value={accountSizeCustom} onChange={(e) => setAccountSizeCustom(e.target.value)} />
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Input id="account-size-custom" type="text" placeholder="e.g. 200k or 200000"
+                          value={accountSizeCustom} onChange={(e) => setAccountSizeCustom(e.target.value)}
+                          onKeyDown={(e: React.KeyboardEvent) => {
+                            if (e.key === 'Enter') {
+                              const v = parseSizeInput(accountSizeCustom)
+                              if (!isNaN(v) && v > 0) { saveCustomSize(v); setAccountSize(v.toString()); setAccountSizeCustom('') }
+                            }
+                          }} />
+                      </div>
+                      <button type="button" onClick={() => { const v = parseSizeInput(accountSizeCustom); if (!isNaN(v) && v > 0) { saveCustomSize(v); setAccountSize(v.toString()); setAccountSizeCustom('') } }}
+                        className="px-3 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shrink-0">
+                        Add
+                      </button>
+                    </div>
                   )}
                   {accountSize && accountSize !== 'custom' && (
                     <p className="text-[10px] text-text-muted">${parseInt(accountSize).toLocaleString()}</p>
@@ -941,6 +966,7 @@ export function TemplatesPage() {
         count={selectedIds.size}
         onDelete={() => setBatchDeleteTarget(selectedIds.size)}
         onCancel={cancelSelect}
+        deleteLabel="Delete"
       />
     </div>
   )

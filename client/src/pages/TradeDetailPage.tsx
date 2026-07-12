@@ -74,6 +74,8 @@ export function TradeDetailPage() {
 
   const t = trade
   const selectedTagIds = t.tags.map((tagRel) => tagRel.tag.id)
+  const tagIdsFromChecklistData = t.checklistData ? Object.keys(t.checklistData) : []
+  const allTagIds = selectedTagIds.length > 0 ? selectedTagIds : tagIdsFromChecklistData
   const initialForm = {
     instrument: trade.instrument,
     direction: trade.direction,
@@ -327,10 +329,10 @@ export function TradeDetailPage() {
             </div>
           </div>
 
-          {selectedTagIds.length > 0 && (
+          {allTagIds.length > 0 && (
             <div className="card p-5 space-y-3">
               <h3 className="text-sm font-medium text-text-primary">Checklist</h3>
-              {tags.filter((tag) => selectedTagIds.includes(tag.id)).map((tag) => {
+              {tags.filter((tag) => allTagIds.includes(tag.id)).map((tag) => {
                 const items = parseTagContent(tag.content)
                 const checkedItems = (trade.checklistData as Record<string, string[]> | null)?.[tag.id] || []
                 return (

@@ -47,8 +47,9 @@ async function syncAccountBalance(userId: string, templateId: string | null) {
     console.log(`[syncAccountBalance] trade: rawDiff=${rawDiff} pipSize=${t.pipSize} diff=${diff} pipValue=${t.pipValue} qty=${t.quantity} fees=${t.fees} tradePnl=${tradePnl}`)
   }
 
-  const newBalance = Math.round((accountSize + totalPnl) * 100) / 100
-  console.log(`[syncAccountBalance] totalPnl=${totalPnl} accountSize=${accountSize} newBalance=${newBalance} oldBalance=${dv.currentAccountSize}`)
+  const baseBalance = (dv.startingBalance as number) || accountSize
+  const newBalance = Math.round((baseBalance + totalPnl) * 100) / 100
+  console.log(`[syncAccountBalance] totalPnl=${totalPnl} baseBalance=${baseBalance} newBalance=${newBalance} oldBalance=${dv.currentAccountSize}`)
   if (dv.currentAccountSize === newBalance) { console.log('[syncAccountBalance] no change'); return }
 
   dv.currentAccountSize = newBalance
@@ -113,8 +114,25 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
     include: tradeInclude,
   })
 
+  const checklistData = data.checklistData as Record<string, string[]> | undefined
+  if (checklistData) {
+    const tagIds = Object.keys(checklistData)
+    if (tagIds.length > 0) {
+      const existing = await prisma.tradeTag.findMany({
+        where: { tradeId: trade.id, tagId: { in: tagIds } },
+      })
+      const existingTagIds = new Set(existing.map((t) => t.tagId))
+      const newTagIds = tagIds.filter((id) => !existingTagIds.has(id))
+      if (newTagIds.length > 0) {
+        await prisma.tradeTag.createMany({
+          data: newTagIds.map((tagId) => ({ tradeId: trade.id, tagId })),
+        })
+      }
+    }
+  }
+
   sendTradeSummary(userId, trade).catch(() => {})
-  syncAccountBalance(userId, trade.templateId).catch(() => {})
+  await syncAccountBalance(userId, trade.templateId)
 
   return trade
 }
@@ -200,7 +218,29 @@ export async function updateTrade(userId: string, tradeId: string, data: Record<
     include: tradeInclude,
   })
 
-  syncAccountBalance(userId, updated.templateId).catch(() => {})
+  const checklistData = data.checklistData as Record<string, string[]> | undefined
+  if (checklistData) {
+    const tagIds = Object.keys(checklistData)
+    const existing = await prisma.tradeTag.findMany({
+      where: { tradeId: trade.id },
+      select: { tagId: true },
+    })
+    const existingTagIds = new Set(existing.map((t) => t.tagId))
+    const toAdd = tagIds.filter((id) => !existingTagIds.has(id))
+    const toRemove = [...existingTagIds].filter((id) => !tagIds.includes(id))
+    if (toRemove.length > 0) {
+      await prisma.tradeTag.deleteMany({
+        where: { tradeId: trade.id, tagId: { in: toRemove } },
+      })
+    }
+    if (toAdd.length > 0) {
+      await prisma.tradeTag.createMany({
+        data: toAdd.map((tagId) => ({ tradeId: trade.id, tagId })),
+      })
+    }
+  }
+
+  await syncAccountBalance(userId, updated.templateId)
   return updated
 }
 
@@ -215,7 +255,7 @@ export async function deleteTrade(userId: string, tradeId: string) {
     data: { isDeleted: true, deletedAt: new Date() },
   })
 
-  syncAccountBalance(userId, deleted.templateId).catch(() => {})
+  await syncAccountBalance(userId, deleted.templateId)
   return deleted
 }
 
@@ -233,7 +273,7 @@ export async function batchDeleteTrades(userId: string, tradeIds: string[]) {
 
   const affectedTemplates = new Set(trades.map(t => t.templateId).filter(Boolean))
   for (const templateId of affectedTemplates) {
-    syncAccountBalance(userId, templateId).catch(() => {})
+    await syncAccountBalance(userId, templateId)
   }
 }
 

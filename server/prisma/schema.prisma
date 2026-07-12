@@ -111,6 +111,7 @@ model Plan {
   id                 String   @id @default(uuid()) @db.Uuid
   name               String   @unique
   price              Float    @default(0)
+  currency           String   @default("INR")
   journalLimit       Int?
   imageLimit         Int?
   accountLimit       Int?
@@ -119,7 +120,7 @@ model Plan {
   dailyTradeLimit    Int?
   weeklyOutlook      Boolean  @default(false)
   aiEnabled          Boolean  @default(false)
-  stripePriceId      String?
+  razorpayPlanId     String?
   isActive           Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -128,15 +129,16 @@ model Plan {
 }
 
 model Subscription {
-  id        String             @id @default(uuid()) @db.Uuid
-  userId    String             @unique @db.Uuid
-  planId    String             @db.Uuid
-  status    SubscriptionStatus @default(ACTIVE)
-  startDate DateTime           @default(now())
-  endDate   DateTime?
-  autoRenew Boolean            @default(true)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  id                    String             @id @default(uuid()) @db.Uuid
+  userId                String             @unique @db.Uuid
+  planId                String             @db.Uuid
+  status                SubscriptionStatus @default(ACTIVE)
+  startDate             DateTime           @default(now())
+  endDate               DateTime?
+  autoRenew             Boolean            @default(true)
+  razorpaySubscriptionId String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 
   user       User          @relation(fields: [userId], references: [id])
   plan       Plan          @relation(fields: [planId], references: [id])
@@ -431,15 +433,15 @@ model RefreshToken {
 }
 
 model Payment {
-  id              String   @id @default(uuid()) @db.Uuid
-  userId          String   @db.Uuid
-  subscriptionId  String   @db.Uuid
-  amount          Float
-  couponId        String?  @db.Uuid
-  provider        String?
-  transactionId   String?
-  status          String   @default("PAID")
-  createdAt       DateTime @default(now())
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @db.Uuid
+  subscriptionId    String   @db.Uuid
+  amount            Float
+  couponId          String?  @db.Uuid
+  razorpayPaymentId String?
+  razorpayOrderId   String?
+  status            String   @default("PAID")
+  createdAt         DateTime @default(now())
 
   user         User         @relation(fields: [userId], references: [id])
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
@@ -479,6 +481,17 @@ model WeeklyOutlook {
 
   @@unique([userId, weekStart, instrument])
   @@index([userId])
+}
+
+model Platform {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  marketType String   // FOREX or FUTURES
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([name, marketType])
 }
 
 model PendingRegistration {

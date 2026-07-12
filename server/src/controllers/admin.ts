@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import * as adminService from '../services/admin.js'
 import * as couponService from '../services/coupon.js'
+import * as platformService from '../services/platform.js'
 import * as auditLogService from '../services/auditLog.js'
 import { sendSuccess, sendError } from '../utils/response.js'
 
@@ -202,6 +203,45 @@ export async function deleteCoupon(req: Request, res: Response) {
     return sendSuccess(res, null, 'Coupon deactivated')
   } catch (err) {
     return sendError(res, err instanceof Error ? err.message : 'Failed to deactivate coupon', 400)
+  }
+}
+
+export async function listPlatforms(_req: Request, res: Response) {
+  try {
+    const platforms = await platformService.listPlatforms()
+    return sendSuccess(res, platforms)
+  } catch {
+    return sendError(res, 'Failed to list platforms', 500)
+  }
+}
+
+export async function createPlatform(req: Request, res: Response) {
+  try {
+    const platform = await platformService.createPlatform(req.body)
+    await auditLogService.logAction(req.user?.userId ?? '', 'PLATFORM_CREATED', 'PLATFORM', platform.id, { name: platform.name })
+    return sendSuccess(res, platform, 'Platform created', 201)
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to create platform', 400)
+  }
+}
+
+export async function updatePlatform(req: Request, res: Response) {
+  try {
+    const platform = await platformService.updatePlatform(req.params.id, req.body)
+    await auditLogService.logAction(req.user?.userId ?? '', 'PLATFORM_EDITED', 'PLATFORM', platform.id)
+    return sendSuccess(res, platform, 'Platform updated')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to update platform', 400)
+  }
+}
+
+export async function deletePlatform(req: Request, res: Response) {
+  try {
+    await platformService.deletePlatform(req.params.id)
+    await auditLogService.logAction(req.user?.userId ?? '', 'PLATFORM_DELETED', 'PLATFORM', req.params.id)
+    return sendSuccess(res, null, 'Platform deleted')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to deactivate platform', 400)
   }
 }
 

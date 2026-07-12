@@ -4,6 +4,7 @@ export interface PublicPlan {
   id: string
   name: string
   price: number
+  currency: string
   journalLimit: number | null
   imageLimit: number | null
   accountLimit: number | null
@@ -20,6 +21,7 @@ export interface UserPlan {
     id: string
     name: string
     price: number
+    currency: string
     accountLimit: number | null
     imageLimit: number | null
     checklistLimit: number | null
@@ -36,6 +38,33 @@ export interface UserPlan {
     accountsUsed: number
     checklistsUsed: number
   }
+}
+
+export interface CouponValidation {
+  valid: boolean
+  couponId: string
+  discountPercent: number
+  originalAmount: number
+  finalAmount: number
+}
+
+export interface RazorpayOrder {
+  keyId: string
+  subscriptionId: string
+  amount: number
+  currency: string
+  couponId?: string
+}
+
+export interface Payment {
+  id: string
+  amount: number
+  couponId: string | null
+  razorpayPaymentId: string | null
+  razorpayOrderId: string | null
+  status: string
+  createdAt: string
+  subscription: { plan: { name: string } }
 }
 
 export async function listPlans(): Promise<PublicPlan[]> {
@@ -58,20 +87,35 @@ export async function upgradeToPro() {
   return data
 }
 
-export async function createCheckout(planName: string): Promise<{ testMode: boolean; url: string | null }> {
-  const { data } = await api.post('/subscriptions/create-checkout', { planName })
+export async function validateCoupon(couponCode: string, planName: string): Promise<CouponValidation> {
+  const { data } = await api.post('/subscriptions/validate-coupon', { couponCode, planName })
   return data.data
 }
 
-export interface Payment {
-  id: string
-  amount: number
-  couponId: string | null
-  provider: string | null
-  transactionId: string | null
-  status: string
-  createdAt: string
-  subscription: { plan: { name: string } }
+export async function redeemCoupon(couponCode: string, planName: string) {
+  const { data } = await api.post('/subscriptions/redeem-coupon', { couponCode, planName })
+  return data
+}
+
+export async function createRazorpayOrder(planName: string, couponCode?: string): Promise<RazorpayOrder> {
+  const { data } = await api.post('/subscriptions/create-order', { planName, couponCode })
+  return data.data
+}
+
+export async function verifyRazorpayPayment(payload: {
+  razorpayPaymentId: string
+  razorpaySubscriptionId?: string
+  planName: string
+  couponId?: string
+  amount?: number
+}) {
+  const { data } = await api.post('/subscriptions/verify-payment', payload)
+  return data
+}
+
+export async function getRazorpayKey(): Promise<string> {
+  const { data } = await api.get('/subscriptions/razorpay-key')
+  return data.keyId
 }
 
 export async function listPayments(): Promise<Payment[]> {

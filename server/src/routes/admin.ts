@@ -28,6 +28,10 @@ router.get('/coupons', adminOnly, adminController.listCoupons)
 router.post('/coupons', adminOnly, adminController.createCoupon)
 router.patch('/coupons/:id', adminOnly, adminController.updateCoupon)
 router.delete('/coupons/:id', adminOnly, adminController.deleteCoupon)
+router.get('/platforms', adminController.listPlatforms)
+router.post('/platforms', adminOnly, adminController.createPlatform)
+router.patch('/platforms/:id', adminOnly, adminController.updatePlatform)
+router.delete('/platforms/:id', adminOnly, adminController.deletePlatform)
 router.get('/audit-logs', adminManager, adminController.getAuditLogs)
 
 export default router

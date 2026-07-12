@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BookOpen, ExternalLink, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { BookOpen, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import * as journalService from '../services/journals'
 import type { JournalEntry } from '../services/journals'
@@ -23,6 +23,13 @@ export function JournalPage() {
     return null
   }
 
+  const getResultBadge = (result?: string | null) => {
+    if (result === 'WIN') return <span className="text-xs font-semibold text-success">Win</span>
+    if (result === 'LOSS') return <span className="text-xs font-semibold text-danger">Loss</span>
+    if (result === 'BREAK_EVEN') return <span className="text-xs font-semibold text-text-muted">BE</span>
+    return null
+  }
+
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div>
@@ -40,68 +47,64 @@ export function JournalPage() {
           <p className="text-sm">No journal entries yet. Write a reflection on a trade to get started.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {journals.map((entry) => {
-            const tradeResult = entry.trade?.result
-            return (
-              <div
-                key={entry.id}
-                className="card p-5 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group"
-                onClick={() => navigate(`/trades/${entry.tradeId}`)}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      tradeResult === 'WIN' ? 'bg-success/10' :
-                      tradeResult === 'LOSS' ? 'bg-danger/10' :
-                      'bg-primary/10'
-                    }`}>
-                      <BookOpen className={`w-4 h-4 ${
-                        tradeResult === 'WIN' ? 'text-success' :
-                        tradeResult === 'LOSS' ? 'text-danger' :
-                        'text-primary-light'
-                      }`} />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-text-primary text-sm">
-                        {entry.trade?.instrument || 'Trade'} Journal
-                      </h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-text-muted">
-                          {new Date(entry.createdAt).toLocaleDateString()}
-                        </p>
-                        {tradeResult && (
-                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                            tradeResult === 'WIN' ? 'bg-success/10 text-success' :
-                            tradeResult === 'LOSS' ? 'bg-danger/10 text-danger' :
-                            'bg-hover text-text-secondary'
-                          }`}>
-                            {tradeResult === 'BREAK_EVEN' ? 'BE' : tradeResult}
-                          </span>
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-sidebar/50">
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Instrument</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Result</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Content</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-text-muted">Lessons</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {journals.map((entry) => {
+                  const tradeResult = entry.trade?.result
+                  return (
+                    <tr key={entry.id}
+                      className="cursor-pointer transition-colors hover:bg-hover"
+                      onClick={() => navigate(`/trades/${entry.tradeId}`)}>
+                      <td className="px-4 py-3 text-text-primary whitespace-nowrap">
+                        {new Date(entry.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-text-primary">
+                        {entry.trade?.instrument || '--'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                          tradeResult === 'WIN' ? 'bg-success/10 text-success' :
+                          tradeResult === 'LOSS' ? 'bg-danger/10 text-danger' :
+                          'bg-hover text-text-muted'
+                        }`}>
+                          {getResultIcon(tradeResult)}
+                          {getResultBadge(tradeResult)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-text-secondary max-w-[250px] truncate">
+                        {entry.content || <span className="text-text-muted">--</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {entry.lessons && entry.lessons.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {entry.lessons.slice(0, 2).map((lesson, i) => (
+                              <span key={i} className="text-xs bg-hover text-text-secondary px-2 py-0.5 rounded-full">{lesson}</span>
+                            ))}
+                            {entry.lessons.length > 2 && (
+                              <span className="text-xs text-text-muted">+{entry.lessons.length - 2}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-text-muted">--</span>
                         )}
-                      </div>
-                    </div>
-                  </div>
-                  <ExternalLink className="w-4 h-4 text-text-muted group-hover:text-primary-light transition-colors" />
-                </div>
-                {entry.content && (
-                  <p className="text-sm text-text-secondary line-clamp-3 leading-relaxed">{entry.content}</p>
-                )}
-                {entry.lessons && entry.lessons.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {entry.lessons.slice(0, 3).map((lesson, i) => (
-                      <span key={i} className="text-xs bg-hover text-text-secondary px-2 py-0.5 rounded-full">
-                        {lesson}
-                      </span>
-                    ))}
-                    {entry.lessons.length > 3 && (
-                      <span className="text-xs text-text-muted">+{entry.lessons.length - 3} more</span>
-                    )}
-                  </div>
-                )}
-              </div>
-            )
-          })}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

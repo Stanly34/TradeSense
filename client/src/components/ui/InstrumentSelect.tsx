@@ -130,7 +130,7 @@ export function InstrumentSelect({ value, onChange, groups, favorites = [], onTo
       {error && <p className="text-xs text-danger mt-1">{error}</p>}
 
       {open && allFiltered.length > 0 && (
-        <div className="absolute z-50 top-full mt-1 left-0 w-full bg-glass/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1.5 max-h-72 overflow-y-auto">
+        <div className="absolute z-50 top-full mt-1 left-0 w-full bg-elevated backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1.5 max-h-72 overflow-y-auto">
           {!hasQuery && favoriteItems.length > 0 && (
             <>
               <div className="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-warning">Favorites</div>

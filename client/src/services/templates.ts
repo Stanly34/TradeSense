@@ -30,6 +30,18 @@ export interface ChallengeProgress {
   manualOverride?: boolean
 }
 
+export interface Platform {
+  id: string
+  name: string
+  marketType: string
+  isActive: boolean
+}
+
+export async function listPlatforms(): Promise<Platform[]> {
+  const { data } = await api.get('/admin/platforms')
+  return data.data
+}
+
 export async function listTemplates(): Promise<Template[]> {
   const { data } = await api.get('/templates')
   return data.data

@@ -8,9 +8,10 @@ interface SelectionBarProps {
   onCancel: () => void
   allSelected?: boolean
   onToggleSelectAll?: () => void
+  deleteLabel?: string
 }
 
-export function SelectionBar({ count, onDelete, onCancel, allSelected, onToggleSelectAll }: SelectionBarProps) {
+export function SelectionBar({ count, onDelete, onCancel, allSelected, onToggleSelectAll, deleteLabel = 'Deactivate' }: SelectionBarProps) {
   const [mounted, setMounted] = useState(false)
   const [animating, setAnimating] = useState(false)
 
@@ -75,7 +76,7 @@ export function SelectionBar({ count, onDelete, onCancel, allSelected, onToggleS
         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
       >
         <Trash2 className="w-4 h-4" />
-        Deactivate
+        {deleteLabel}
       </button>
 
       <button

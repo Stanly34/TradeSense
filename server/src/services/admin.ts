@@ -7,7 +7,7 @@ export async function listUsers(page = 1, limit = 50) {
     prisma.user.findMany({
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ role: 'asc' }, { createdAt: 'desc' }],
       select: {
         id: true, fullName: true, username: true, email: true, role: true,
         isVerified: true, isActive: true, lastLogin: true, createdAt: true,
@@ -54,7 +54,15 @@ export async function deleteUser(userId: string) {
 }
 
 export async function listPlans() {
-  return prisma.plan.findMany({ orderBy: { price: 'asc' } })
+  const [plans, currencySetting] = await Promise.all([
+    prisma.plan.findMany({
+      where: { isActive: true },
+      orderBy: { price: 'asc' },
+    }),
+    prisma.setting.findUnique({ where: { key: 'default_currency' } }),
+  ])
+  const defaultCurrency = currencySetting?.value || 'INR'
+  return plans.map((p) => ({ ...p, currency: defaultCurrency }))
 }
 
 export async function createPlan(data: Record<string, unknown>, actingUserId: string) {
@@ -177,10 +185,10 @@ export async function updateSubscription(subscriptionId: string, data: { status?
 }
 
 export async function listSettings() {
-  const keys = ['allow_registration', 'maintenance_mode', 'email_enabled', 'free_plan_available']
+  const keys = ['allow_registration', 'maintenance_mode', 'email_enabled', 'free_plan_available', 'default_currency']
   const settings = await prisma.setting.findMany({ where: { key: { in: keys } } })
   const map = Object.fromEntries(settings.map((s) => [s.key, s.value]))
-  return keys.map((key) => ({ key, value: map[key] ?? 'true' }))
+  return keys.map((key) => ({ key, value: map[key] ?? (key === 'default_currency' ? 'INR' : 'true') }))
 }
 
 export async function updateSetting(key: string, value: string) {

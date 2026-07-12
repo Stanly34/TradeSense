@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { Button } from '../components/ui/Button'
 import * as subscriptionService from '../services/subscriptions'
 import type { PublicPlan } from '../services/subscriptions'
+import { loadRazorpayScript } from '../lib/razorpay'
+import { getCurrencySymbol } from '../lib/currency'
 import toast from 'react-hot-toast'
 
 interface PlanField {
@@ -25,7 +27,7 @@ const PLAN_FIELDS: PlanField[] = [
 
 export function ChoosePlanPage() {
   const navigate = useNavigate()
-  const { refreshUser } = useAuth()
+  const { refreshUser, user: authUser } = useAuth()
   const [plans, setPlans] = useState<PublicPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
@@ -54,15 +56,41 @@ export function ChoosePlanPage() {
   async function handleUpgrade(planName: string) {
     setActionLoading(planName)
     try {
-      const result = await subscriptionService.createCheckout(planName)
-      if (result.testMode || !result.url) {
-        toast.error('Stripe not configured.')
-        return
-      }
-      window.location.href = result.url
+      const order = await subscriptionService.createRazorpayOrder(planName)
+
+      await loadRazorpayScript()
+
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        name: 'TradeSense',
+        description: `${planName} Plan`,
+        subscription_id: order.subscriptionId,
+        prefill: { name: authUser?.fullName || '', email: authUser?.email || '', contact: '9999999999' },
+        handler: async (response) => {
+          try {
+            await subscriptionService.verifyRazorpayPayment({
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySubscriptionId: response.razorpay_subscription_id,
+              planName,
+              couponId: order.couponId,
+            })
+            toast.success('Welcome to Pro!')
+            setActionLoading(null)
+            await refreshUser()
+            navigate('/dashboard')
+          } catch {
+            toast.error('Payment verification failed. Please contact support.')
+            setActionLoading(null)
+          }
+        },
+        modal: {
+          ondismiss: () => setActionLoading(null),
+        },
+      })
+
+      rzp.open()
     } catch {
       toast.error('Failed to start checkout')
-    } finally {
       setActionLoading(null)
     }
   }
@@ -100,7 +128,7 @@ export function ChoosePlanPage() {
                     <div>
                       <h3 className="text-lg font-bold text-text-primary">{plan.name}</h3>
                       <div className="mt-2 flex items-baseline gap-1">
-                        <span className="text-3xl font-bold text-text-primary">${plan.price}</span>
+                        <span className="text-3xl font-bold text-text-primary">{getCurrencySymbol(plan.currency)}{plan.price}</span>
                         <span className="text-text-muted text-xs">/month</span>
                       </div>
                     </div>
