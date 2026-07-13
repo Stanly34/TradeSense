@@ -166,7 +166,8 @@ export function TemplatesPage() {
     }
     const num = parseFloat(trimmed.replace(/,/g, ''))
     if (isNaN(num) || num <= 0) return undefined
-    return num
+    if (num > accountSize) return Math.round(num - accountSize)
+    return Math.round(num)
   }
 
   async function handleCreate() {
