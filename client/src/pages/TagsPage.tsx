@@ -138,7 +138,7 @@ export function TagsPage() {
 
   async function handleSaveContent(id: string) {
     if (isAtChecklistLimit && editItems.length > 0) {
-      const existingCount = tags.filter((t) => t.id !== id && t.content && JSON.parse(t.content).length > 0).length
+      const existingCount = tags.filter((t) => t.id !== id && t.content && parseTagContent(t.content).length > 0).length
       if (existingCount >= (plan?.checklistLimit || 1)) {
         setShowUpgradeDialog(true)
         return

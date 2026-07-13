@@ -11,7 +11,7 @@
     "build:client": "npx vite build client",
     "build:server": "npx tsc --project server/tsconfig.json",
     "build": "npm run build:server && npm run build:client",
-    "render-build": "npm install && npx prisma generate --schema=server/prisma/schema.prisma && npx tsc --project server/tsconfig.json && npx vite build client",
+    "render-build": "npm install && npx prisma generate --schema=server/prisma/schema.prisma && npx tsx server/prisma/seed.ts && npx tsc --project server/tsconfig.json && npx vite build client",
     "start": "node server/dist/server.js"
   },
   "dependencies": {
