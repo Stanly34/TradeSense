@@ -8,6 +8,45 @@ const api = axios.create({
 
 let accessToken: string | null = null
 
+const cache = new Map<string, { data: unknown; expiry: number }>()
+const TTL = 15_000
+
+function getCacheKey(config: { method?: string; url?: string; params?: Record<string, unknown> }) {
+  if (config.method !== 'get' && config.method !== undefined) return null
+  return `${config.url}${JSON.stringify(config.params ?? {})}`
+}
+
+api.interceptors.request.use((config) => {
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`
+  }
+  const key = getCacheKey(config)
+  if (key) {
+    const hit = cache.get(key)
+    if (hit && Date.now() < hit.expiry) {
+      config.adapter = () => Promise.resolve({ data: hit.data, status: 200, statusText: 'OK', headers: {}, config })
+    }
+  }
+  return config
+})
+
+api.interceptors.response.use((response) => {
+  const key = getCacheKey(response.config)
+  if (key) cache.set(key, { data: response.data, expiry: Date.now() + TTL })
+  if (response.config.method && !['get', 'head'].includes(response.config.method)) {
+    const base = response.config.url?.split('?')[0] ?? ''
+    const keys = Array.from(cache.keys()).filter(k => k.startsWith(base))
+    keys.forEach(k => cache.delete(k))
+  }
+  return response
+})
+
+export function clearCache(pattern?: string) {
+  if (!pattern) { cache.clear(); return }
+  const keys = Array.from(cache.keys()).filter(k => k.includes(pattern))
+  keys.forEach(k => cache.delete(k))
+}
+
 export function setAccessToken(token: string | null) {
   accessToken = token
   if (!token) {
@@ -18,13 +57,6 @@ export function setAccessToken(token: string | null) {
 export function getAccessToken() {
   return accessToken
 }
-
-api.interceptors.request.use((config) => {
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`
-  }
-  return config
-})
 
 let isRefreshing = false
 let failedQueue: Array<{
