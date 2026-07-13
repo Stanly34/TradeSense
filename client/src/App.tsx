@@ -42,6 +42,18 @@ function PrefetchOnAuth() {
   return null
 }
 
+function KeepAlive() {
+  const { user } = useAuth()
+  useEffect(() => {
+    if (!user) return
+    const id = setInterval(() => {
+      fetch('/api/health').catch(() => {})
+    }, 30_000)
+    return () => clearInterval(id)
+  }, [user])
+  return null
+}
+
 function ToasterWithTheme() {
   const { activeTheme } = useTheme()
   const isDark = activeTheme === 'dark'
@@ -69,6 +81,7 @@ function App() {
         <AuthProvider>
           <ThemeProvider>
             <AppRouter />
+            <KeepAlive />
             <PrefetchOnAuth />
             <ToasterWithTheme />
           </ThemeProvider>
