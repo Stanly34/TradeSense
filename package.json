@@ -5,21 +5,15 @@
   "workspaces": ["client", "server"],
   "type": "module",
   "description": "TradeSense - Premium Trading Journal Platform",
-  "prisma": {
-    "schema": "server/prisma/schema.prisma"
-  },
   "scripts": {
     "dev:client": "npm run dev --prefix client",
     "dev:server": "npm run dev --prefix server",
     "dev": "concurrently -n client,server -c cyan,green \"npm run dev:client\" \"npm run dev:server\"",
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
-    "build": "npm run build:client",
-    "vercel-build": "npx prisma generate --schema=server/prisma/schema.prisma && cd client && vite build",
-    "start": "pm2 start ecosystem.config.cjs",
-    "stop": "pm2 stop ecosystem.config.cjs",
-    "status": "pm2 status",
-    "logs": "pm2 logs"
+    "build": "npm run build:server && npm run build:client",
+    "render-build": "npm install && npx prisma generate --schema=server/prisma/schema.prisma && npm run build",
+    "start": "node server/dist/server.js"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
