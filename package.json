@@ -2,7 +2,6 @@
   "name": "tradesense",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["client", "server"],
   "type": "module",
   "description": "TradeSense - Premium Trading Journal Platform",
   "scripts": {
