@@ -492,8 +492,8 @@ export function TemplatesPage() {
             const totalDrawdown = dv.maxTotalDrawdown as number || 0
             const accountSizeVal = dv.accountSize as number || 0
             const currentBalanceVal = dv.currentAccountSize as number || (accountSizeVal + (progress?.totalPnl || 0))
-            const progressPercent = target > 0 && accountSizeVal > 0 ? Math.min(100, Math.max(0, ((currentBalanceVal - accountSizeVal) / target) * 100)) : 0
-            const drawdownPercent = totalDrawdown > 0 ? Math.min(100, Math.max(0, ((progress?.maxDrawdown || 0) / totalDrawdown) * 100)) : 0
+            const progressPercent = target > 0 && accountSizeVal > 0 ? ((currentBalanceVal - accountSizeVal) / target) * 100 : 0
+
 
             return (
               <div key={tpl.id}
@@ -716,7 +716,7 @@ export function TemplatesPage() {
                 const totalDrawdown = dv.maxTotalDrawdown as number || 0
                 const accountSizeVal = dv.accountSize as number || 0
                 const currentBalanceVal = dv.currentAccountSize as number || (accountSizeVal + (progress?.totalPnl || 0))
-                const progressPercent = target > 0 && accountSizeVal > 0 ? Math.min(100, Math.max(0, ((currentBalanceVal - accountSizeVal) / target) * 100)) : 0
+            const progressPercent = target > 0 && accountSizeVal > 0 ? ((currentBalanceVal - accountSizeVal) / target) * 100 : 0
                 const drawdownPercent = totalDrawdown > 0 ? Math.min(100, Math.max(0, ((progress?.maxDrawdown || 0) / totalDrawdown) * 100)) : 0
 
                 function tradePnL(t: Trade) {

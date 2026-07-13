@@ -555,7 +555,7 @@ export function DashboardPage() {
                   if (!limit) return null
                   const hasBalance = currentBalance > 0 && startingBalance > 0
                   const progress = hasBalance ? currentBalance - startingBalance : pnl
-                  const pct = limit > 0 ? Math.min(100, Math.max(0, (progress / limit) * 100)) : 0
+                  const pct = limit > 0 ? (progress / limit) * 100 : 0
                   return (
                     <>
                       <span className="text-lg sm:text-xl font-medium text-[#D5D8DF] self-end mb-1">left</span>
