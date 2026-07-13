@@ -1,12 +1,46 @@
+import { useEffect } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/AuthContext'
+import { useAuth } from './hooks/useAuth'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useTheme } from './hooks/useTheme'
 import { AppRouter } from './routes'
+import api from './services/api'
 
 const queryClient = new QueryClient()
+
+const prefetchRoutes = [
+  '/dashboard/stats',
+  '/dashboard/monthly-performance',
+  '/dashboard/result-distribution',
+  '/dashboard/instrument-performance',
+  '/dashboard/recent-trades',
+  '/trades?limit=20&page=1&sortBy=createdAt&sortOrder=desc',
+  '/journals',
+  '/templates',
+  '/tags',
+  '/plans',
+  '/plans/current',
+  '/notifications/preferences',
+  '/outlooks',
+  '/dashboard/calendar',
+]
+
+function PrefetchOnAuth() {
+  const { user } = useAuth()
+  useEffect(() => {
+    if (!user) return
+    const controller = new AbortController()
+    const entries = prefetchRoutes.map(url =>
+      api.get(url, { signal: controller.signal }).catch(() => {})
+    )
+    Promise.allSettled(entries)
+    return () => controller.abort()
+  }, [user])
+  return null
+}
 
 function ToasterWithTheme() {
   const { activeTheme } = useTheme()
@@ -35,6 +69,7 @@ function App() {
         <AuthProvider>
           <ThemeProvider>
             <AppRouter />
+            <PrefetchOnAuth />
             <ToasterWithTheme />
           </ThemeProvider>
         </AuthProvider>

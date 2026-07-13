@@ -9,7 +9,7 @@ const api = axios.create({
 let accessToken: string | null = null
 
 const cache = new Map<string, { data: unknown; expiry: number }>()
-const TTL = 15_000
+const TTL = 300_000
 
 function getCacheKey(config: { method?: string; url?: string; params?: Record<string, unknown> }) {
   if (config.method !== 'get' && config.method !== undefined) return null
