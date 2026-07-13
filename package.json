@@ -15,7 +15,7 @@
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
     "build": "npm run build:client",
-    "vercel-build": "cd client && vite build",
+    "vercel-build": "npx prisma generate --schema=server/prisma/schema.prisma && cd client && vite build",
     "start": "pm2 start ecosystem.config.cjs",
     "stop": "pm2 stop ecosystem.config.cjs",
     "status": "pm2 status",
