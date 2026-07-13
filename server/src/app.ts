@@ -64,9 +64,11 @@ app.use('/api/v1/subscriptions', subscriptionRoutes)
 app.use('/api/v1/outlook', outlookRoutes)
 
 const uploadsDir = path.join(process.cwd(), 'uploads')
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true })
-}
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true })
+  }
+} catch {}
 app.use('/uploads', express.static(uploadsDir))
 
 app.get('/api/health', (_req, res) => {
