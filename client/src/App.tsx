@@ -48,7 +48,7 @@ function KeepAlive() {
     if (!user) return
     const id = setInterval(() => {
       fetch('/api/health').catch(() => {})
-    }, 30_000)
+    }, 10_000)
     return () => clearInterval(id)
   }, [user])
   return null
