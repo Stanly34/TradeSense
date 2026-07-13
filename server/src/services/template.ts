@@ -20,7 +20,7 @@ export async function createTemplate(userId: string, data: {
   if (data.type === 'PROP_FIRM') {
     const accountSize = (dv.accountSize as number) || 0
     const currentAccountSize = (dv.currentAccountSize as number) || 0
-    dv.startingBalance = currentAccountSize || accountSize
+    dv.startingBalance = accountSize
   }
 
   return prisma.template.create({
