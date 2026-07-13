@@ -202,7 +202,7 @@ export function TradesPage() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">Journals</h1>
           <p className="text-text-secondary mt-1">Log and manage your trading activity.</p>

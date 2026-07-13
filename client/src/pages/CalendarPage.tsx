@@ -84,8 +84,8 @@ export function CalendarPage() {
   return (
     <div className="pt-5 px-5 pb-3 lg:pt-7 lg:px-7 lg:pb-4 h-[calc(100vh-4rem)] flex flex-col">
       {/* Top bar: account selector + summary */}
-      <div className="flex items-center gap-4 mb-3 shrink-0">
-        <div className="w-56 relative" ref={accountDropdownRef}>
+      <div className="flex items-center gap-4 mb-3 shrink-0 flex-wrap gap-y-2">
+        <div className="w-56 max-w-full relative" ref={accountDropdownRef}>
           <button type="button" onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
             className={cn(
               'flex items-center gap-2 w-full rounded-lg border border-border/80 px-3 py-1.5 text-xs bg-input/60 backdrop-blur-sm transition-all duration-200',
@@ -116,7 +116,7 @@ export function CalendarPage() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="flex items-center gap-3 sm:ml-auto">
           <div className="flex items-center gap-2 text-xs text-text-muted">
             <span className="font-semibold uppercase tracking-wider text-text-secondary">P&L</span>
             <span className={`font-bold ${totalPnl >= 0 ? 'text-success' : 'text-danger'}`}>

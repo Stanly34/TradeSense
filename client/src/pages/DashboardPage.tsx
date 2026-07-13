@@ -292,7 +292,7 @@ export function DashboardPage() {
 
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="w-64 relative" ref={accountDropdownRef}>
+          <div className="w-64 max-w-full relative" ref={accountDropdownRef}>
             <button type="button" onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
               className={cn(
                 'flex items-center gap-2 w-full rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm transition-all duration-200',
@@ -358,7 +358,7 @@ export function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div className="col-span-2 lg:col-span-1 bg-gradient-to-br from-brand/15 via-brand/5 to-transparent rounded-2xl border border-primary/15 p-5 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),transparent)] pointer-events-none" />
           <p className="text-xs text-text-muted uppercase tracking-widest font-medium relative z-10">TradeSense Score</p>
@@ -420,18 +420,11 @@ export function DashboardPage() {
       {/* Challenge Metrics - Prop Firm Style */}
       {selectedAccountId && selectedAccount && overallStats && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="group relative overflow-hidden rounded-[20px] p-7 transition-all duration-250"
-              style={{
-                background: '#171A21',
-                border: '1px solid rgba(255,255,255,0.05)',
-                boxShadow: '0 8px 30px rgba(0,0,0,.35)',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,.45)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,.35)' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 bg-[#171A21] border border-white/5 shadow-[0_8px_30px_rgba(0,0,0,.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,.45)]">
               <div className="flex items-center justify-between mb-1">
-                <p style={{ fontSize: '14px', fontWeight: 600, color: '#B8C0D4' }}>Daily Drawdown Level</p>
-                <span style={{ background: '#222734', padding: '8px 16px', borderRadius: '999px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>
+                <p className="text-xs sm:text-sm font-semibold text-[#B8C0D4]">Daily Drawdown Level</p>
+                <span className="bg-[#222734] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-white whitespace-nowrap">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
                     const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
@@ -442,7 +435,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-end gap-2 mt-1">
-                <span style={{ fontSize: '58px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-none">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
                     const pnl = todayStats?.pnl || 0
@@ -453,36 +446,26 @@ export function DashboardPage() {
                   })()}
                 </span>
               </div>
-              <div className="mt-[30px]">
-                <div style={{ height: '22px', background: '#252A35', borderRadius: '999px', overflow: 'hidden', position: 'relative' }}>
-                  <div style={{
-                    height: '100%', background: '#4D6BFF', borderRadius: '999px',
-                    transition: 'width .4s ease',
-                    width: `${(() => {
+              <div className="mt-6 sm:mt-8">
+                <div className="h-4 sm:h-5 lg:h-6 bg-[#252A35] rounded-full overflow-hidden relative">
+                  <div className="h-full rounded-full transition-all duration-[400ms] bg-[#4D6BFF]"
+                    style={{ width: `${(() => {
                       const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
                       const pnl = todayStats?.pnl || 0
                       const used = Math.abs(Math.min(0, pnl))
                       return limit ? Math.min(100, (used / limit) * 100) : 0
-                    })()}%`,
-                  }} />
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                    })()}%` }} />
+                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
                     <span>0%</span><span>100%</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-[20px] p-7 transition-all duration-250"
-              style={{
-                background: '#171A21',
-                border: '1px solid rgba(255,255,255,0.05)',
-                boxShadow: '0 8px 30px rgba(0,0,0,.35)',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,.45)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,.35)' }}>
+            <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 bg-[#171A21] border border-white/5 shadow-[0_8px_30px_rgba(0,0,0,.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,.45)]">
               <div className="flex items-center justify-between mb-1">
-                <p style={{ fontSize: '14px', fontWeight: 600, color: '#B8C0D4' }}>Max Drawdown Level</p>
-                <span style={{ background: '#222734', padding: '8px 16px', borderRadius: '999px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>
+                <p className="text-xs sm:text-sm font-semibold text-[#B8C0D4]">Max Drawdown Level</p>
+                <span className="bg-[#222734] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-white whitespace-nowrap">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxTotalDrawdown as number) || 0
                     const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
@@ -493,7 +476,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-end gap-2 mt-1">
-                <span style={{ fontSize: '58px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-none">
                   {(() => {
                     const dv = selectedAccount.defaultValues || {}
                     const limit = (dv.maxTotalDrawdown as number) || 0
@@ -509,12 +492,10 @@ export function DashboardPage() {
                   })()}
                 </span>
               </div>
-              <div className="mt-[30px]">
-                <div style={{ height: '22px', background: '#252A35', borderRadius: '999px', overflow: 'hidden', position: 'relative' }}>
-                  <div style={{
-                    height: '100%', background: '#4D6BFF', borderRadius: '999px',
-                    transition: 'width .4s ease',
-                    width: `${(() => {
+              <div className="mt-6 sm:mt-8">
+                <div className="h-4 sm:h-5 lg:h-6 bg-[#252A35] rounded-full overflow-hidden relative">
+                  <div className="h-full rounded-full transition-all duration-[400ms] bg-[#4D6BFF]"
+                    style={{ width: `${(() => {
                       const dv = selectedAccount.defaultValues || {}
                       const limit = (dv.maxTotalDrawdown as number) || 0
                       const accountSize = (dv.accountSize as number) || 0
@@ -524,9 +505,8 @@ export function DashboardPage() {
                       const tradeDrawdown = Math.abs(Math.min(0, pnl))
                       const used = Math.max(balanceDrawdown, tradeDrawdown)
                       return limit ? Math.min(100, (used / limit) * 100) : 0
-                    })()}%`,
-                  }} />
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                    })()}%` }} />
+                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
                     <span>0%</span><span>100%</span>
                   </div>
                 </div>
@@ -534,17 +514,10 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-[20px] p-7 transition-all duration-250"
-            style={{
-              background: '#171A21',
-              border: '1px solid rgba(255,255,255,0.05)',
-              boxShadow: '0 8px 30px rgba(0,0,0,.35)',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,.45)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,.35)' }}>
+          <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 bg-[#171A21] border border-white/5 shadow-[0_8px_30px_rgba(0,0,0,.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,.45)]">
             <div className="flex items-center justify-between mb-1">
-              <p style={{ fontSize: '14px', fontWeight: 600, color: '#B8C0D4' }}>Target Profit</p>
-              <span style={{ background: '#222734', padding: '8px 16px', borderRadius: '999px', fontSize: '15px', fontWeight: 700, color: '#fff' }}>
+              <p className="text-xs sm:text-sm font-semibold text-[#B8C0D4]">Target Profit</p>
+              <span className="bg-[#222734] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-white whitespace-nowrap">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.targetProfit as number) || 0
                     const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
@@ -554,8 +527,8 @@ export function DashboardPage() {
                   })()}
                 </span>
               </div>
-              <div className="flex items-end gap-2 mt-1">
-                <span style={{ fontSize: '58px', fontWeight: 800, color: '#fff', lineHeight: 1 }}>
+              <div className="flex items-end gap-2 mt-1 flex-wrap">
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-none">
                   {(() => {
                     const dv = selectedAccount.defaultValues || {}
                     const limit = (dv.targetProfit as number) || 0
@@ -585,20 +558,18 @@ export function DashboardPage() {
                   const pct = limit > 0 ? Math.min(100, Math.max(0, (progress / limit) * 100)) : 0
                   return (
                     <>
-                      <span style={{ fontSize: '22px', fontWeight: 500, color: '#D5D8DF', lineHeight: '58px' }}>left</span>
-                      <span style={{ fontSize: '16px', fontWeight: 600, color: '#22C55E', lineHeight: '58px', marginLeft: '8px' }}>
+                      <span className="text-lg sm:text-xl font-medium text-[#D5D8DF] self-end mb-1">left</span>
+                      <span className="text-sm sm:text-base font-semibold text-success self-end mb-1">
                         ({Math.round(pct)}%)
                       </span>
                     </>
                   )
                 })()}
               </div>
-              <div className="mt-[30px]">
-                <div style={{ height: '22px', background: '#252A35', borderRadius: '999px', overflow: 'hidden', position: 'relative' }}>
-                  <div style={{
-                    height: '100%', background: '#22C55E', borderRadius: '999px',
-                    transition: 'width .4s ease',
-                    width: `${(() => {
+              <div className="mt-6 sm:mt-8">
+                <div className="h-4 sm:h-5 lg:h-6 bg-[#252A35] rounded-full overflow-hidden relative">
+                  <div className="h-full rounded-full transition-all duration-[400ms] bg-success"
+                    style={{ width: `${(() => {
                       const dv = selectedAccount.defaultValues || {}
                       const limit = (dv.targetProfit as number) || 0
                       const accountSize = (dv.accountSize as number) || 0
@@ -609,9 +580,8 @@ export function DashboardPage() {
                       const hasBalance = currentBalance > 0 && startingBalance > 0
                       const progress = hasBalance ? currentBalance - startingBalance : pnl
                       return Math.min(100, Math.max(0, (progress / limit) * 100))
-                    })()}%`,
-                  }} />
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+                    })()}%` }} />
+                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
                     <span>0%</span><span>100%</span>
                   </div>
                 </div>
@@ -621,14 +591,12 @@ export function DashboardPage() {
         )}
 
       {!selectedAccountId && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-[20px] p-7 flex items-center justify-center"
-            style={{ background: '#171A21', border: '1px solid rgba(255,255,255,0.05)', minHeight: '180px' }}>
-            <p className="text-sm text-text-muted">Select an account to view challenge progress</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-[20px] p-5 sm:p-7 flex items-center justify-center bg-[#171A21] border border-white/5 min-h-[140px] sm:min-h-[180px]">
+            <p className="text-xs sm:text-sm text-text-muted text-center">Select an account to view challenge progress</p>
           </div>
-          <div className="rounded-[20px] p-7 flex items-center justify-center"
-            style={{ background: '#171A21', border: '1px solid rgba(255,255,255,0.05)', minHeight: '180px' }}>
-            <p className="text-sm text-text-muted">Select an account to view challenge progress</p>
+          <div className="rounded-[20px] p-5 sm:p-7 flex items-center justify-center bg-[#171A21] border border-white/5 min-h-[140px] sm:min-h-[180px]">
+            <p className="text-xs sm:text-sm text-text-muted text-center">Select an account to view challenge progress</p>
           </div>
         </div>
       )}
@@ -642,7 +610,7 @@ export function DashboardPage() {
         onMonthChange={handleCalendarMonthChange}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-text-primary mb-4">Equity Curve</h2>
           {equityData.length === 0 ? (
@@ -710,7 +678,7 @@ export function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {instruments.slice(0, 8).map((inst) => (
               <div key={inst.instrument} className="flex items-center gap-4">
-                <span className="text-sm font-medium text-text-primary w-24 truncate">{inst.instrument}</span>
+                <span className="text-sm font-medium text-text-primary w-20 sm:w-24 truncate">{inst.instrument}</span>
                 <div className="flex-1 h-2 bg-hover/50 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-brand to-brand-light rounded-full transition-all duration-500"

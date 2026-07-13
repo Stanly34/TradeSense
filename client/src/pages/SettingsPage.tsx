@@ -107,7 +107,7 @@ export function SettingsPage() {
         <p className="text-text-secondary mt-1">Manage your account and preferences.</p>
       </div>
 
-      <div className="flex gap-1 card p-1 w-fit">
+      <div className="flex gap-1 card p-1 w-fit flex-wrap">
         {tabs.map((tab) => {
           const Icon = tab.icon
           return (
