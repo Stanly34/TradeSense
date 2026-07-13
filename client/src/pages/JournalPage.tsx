@@ -7,13 +7,11 @@ import type { JournalEntry } from '../services/journals'
 export function JournalPage() {
   const navigate = useNavigate()
   const [journals, setJournals] = useState<JournalEntry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     journalService.listJournals()
       .then(setJournals)
       .catch(() => setJournals([]))
-      .finally(() => setIsLoading(false))
   }, [])
 
   const getResultIcon = (result?: string | null) => {
@@ -37,11 +35,7 @@ export function JournalPage() {
         <p className="text-text-secondary mt-1">Write and review your trading journal entries.</p>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-        </div>
-      ) : journals.length === 0 ? (
+      {journals.length === 0 ? (
         <div className="card p-12 text-center text-text-muted">
           <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No journal entries yet. Write a reflection on a trade to get started.</p>

@@ -254,7 +254,6 @@ function formatWeekRange(weekStart: string): string {
 export function OutlookPage() {
   const { isPro, plan } = usePlan()
   const [entries, setEntries] = useState<WeeklyOutlook[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -300,8 +299,6 @@ export function OutlookPage() {
       setEntries(data)
     } catch {
       setEntries([])
-    } finally {
-      setIsLoading(false)
     }
   }, [])
 
@@ -546,11 +543,7 @@ export function OutlookPage() {
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-        </div>
-      ) : entries.length === 0 ? (
+      {entries.length === 0 ? (
         <div className="card p-12 text-center text-text-muted">
           <CalendarCheck className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No outlooks yet. Create one to track your weekly analysis.</p>

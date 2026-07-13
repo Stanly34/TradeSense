@@ -49,7 +49,6 @@ function AdminPanel({ role }: { role: string }) {
   const [plans, setPlans] = useState<AdminPlan[]>([])
 
   const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'platforms' | 'coupons' | 'activity'>('users')
-  const [isLoading, setIsLoading] = useState(true)
   const [planModal, setPlanModal] = useState<{ mode: 'create' | 'edit'; plan?: AdminPlan } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'user' | 'plan'; id: string; name: string } | null>(null)
 
@@ -63,7 +62,6 @@ function AdminPanel({ role }: { role: string }) {
   ]
 
   async function loadCore() {
-    setIsLoading(true)
     try {
       const [u, p] = await Promise.all([
         adminService.listUsers(1, 50),
@@ -72,7 +70,6 @@ function AdminPanel({ role }: { role: string }) {
       setUsers(u.users)
       setPlans(p)
     } catch {}
-    setIsLoading(false)
   }
 
   async function refreshCore() {
@@ -100,12 +97,7 @@ function AdminPanel({ role }: { role: string }) {
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-        </div>
-      ) : (
-        <>
+      <>
           <div className="flex gap-1 bg-card p-1 rounded-lg border border-border w-fit flex-wrap">
             {tabs.map((t) => (
               <button
@@ -147,7 +139,6 @@ function AdminPanel({ role }: { role: string }) {
           {isAdmin && <div className={tab === 'coupons' ? '' : 'hidden'}><CouponsTab /></div>}
           <div className={tab === 'activity' ? '' : 'hidden'}><ActivityLogTab /></div>
         </>
-      )}
 
       {planModal && (
         <PlanModal
@@ -1073,9 +1064,7 @@ function AdminTradesTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {isLoading ? (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-text-muted">Loading...</td></tr>
-            ) : trades.length === 0 ? (
+            {trades.length === 0 ? (
               <tr><td colSpan={6} className="px-4 py-8 text-center text-text-muted">No trades found</td></tr>
             ) : trades.map((t) => (
               <tr key={t.id} className="hover:bg-hover">
@@ -1115,16 +1104,13 @@ function AdminTradesTab() {
 function PlatformsTab() {
   const [platforms, setPlatforms] = useState<AdminPlatform[]>([])
   const [modal, setModal] = useState<{ mode: 'create' | 'edit'; platform?: AdminPlatform } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [confirmDelete, setConfirmDelete] = useState<AdminPlatform | null>(null)
 
   async function load() {
-    setIsLoading(true)
     try {
       const p = await adminService.listPlatforms()
       setPlatforms(p)
     } catch {}
-    setIsLoading(false)
   }
 
   useEffect(() => { load() }, [])
@@ -1150,9 +1136,7 @@ function PlatformsTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {isLoading ? (
-              <tr><td colSpan={4} className="px-4 py-8 text-center text-text-muted">Loading...</td></tr>
-            ) : platforms.length === 0 ? (
+            {platforms.length === 0 ? (
               <tr><td colSpan={4} className="px-4 py-8 text-center text-text-muted">No platforms found</td></tr>
             ) : platforms.map((p) => (
               <tr key={p.id} className="hover:bg-hover">
@@ -1663,11 +1647,9 @@ function ActivityLogTab() {
   const [logs, setLogs] = useState<AuditLogEntry[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
   const [actionFilter, setActionFilter] = useState('')
 
   async function load(pageNum: number, filter?: string) {
-    setIsLoading(true)
     try {
       const params: { action?: string } = {}
       if (filter) params.action = filter
@@ -1676,7 +1658,6 @@ function ActivityLogTab() {
       setTotalPages(result.totalPages)
       setPage(pageNum)
     } catch {}
-    setIsLoading(false)
   }
 
   useEffect(() => { load(1, actionFilter) }, [actionFilter])
@@ -1709,9 +1690,7 @@ function ActivityLogTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {isLoading ? (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-text-muted">Loading...</td></tr>
-            ) : logs.length === 0 ? (
+            {logs.length === 0 ? (
               <tr><td colSpan={5} className="px-4 py-8 text-center text-text-muted">No activity found</td></tr>
             ) : logs.map((l) => (
               <tr key={l.id} className="hover:bg-hover">

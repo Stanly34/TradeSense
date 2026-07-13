@@ -14,7 +14,6 @@ export function CalendarPage() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [days, setDays] = useState<CalendarDay[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [showYearPicker, setShowYearPicker] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
   const [accounts, setAccounts] = useState<Template[]>([])
@@ -38,11 +37,9 @@ export function CalendarPage() {
   }, [])
 
   useEffect(() => {
-    setIsLoading(true)
     dashboardService.getCalendarData(year, month, selectedAccountId || undefined)
       .then(setDays)
       .catch(() => setDays([]))
-      .finally(() => setIsLoading(false))
   }, [year, month, selectedAccountId])
 
   const dayMap = useMemo(() => {
@@ -189,32 +186,28 @@ export function CalendarPage() {
       </div>
 
       {/* Calendar grid */}
-      <div className="flex-1 card pt-4 px-4 pb-3 flex flex-col min-h-0">
-        {isLoading ? (
-          <div className="flex-1 flex items-center justify-center text-text-muted text-sm">Loading...</div>
-        ) : (
-          <>
-            <div className="grid grid-cols-7 gap-[3px] mb-1.5">
-              {DAYS.map((d, i) => (
-                <div key={`${d}-${i}`} className="text-center text-xs text-text-muted font-semibold py-1">
-                  {d}
-                </div>
-              ))}
-            </div>
-            <div className="flex-1 grid grid-cols-7 gap-[3px] auto-rows-fr">
-              {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-                <div key={`empty-${i}`} />
-              ))}
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-                const data = dayMap[dateStr]
-                const isToday = dateStr === `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-                return (
-                  <div key={dateStr}
-                    className={`rounded-xl flex flex-col items-center justify-center text-sm relative transition-all border border-border ${
-                      isToday ? 'ring-2 ring-primary border-primary' : ''
-                    } ${
-                      data
+        <div className="flex-1 card pt-4 px-4 pb-3 flex flex-col min-h-0">
+          <div className="grid grid-cols-7 gap-[3px] mb-1.5">
+            {DAYS.map((d, i) => (
+              <div key={`${d}-${i}`} className="text-center text-xs text-text-muted font-semibold py-1">
+                {d}
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 grid grid-cols-7 gap-[3px] auto-rows-fr">
+            {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+              const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+              const data = dayMap[dateStr]
+              const isToday = dateStr === `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+              return (
+                <div key={dateStr}
+                  className={`rounded-xl flex flex-col items-center justify-center text-sm relative transition-all border border-border ${
+                    isToday ? 'ring-2 ring-primary border-primary' : ''
+                  } ${
+                    data
                         ? data.pnl > 0
                           ? 'bg-success/25 text-success border-success/30'
                           : data.pnl < 0
@@ -238,9 +231,6 @@ export function CalendarPage() {
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-glass" /> Flat</span>
               <span className="flex items-center gap-1.5 ml-auto"><span className="w-3 h-3 rounded-sm border border-primary" /> Today</span>
             </div>
-
-          </>
-        )}
       </div>
     </div>
   )

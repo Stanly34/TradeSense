@@ -32,7 +32,6 @@ export function TradesPage() {
   const [trades, setTrades] = useState<Trade[]>([])
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formTabs, setFormTabs] = useState<number[]>([0])
   const [activeFormTab, setActiveFormTab] = useState(0)
@@ -65,7 +64,6 @@ export function TradesPage() {
   }, [trades, todayStr])
 
   const fetchTrades = useCallback(async () => {
-    setIsLoading(true)
     try {
       const result = await tradeService.listTrades(params)
       setTrades(result.trades)
@@ -73,8 +71,6 @@ export function TradesPage() {
       setTotalPages(result.totalPages)
     } catch {
       setTrades([])
-    } finally {
-      setIsLoading(false)
     }
   }, [params])
 
@@ -302,13 +298,7 @@ export function TradesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={9} className="text-center py-12 text-text-muted">
-                      Loading...
-                    </td>
-                  </tr>
-                ) : trades.length === 0 ? (
+                {trades.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="text-center py-12 text-text-muted">
                       <TrendingUp className="w-10 h-10 mx-auto mb-2 opacity-50" />
@@ -434,11 +424,7 @@ export function TradesPage() {
         </div>
       ) : (
         <>
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : trades.length === 0 ? (
+          {trades.length === 0 ? (
             <div className="card p-12 text-center text-text-muted">
               <TrendingUp className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No trades found. Start by logging your first trade.</p>

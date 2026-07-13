@@ -101,7 +101,6 @@ export function DashboardPage() {
   const [distribution, setDistribution] = useState<ResultDistribution | null>(null)
   const [instruments, setInstruments] = useState<InstrumentPerformance[]>([])
   const [recentTrades, setRecentTrades] = useState<RecentTrade[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [overallStats, setOverallStats] = useState<DashboardStats | null>(null)
   const [todayStats, setTodayStats] = useState<DashboardStats | null>(null)
   const [accounts, setAccounts] = useState<Template[]>([])
@@ -183,7 +182,6 @@ export function DashboardPage() {
   const ed = timePeriod !== 'CUSTOM' ? rangeEnd || undefined : customEnd ? new Date(customEnd + 'T23:59:59').toISOString() : undefined
 
   useEffect(() => {
-    setIsLoading(true)
     const t = selectedAccountId || undefined
     Promise.all([
       dashboardService.getStats(t, sd, ed),
@@ -200,7 +198,6 @@ export function DashboardPage() {
         setRecentTrades(r)
       })
       .catch(() => {})
-      .finally(() => setIsLoading(false))
   }, [selectedAccountId, sd, ed, refreshKey])
 
   useEffect(() => {
@@ -648,9 +645,7 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-text-primary mb-4">Equity Curve</h2>
-          {isLoading ? (
-            <div className="h-64 flex items-center justify-center text-text-muted text-sm">Loading...</div>
-          ) : equityData.length === 0 ? (
+          {equityData.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-text-muted text-sm">No data yet</div>
           ) : (
             <ResponsiveContainer width="100%" height={280}>
@@ -669,9 +664,7 @@ export function DashboardPage() {
 
         <div className="card p-5">
           <h2 className="text-sm font-semibold text-text-primary mb-4">Result Distribution</h2>
-          {isLoading ? (
-            <div className="h-64 flex items-center justify-center text-text-muted text-sm">Loading...</div>
-          ) : pieData.every((d) => d.value === 0) ? (
+          {pieData.every((d) => d.value === 0) ? (
             <div className="h-64 flex items-center justify-center text-text-muted text-sm">No data yet</div>
           ) : (
             <>

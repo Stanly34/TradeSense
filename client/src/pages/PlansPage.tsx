@@ -28,7 +28,6 @@ export function PlansPage() {
   const { refreshUser, user: authUser } = useAuth()
   const [plans, setPlans] = useState<PublicPlan[]>([])
   const [planData, setPlanData] = useState<subscriptionService.UserPlan | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [couponCode, setCouponCode] = useState('')
   const [couponApplied, setCouponApplied] = useState<(subscriptionService.CouponValidation & { currency: string }) | null>(null)
@@ -41,7 +40,6 @@ export function PlansPage() {
     ])
       .then(([p, pd]) => { setPlans(p); setPlanData(pd) })
       .catch(() => toast.error('Failed to load plan info'))
-      .finally(() => setIsLoading(false))
   }, [])
 
   async function handleApplyCoupon(planName: string) {
@@ -161,14 +159,6 @@ export function PlansPage() {
   const subExpired = planData?.status === 'EXPIRED'
   const isCurrentPlan = (name: string) => name === currentPlanName && !subExpired
   const isProActive = !!currentPlan && currentPlan.price > 0 && !subExpired
-
-  if (isLoading) {
-    return (
-      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    )
-  }
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-6xl mx-auto">

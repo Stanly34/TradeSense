@@ -18,7 +18,6 @@ export function TradeDetailPage() {
   const navigate = useNavigate()
   const [trade, setTrade] = useState<Trade | null>(null)
   const [tags, setTags] = useState<Array<{ id: string; name: string; content: string | null; _count?: { trades: number } }>>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [showEdit, setShowEdit] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,7 +30,6 @@ export function TradeDetailPage() {
 
   useEffect(() => {
     if (!id) return
-    setIsLoading(true)
     Promise.all([
       tradeService.getTrade(id),
       tagService.listTags(),
@@ -41,7 +39,6 @@ export function TradeDetailPage() {
         setTags(tagsData)
       })
       .catch(() => setError('Trade not found'))
-      .finally(() => setIsLoading(false))
   }, [id])
 
   useEffect(() => {
@@ -52,14 +49,6 @@ export function TradeDetailPage() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [selectedImage])
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-      </div>
-    )
-  }
 
   if (error || !trade) {
     return (

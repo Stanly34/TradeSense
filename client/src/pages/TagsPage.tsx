@@ -19,7 +19,6 @@ interface TagItem {
 export function TagsPage() {
   const { isAtChecklistLimit, plan } = usePlan()
   const [tags, setTags] = useState<TagItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
@@ -38,7 +37,6 @@ export function TagsPage() {
     tagService.listTags()
       .then(setTags)
       .catch(() => setTags([]))
-      .finally(() => setIsLoading(false))
   }, [])
 
   function addItem() {
@@ -173,11 +171,7 @@ export function TagsPage() {
           </Button>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-6">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-          </div>
-        ) : tags.length === 0 ? (
+        {tags.length === 0 ? (
           <div className="text-center text-text-muted py-6 text-sm">
             No checklist items yet. Create your first item above.
           </div>

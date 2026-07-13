@@ -21,7 +21,6 @@ export function TemplatesPage() {
   const navigate = useNavigate()
   const { isPro, plan } = usePlan()
   const [templates, setTemplates] = useState<Template[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [templateType, setTemplateType] = useState<'PROP_FIRM' | 'PERSONAL_ACCOUNT'>('PROP_FIRM')
   const [name, setName] = useState('')
@@ -96,7 +95,6 @@ export function TemplatesPage() {
     ])
       .then(([t, p]) => { setTemplates(t); setPlatforms(p) })
       .catch(() => { setTemplates([]); setPlatforms([]) })
-      .finally(() => setIsLoading(false))
   }, [])
 
   useEffect(() => {
@@ -481,11 +479,7 @@ export function TemplatesPage() {
         </div>
       )}
 
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-        </div>
-      ) : templates.length === 0 ? (
+      {templates.length === 0 ? (
         <div className="card p-12 text-center text-text-muted">
           <FileText className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No accounts yet. Create your first account to get started.</p>
