@@ -96,18 +96,18 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post('/api/v1/auth/refresh', {
-          refreshToken: localStorage.getItem('refreshToken'),
+          refreshToken: sessionStorage.getItem('refreshToken'),
         })
         const newToken = data.data.accessToken
         setAccessToken(newToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken)
+        sessionStorage.setItem('refreshToken', data.data.refreshToken)
         processQueue(null, newToken)
         originalRequest.headers.Authorization = `Bearer ${newToken}`
         return api(originalRequest)
       } catch (err) {
         processQueue(err as Error)
         setAccessToken(null)
-        localStorage.removeItem('refreshToken')
+        sessionStorage.removeItem('refreshToken')
         window.location.href = '/login'
         return Promise.reject(err)
       } finally {

@@ -34,7 +34,7 @@ export async function verifyOtpAndLogin(email: string, otp: string): Promise<Aut
   const { data } = await api.post('/auth/verify-otp', { email, otp })
   const result = data.data
   setAccessToken(result.accessToken)
-  localStorage.setItem('refreshToken', result.refreshToken)
+  sessionStorage.setItem('refreshToken', result.refreshToken)
   return result
 }
 
@@ -42,24 +42,24 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
   const { data } = await api.post('/auth/login', input)
   const result = data.data
   setAccessToken(result.accessToken)
-  localStorage.setItem('refreshToken', result.refreshToken)
+  sessionStorage.setItem('refreshToken', result.refreshToken)
   return result
 }
 
 export async function logout() {
-  const refreshToken = localStorage.getItem('refreshToken')
+  const refreshToken = sessionStorage.getItem('refreshToken')
   try {
     await api.post('/auth/logout', { refreshToken })
   } finally {
     setAccessToken(null)
-    localStorage.removeItem('refreshToken')
+    sessionStorage.removeItem('refreshToken')
   }
 }
 
 export async function logoutAll() {
   await api.post('/auth/logout-all')
   setAccessToken(null)
-  localStorage.removeItem('refreshToken')
+  sessionStorage.removeItem('refreshToken')
 }
 
 export async function getMe(): Promise<Record<string, unknown>> {

@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchUser = useCallback(async () => {
-    const refreshToken = localStorage.getItem('refreshToken')
+    const refreshToken = sessionStorage.getItem('refreshToken')
     const accessToken = getAccessToken()
     if (!refreshToken) {
       setIsLoading(false)
@@ -69,11 +69,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const { data } = await api.post('/auth/refresh', { refreshToken })
       setAccessToken(data.data.accessToken)
-      localStorage.setItem('refreshToken', data.data.refreshToken)
+      sessionStorage.setItem('refreshToken', data.data.refreshToken)
       const userData = await authService.getMe()
       setUser(userData as AuthUser)
     } catch {
-      localStorage.removeItem('refreshToken')
+      sessionStorage.removeItem('refreshToken')
       setAccessToken(null)
     } finally {
       setIsLoading(false)
