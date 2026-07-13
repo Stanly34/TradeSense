@@ -162,12 +162,10 @@ export function TemplatesPage() {
     if (!trimmed) return undefined
     if (trimmed.endsWith('%')) {
       const pct = parseFloat(trimmed)
-      return isNaN(pct) ? undefined : (pct / 100) * accountSize
+      return isNaN(pct) ? undefined : Math.round((pct / 100) * accountSize)
     }
-    const num = parseFloat(trimmed)
-    if (isNaN(num)) return undefined
-    if (num > accountSize) return Math.abs(num - accountSize)
-    if (Math.abs(num - accountSize) / accountSize < 0.5) return Math.abs(num - accountSize)
+    const num = parseFloat(trimmed.replace(/,/g, ''))
+    if (isNaN(num) || num <= 0) return undefined
     return num
   }
 
