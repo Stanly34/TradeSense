@@ -590,16 +590,7 @@ export function DashboardPage() {
           </div>
         )}
 
-      {!selectedAccountId && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-[20px] p-5 sm:p-7 flex items-center justify-center bg-[#171A21] border border-white/5 min-h-[140px] sm:min-h-[180px]">
-            <p className="text-xs sm:text-sm text-text-muted text-center">Select an account to view challenge progress</p>
-          </div>
-          <div className="rounded-[20px] p-5 sm:p-7 flex items-center justify-center bg-[#171A21] border border-white/5 min-h-[140px] sm:min-h-[180px]">
-            <p className="text-xs sm:text-sm text-text-muted text-center">Select an account to view challenge progress</p>
-          </div>
-        </div>
-      )}
+
 
       <TradeCalendar
         selectedAccountId={selectedAccountId}
