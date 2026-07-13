@@ -303,10 +303,7 @@ export function OutlookPage() {
   }, [])
 
   useEffect(() => {
-    if (!isPro) {
-      setIsLoading(false)
-      return
-    }
+    if (!isPro) return
     fetchEntries()
   }, [isPro, fetchEntries])
 
