@@ -86,6 +86,9 @@ export function TradeDetailPage() {
     notes: t.notes ?? undefined,
     reason: t.reason ?? undefined,
     mistakes: t.mistakes ?? undefined,
+    pipSize: trade.pipSize ?? undefined,
+    pipValue: trade.pipValue ?? undefined,
+    templateId: trade.templateId ?? undefined,
     checklistData: t.checklistData ?? undefined,
     _partialExits: t.partialExits?.map((pe) => ({
       quantity: pe.quantity,

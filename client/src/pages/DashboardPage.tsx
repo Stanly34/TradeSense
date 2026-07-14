@@ -7,7 +7,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, A
 import * as dashboardService from '../services/dashboard'
 import * as templateService from '../services/templates'
 import type { DashboardStats, MonthlyPerformance, ResultDistribution, InstrumentPerformance, RecentTrade } from '../services/dashboard'
-import type { Template } from '../services/templates'
+import type { Template, ChallengeProgress } from '../services/templates'
 import { TradeCalendar } from '../components/dashboard/TradeCalendar'
 import { cn } from '../lib/utils'
 import { DateRangePicker } from '../components/ui/DateRangePicker'
@@ -103,6 +103,7 @@ export function DashboardPage() {
   const [recentTrades, setRecentTrades] = useState<RecentTrade[]>([])
   const [overallStats, setOverallStats] = useState<DashboardStats | null>(null)
   const [todayStats, setTodayStats] = useState<DashboardStats | null>(null)
+  const [challengeProgress, setChallengeProgress] = useState<ChallengeProgress | null>(null)
   const [accounts, setAccounts] = useState<Template[]>([])
   const [colors, setColors] = useState(getChartColors)
   const [refreshKey, setRefreshKey] = useState(0)
@@ -217,6 +218,13 @@ export function DashboardPage() {
     dashboardService.getStats(selectedAccountId, dayStart, dayEnd)
       .then(setTodayStats)
       .catch(() => setTodayStats(null))
+  }, [selectedAccountId, refreshKey])
+
+  useEffect(() => {
+    if (!selectedAccountId) { setChallengeProgress(null); return }
+    templateService.getChallengeProgress(selectedAccountId)
+      .then(setChallengeProgress)
+      .catch(() => setChallengeProgress(null))
   }, [selectedAccountId, refreshKey])
 
   useEffect(() => {
@@ -484,9 +492,10 @@ export function DashboardPage() {
                     const currentBalance = (dv.currentAccountSize as number) || 0
                     const pnl = overallStats.pnl || 0
                     if (!limit) return '—'
-                    const balanceDrawdown = currentBalance > 0 && accountSize > 0 ? Math.max(0, accountSize - currentBalance) : 0
-                    const tradeDrawdown = Math.abs(Math.min(0, pnl))
-                    const used = Math.max(balanceDrawdown, tradeDrawdown)
+                    const used = challengeProgress?.maxDrawdown ?? Math.max(
+                      currentBalance > 0 && accountSize > 0 ? Math.max(0, accountSize - currentBalance) : 0,
+                      Math.abs(Math.min(0, pnl))
+                    )
                     const pct = Math.min(100, (used / limit) * 100)
                     return `${Math.round(pct)}%`
                   })()}
@@ -501,10 +510,12 @@ export function DashboardPage() {
                       const accountSize = (dv.accountSize as number) || 0
                       const currentBalance = (dv.currentAccountSize as number) || 0
                       const pnl = overallStats.pnl || 0
-                      const balanceDrawdown = currentBalance > 0 && accountSize > 0 ? Math.max(0, accountSize - currentBalance) : 0
-                      const tradeDrawdown = Math.abs(Math.min(0, pnl))
-                      const used = Math.max(balanceDrawdown, tradeDrawdown)
-                      return limit ? Math.min(100, (used / limit) * 100) : 0
+                      if (!limit) return 0
+                      const used = challengeProgress?.maxDrawdown ?? Math.max(
+                        currentBalance > 0 && accountSize > 0 ? Math.max(0, accountSize - currentBalance) : 0,
+                        Math.abs(Math.min(0, pnl))
+                      )
+                      return Math.min(100, (used / limit) * 100)
                     })()}%` }} />
                   <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
                     <span>0%</span><span>100%</span>
@@ -534,11 +545,10 @@ export function DashboardPage() {
                     const limit = (dv.targetProfit as number) || 0
                     const accountSize = (dv.accountSize as number) || 0
                     const currentBalance = (dv.currentAccountSize as number) || 0
-                    const startingBalance = (dv.startingBalance as number) || accountSize
                     const pnl = overallStats.pnl || 0
                     if (!limit) return '—'
-                    const hasBalance = currentBalance > 0 && startingBalance > 0
-                    const progress = hasBalance ? currentBalance - startingBalance : pnl
+                    const hasBalance = currentBalance > 0 && accountSize > 0
+                    const progress = hasBalance ? currentBalance - accountSize : pnl
                     const rem = hasBalance
                       ? Math.max(0, (accountSize + limit) - currentBalance)
                       : Math.max(0, limit - pnl)
@@ -550,11 +560,10 @@ export function DashboardPage() {
                   const limit = (dv.targetProfit as number) || 0
                   const accountSize = (dv.accountSize as number) || 0
                   const currentBalance = (dv.currentAccountSize as number) || 0
-                  const startingBalance = (dv.startingBalance as number) || accountSize
                   const pnl = overallStats.pnl || 0
                   if (!limit) return null
-                  const hasBalance = currentBalance > 0 && startingBalance > 0
-                  const progress = hasBalance ? currentBalance - startingBalance : pnl
+                  const hasBalance = currentBalance > 0 && accountSize > 0
+                  const progress = hasBalance ? currentBalance - accountSize : pnl
                   const pct = limit > 0 ? (progress / limit) * 100 : 0
                   return (
                     <>
@@ -574,11 +583,10 @@ export function DashboardPage() {
                       const limit = (dv.targetProfit as number) || 0
                       const accountSize = (dv.accountSize as number) || 0
                       const currentBalance = (dv.currentAccountSize as number) || 0
-                      const startingBalance = (dv.startingBalance as number) || accountSize
                       const pnl = overallStats.pnl || 0
                       if (!limit) return 0
-                      const hasBalance = currentBalance > 0 && startingBalance > 0
-                      const progress = hasBalance ? currentBalance - startingBalance : pnl
+                      const hasBalance = currentBalance > 0 && accountSize > 0
+                      const progress = hasBalance ? currentBalance - accountSize : pnl
                       return Math.min(100, Math.max(0, (progress / limit) * 100))
                     })()}%` }} />
                   <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">

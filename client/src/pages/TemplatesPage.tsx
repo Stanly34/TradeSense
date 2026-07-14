@@ -17,6 +17,12 @@ import type { Trade } from '../types/trade'
 const FOREX_ACCOUNT_SIZE_PRESETS = [5000, 10000, 25000, 50000, 100000]
 const FUTURES_ACCOUNT_SIZE_PRESETS = [25000, 50000, 100000, 150000]
 
+const DRAWDOWN_TYPE_LABELS: Record<string, string> = {
+  STATIC: 'Static',
+  EOD_TRAILING: 'EOD',
+  INTRADAY_TRAILING: 'Intraday',
+}
+
 export function TemplatesPage() {
   const navigate = useNavigate()
   const { isPro, plan } = usePlan()
@@ -35,6 +41,9 @@ export function TemplatesPage() {
   const [maxDailyDrawdown, setMaxDailyDrawdown] = useState('')
   const [noDailyDrawdown, setNoDailyDrawdown] = useState(false)
   const [maxTotalDrawdown, setMaxTotalDrawdown] = useState('')
+  const [drawdownType, setDrawdownType] = useState<'STATIC' | 'EOD_TRAILING' | 'INTRADAY_TRAILING'>('STATIC')
+  const [totalParsed, setTotalParsed] = useState<{ allowedDrawdown: number; minimumBalance: number; mode: string; original: number } | null>(null)
+  const [dailyParsed, setDailyParsed] = useState<{ allowedDrawdown: number; minimumBalance: number; mode: string; original: number } | null>(null)
   const [brokerName, setBrokerName] = useState('')
   const [accountLabel, setAccountLabel] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -117,6 +126,26 @@ export function TemplatesPage() {
       .finally(() => setAccountTradesLoading(false))
   }, [selectedAccount])
 
+  useEffect(() => {
+    if (!maxTotalDrawdown || templateType !== 'PROP_FIRM') { setTotalParsed(null); return }
+    const as = accountSize === 'custom' ? parseSizeInput(accountSizeCustom) : parseFloat(accountSize)
+    if (!as || isNaN(as) || as <= 0) { setTotalParsed(null); return }
+    const result = parseDrawdownInput(maxTotalDrawdown, as)
+    if ('error' in result && result.error) setTotalParsed(null)
+    else if ('allowedDrawdown' in result) setTotalParsed(result)
+    else setTotalParsed(null)
+  }, [maxTotalDrawdown, accountSize, accountSizeCustom, templateType])
+
+  useEffect(() => {
+    if (!maxDailyDrawdown || templateType !== 'PROP_FIRM') { setDailyParsed(null); return }
+    const as = accountSize === 'custom' ? parseSizeInput(accountSizeCustom) : parseFloat(accountSize)
+    if (!as || isNaN(as) || as <= 0) { setDailyParsed(null); return }
+    const result = parseDrawdownInput(maxDailyDrawdown, as)
+    if ('error' in result && result.error) setDailyParsed(null)
+    else if ('allowedDrawdown' in result) setDailyParsed(result)
+    else setDailyParsed(null)
+  }, [maxDailyDrawdown, accountSize, accountSizeCustom, templateType])
+
   function resetForm() {
     setName('')
     setMarketType('FOREX')
@@ -132,6 +161,9 @@ export function TemplatesPage() {
     setBrokerName('')
     setAccountLabel('')
     setTemplateType('PROP_FIRM')
+    setDrawdownType('STATIC')
+    setTotalParsed(null)
+    setDailyParsed(null)
     setErrors({})
   }
 
@@ -157,6 +189,44 @@ export function TemplatesPage() {
     return Object.keys(errs).length === 0
   }
 
+  function sanitizeNumericPercentInput(value: string): string {
+    let cleaned = value.replace(/[^0-9.%]/g, '')
+    const firstDot = cleaned.indexOf('.')
+    if (firstDot !== -1) {
+      cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '')
+    }
+    if (cleaned.includes('%')) {
+      if (cleaned.endsWith('%')) {
+        cleaned = cleaned.slice(0, -1).replace(/%/g, '') + '%'
+      } else {
+        cleaned = cleaned.replace(/%/g, '')
+      }
+    }
+    return cleaned
+  }
+
+  function handleNumericPercentKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.ctrlKey || e.metaKey) return
+    const navKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'Enter', 'Escape']
+    if (navKeys.includes(e.key)) return
+    if (/^\d$/.test(e.key)) return
+    if (e.key === '.') {
+      if (e.currentTarget.value.includes('.')) { e.preventDefault() }
+      return
+    }
+    if (e.key === '%') {
+      const { value, selectionStart } = e.currentTarget
+      if (value.includes('%') || selectionStart !== value.length) {
+        e.preventDefault()
+      }
+      return
+    }
+    e.preventDefault()
+  }
+
+  const MINIMUM_BALANCE_THRESHOLD = 0.8
+  const MAX_DRAWDOWN_WARNING_RATIO = 0.5
+
   function parseChallengeInput(val: string, accountSize: number): number | undefined {
     const trimmed = val.trim()
     if (!trimmed) return undefined
@@ -170,6 +240,33 @@ export function TemplatesPage() {
     return Math.round(num)
   }
 
+  function parseDrawdownInput(val: string, accountSize: number): { allowedDrawdown: number; minimumBalance: number; mode: string; original: number } | { error: string } {
+    const trimmed = val.trim()
+    if (!trimmed) return { error: '' }
+    const isPercent = trimmed.endsWith('%')
+    const num = parseFloat(trimmed.replace(/,/g, ''))
+    if (isNaN(num) || num <= 0) return { error: 'Enter a positive number' }
+    if (isPercent) {
+      if (num > 100) return { error: 'Percentage cannot exceed 100%' }
+      const allowedDrawdown = Math.round((num / 100) * accountSize)
+      const minimumBalance = accountSize - allowedDrawdown
+      if (allowedDrawdown <= 0) return { error: 'Drawdown must be greater than 0' }
+      if (minimumBalance <= 0) return { error: 'Minimum balance must be greater than 0' }
+      return { allowedDrawdown, minimumBalance, mode: 'PERCENTAGE', original: num }
+    }
+    if (num >= accountSize) return { error: 'Value must be below account size' }
+    if (num >= accountSize * MINIMUM_BALANCE_THRESHOLD) {
+      const allowedDrawdown = accountSize - num
+      const minimumBalance = num
+      if (allowedDrawdown <= 0) return { error: 'Drawdown must be greater than 0' }
+      return { allowedDrawdown, minimumBalance, mode: 'MINIMUM_BALANCE', original: num }
+    }
+    const allowedDrawdown = num
+    const minimumBalance = accountSize - num
+    if (minimumBalance <= 0) return { error: 'Minimum balance must be greater than 0' }
+    return { allowedDrawdown, minimumBalance, mode: 'DRAWDOWN_AMOUNT', original: num }
+  }
+
   async function handleCreate() {
     if (!validate()) return
     setIsCreating(true)
@@ -177,15 +274,20 @@ export function TemplatesPage() {
       let defaultValues: Record<string, unknown> | undefined
       if (templateType === 'PROP_FIRM') {
         const finalAccountSize = accountSize === 'custom' ? parseSizeInput(accountSizeCustom) : parseFloat(accountSize)
+        const totalResult = maxTotalDrawdown ? parseDrawdownInput(maxTotalDrawdown, finalAccountSize) : null
+        const dailyResult = !noDailyDrawdown && maxDailyDrawdown ? parseDrawdownInput(maxDailyDrawdown, finalAccountSize) : null
+        if (totalResult && 'error' in totalResult && totalResult.error) { toast.error(`Max Total Drawdown: ${totalResult.error}`); setIsCreating(false); return }
+        if (dailyResult && 'error' in dailyResult && dailyResult.error) { toast.error(`Max Daily Drawdown: ${dailyResult.error}`); setIsCreating(false); return }
         defaultValues = {
           marketType,
           platform,
           accountSize: finalAccountSize || undefined,
           currentAccountSize: parseFloat(currentAccountSize) || undefined,
           phase,
+          drawdownType,
           targetProfit: parseChallengeInput(targetProfit, finalAccountSize),
-          maxDailyDrawdown: noDailyDrawdown ? undefined : parseChallengeInput(maxDailyDrawdown, finalAccountSize),
-          maxTotalDrawdown: parseChallengeInput(maxTotalDrawdown, finalAccountSize),
+          maxDailyDrawdown: noDailyDrawdown ? undefined : (dailyResult && 'allowedDrawdown' in dailyResult ? dailyResult.allowedDrawdown : undefined),
+          maxTotalDrawdown: totalResult && 'allowedDrawdown' in totalResult ? totalResult.allowedDrawdown : undefined,
         }
       } else if (templateType === 'PERSONAL_ACCOUNT') {
         defaultValues = { broker: brokerName, accountLabel }
@@ -355,7 +457,7 @@ export function TemplatesPage() {
                 <label className="block text-sm font-medium text-text-secondary">Market Type</label>
                 <div className="flex gap-2">
                   {(['FOREX', 'FUTURES'] as const).map((type) => (
-                    <button key={type} type="button" onClick={() => { setMarketType(type); setPlatform('') }}
+                    <button key={type} type="button" onClick={() => { setMarketType(type); setPlatform(''); setDrawdownType(type === 'FUTURES' ? 'EOD_TRAILING' : 'STATIC') }}
                       className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
                         marketType === type
                           ? type === 'FOREX' ? 'bg-green-500/10 border-green-500/30 text-green-400'
@@ -435,29 +537,82 @@ export function TemplatesPage() {
                     { value: 'FUNDED', label: 'Funded' },
                   ]} />
                 {phase !== 'FUNDED' && (
-                  <Input id="target-profit" label="Target Profit" type="text" placeholder="e.g., 5000 or 10%"
-                    value={targetProfit} onChange={(e) => setTargetProfit(e.target.value)} />
+                  <Input id="target-profit" label="Target Profit" type="text" placeholder="e.g., 5000 or 10%" inputMode="decimal" autoComplete="off" spellCheck={false}
+                    value={targetProfit} onChange={(e) => setTargetProfit(sanitizeNumericPercentInput(e.target.value))} onKeyDown={handleNumericPercentKeyDown} />
                 )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-text-secondary">Drawdown Type</label>
+                <div className="flex gap-2">
+                  {(['STATIC', 'EOD_TRAILING', 'INTRADAY_TRAILING'] as const).map((type) => (
+                    <button key={type} type="button" onClick={() => setDrawdownType(type)}
+                      className={`flex-1 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
+                        drawdownType === type
+                          ? 'bg-primary/10 border-primary/30 text-primary-light'
+                          : 'bg-input border-border text-text-secondary hover:bg-hover'
+                      }`}>
+                      {type === 'STATIC' ? 'Static' : type === 'EOD_TRAILING' ? 'EOD Trailing' : 'Intraday'}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-text-secondary">Max Total Drawdown</label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <input type="text" placeholder="e.g., 2500 or 5%" inputMode="decimal" autoComplete="off" spellCheck={false}
+                         value={maxTotalDrawdown} onChange={(e) => setMaxTotalDrawdown(sanitizeNumericPercentInput(e.target.value))} onKeyDown={handleNumericPercentKeyDown}
+                         className="block w-full rounded-xl border border-border px-3.5 py-2.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all" />
+                    </div>
+
+                  </div>
+                  {totalParsed && (
+                    <div className="text-xs text-text-secondary mt-1 space-y-0.5">
+                      {totalParsed.mode === 'MINIMUM_BALANCE' && (
+                        <p>Minimum balance: ${totalParsed.original.toLocaleString()} → ${totalParsed.allowedDrawdown.toLocaleString()} drawdown</p>
+                      )}
+                      {totalParsed.mode === 'DRAWDOWN_AMOUNT' && (
+                        <p>Drawdown amount: ${totalParsed.allowedDrawdown.toLocaleString()} → min balance ${totalParsed.minimumBalance.toLocaleString()}</p>
+                      )}
+                      {totalParsed.mode === 'PERCENTAGE' && (
+                        <p>{totalParsed.original}% → ${totalParsed.allowedDrawdown.toLocaleString()} drawdown</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5">
                   <label className="block text-sm font-medium text-text-secondary">Max Daily Drawdown</label>
-                  <div className="flex items-center gap-3">
-                    <Input id="daily-dd" type="text" placeholder="e.g., 1000 or 2%"
-                      value={noDailyDrawdown ? '' : maxDailyDrawdown}
-                      onChange={(e) => setMaxDailyDrawdown(e.target.value)}
-                      disabled={noDailyDrawdown}
-                      className="flex-1" />
-                    <label className="flex items-center gap-1.5 text-sm text-text-muted cursor-pointer whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <input type="text" placeholder="e.g., 1000 or 2%" inputMode="decimal" autoComplete="off" spellCheck={false}
+                         value={noDailyDrawdown ? '' : maxDailyDrawdown}
+                         onChange={(e) => setMaxDailyDrawdown(sanitizeNumericPercentInput(e.target.value))} onKeyDown={handleNumericPercentKeyDown}
+                         disabled={noDailyDrawdown}
+                         className="block w-full rounded-xl border border-border px-3.5 py-2.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all disabled:opacity-40" />
+                    </div>
+
+                    <label className="flex items-center gap-1.5 text-sm text-text-muted cursor-pointer whitespace-nowrap shrink-0">
                       <input type="checkbox" checked={noDailyDrawdown}
                         onChange={(e) => setNoDailyDrawdown(e.target.checked)}
                         className="accent-primary w-4 h-4 rounded border-border" />
                       No limit
                     </label>
                   </div>
+                  {dailyParsed && (
+                    <div className="text-xs text-text-secondary mt-1 space-y-0.5">
+                      {dailyParsed.mode === 'MINIMUM_BALANCE' && (
+                        <p>Minimum balance: ${dailyParsed.original.toLocaleString()} → ${dailyParsed.allowedDrawdown.toLocaleString()} drawdown</p>
+                      )}
+                      {dailyParsed.mode === 'DRAWDOWN_AMOUNT' && (
+                        <p>Drawdown amount: ${dailyParsed.allowedDrawdown.toLocaleString()} → min balance ${dailyParsed.minimumBalance.toLocaleString()}</p>
+                      )}
+                      {dailyParsed.mode === 'PERCENTAGE' && (
+                        <p>{dailyParsed.original}% → ${dailyParsed.allowedDrawdown.toLocaleString()} drawdown</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <Input id="total-dd" label="Max Total Drawdown" type="text" placeholder="e.g., 2500 or 5%"
-                  value={maxTotalDrawdown} onChange={(e) => setMaxTotalDrawdown(e.target.value)} />
               </div>
             </>
           )}
@@ -492,7 +647,9 @@ export function TemplatesPage() {
             const totalDrawdown = dv.maxTotalDrawdown as number || 0
             const accountSizeVal = dv.accountSize as number || 0
             const currentBalanceVal = dv.currentAccountSize as number || (accountSizeVal + (progress?.totalPnl || 0))
+            const profitDisplay = progress?.totalPnl ?? 0
             const progressPercent = target > 0 && accountSizeVal > 0 ? ((currentBalanceVal - accountSizeVal) / target) * 100 : 0
+            const displayPercent = target > 0 ? Math.min(100, Math.max(0, (profitDisplay / target) * 100)) : 0
             const drawdownPercent = totalDrawdown > 0 ? Math.min(100, Math.max(0, ((progress?.maxDrawdown || 0) / totalDrawdown) * 100)) : 0
 
             return (
@@ -515,7 +672,7 @@ export function TemplatesPage() {
                   </div>
                 )}
                 <div className={`flex items-start justify-between mb-3 ${selecting ? 'ml-8' : ''}`}>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <div className={`p-2 rounded-lg ${typeColor(tpl.type)}`}>
                       {typeIcon(tpl.type)}
                     </div>
@@ -526,13 +683,15 @@ export function TemplatesPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-0.5">
                     <button onClick={(e) => { e.stopPropagation(); handleToggleFavorite(tpl.id) }} className="p-1 text-text-muted hover:text-warning transition-colors">
                       <Star className={`w-4 h-4 ${tpl.isFavorite ? 'fill-warning text-warning' : ''}`} />
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); openDeleteDialog(tpl.id, e) }} className="p-1 text-text-muted hover:text-danger transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {!selecting && (
+                      <button onClick={(e) => { e.stopPropagation(); openDeleteDialog(tpl.id, e) }} className="p-1 text-text-muted hover:text-danger transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -542,47 +701,63 @@ export function TemplatesPage() {
                           <span className={`font-medium px-1.5 py-0.5 rounded ${dv.marketType === 'FUTURES' ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'}`}>
                             {dv.marketType === 'FUTURES' ? 'Futures' : 'Forex'}
                           </span>
+                          {dv.drawdownType && (
+                            <span className="font-medium px-1.5 py-0.5 rounded bg-primary/10 text-primary-light">
+                              {DRAWDOWN_TYPE_LABELS[dv.drawdownType as string] || (dv.drawdownType as string)}
+                            </span>
+                          )}
                           {dv.accountSize && (
                             <span>Account: <span className="text-text-secondary">${(dv.accountSize as number).toLocaleString()}</span></span>
                           )}
                           {(() => {
                             const st = progress?.status || 'ACTIVE'
                             if (st === 'PASSED')
-                              return <span className="font-medium px-1.5 py-0.5 rounded bg-success/15 text-success">Passed</span>
+                              return <span className="font-medium px-1.5 py-0.5 rounded bg-primary/15 text-primary-light">Passed</span>
                             if (st === 'FAILED')
                               return <span className="font-medium px-1.5 py-0.5 rounded bg-danger/15 text-danger">Failed</span>
-                            return <span className="font-medium px-1.5 py-0.5 rounded bg-primary/15 text-primary-light">Active</span>
+                            return <span className="font-medium px-1.5 py-0.5 rounded bg-success/15 text-success">Active</span>
                           })()}
                         </div>
 
                     {dv.currentAccountSize && (
-                      <div className="flex items-center gap-1 text-sm text-text-muted">
-                        <DollarSign className="w-3 h-3" />
-                        Current Balance: <span className="text-text-primary font-medium">${(dv.currentAccountSize as number).toLocaleString()}</span>
+                      <div className="flex items-center gap-1 text-text-muted mt-2">
+                        <DollarSign className="w-4 h-4" />
+                        <span className="text-base font-semibold text-text-primary">${(dv.currentAccountSize as number).toLocaleString()}</span>
+                        <span className="text-xs ml-1">Current Balance</span>
                       </div>
                     )}
 
                     {target > 0 && accountSizeVal > 0 && (
                       <>
+                        <div className="flex items-center justify-between text-xs text-text-muted">
+                          <span>Target Progress</span>
+                        </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-text-muted flex items-center gap-1"><Target className="w-3 h-3" /> ${(accountSizeVal + target).toLocaleString()} (+${target.toLocaleString()})</span>
-                          <span className={`text-xs ${currentBalanceVal >= accountSizeVal + target ? 'text-success' : 'text-text-muted'}`}>
-                            {Math.round(progressPercent)}%
+                          <span className="text-text-primary font-medium">
+                            +${Math.max(0, profitDisplay).toLocaleString()} / +${target.toLocaleString()}
+                          </span>
+                          <span className={`text-xs ${profitDisplay >= target ? 'text-success' : 'text-text-muted'}`}>
+                            {Math.round(displayPercent)}% Complete
                           </span>
                         </div>
                         <div className="h-1.5 bg-glass rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full transition-all ${progress?.status === 'PASSED' ? 'bg-success' : progressPercent >= 100 ? 'bg-success' : 'bg-primary'}`}
-                            style={{ width: `${progressPercent}%` }} />
+                          <div className={`h-full rounded-full transition-all ${progress?.status === 'PASSED' ? 'bg-success' : displayPercent >= 100 ? 'bg-success' : 'bg-primary'}`}
+                            style={{ width: `${displayPercent}%` }} />
                         </div>
                       </>
                     )}
 
                     {totalDrawdown > 0 && (
                       <>
+                        <div className="flex items-center justify-between text-xs text-text-muted">
+                          <span>Drawdown Used</span>
+                        </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-text-muted flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Drawdown: ${totalDrawdown.toLocaleString()}</span>
+                          <span className="text-text-primary font-medium">
+                            ${(progress?.maxDrawdown || 0).toLocaleString()} / ${totalDrawdown.toLocaleString()}
+                          </span>
                           <span className={`text-xs ${drawdownPercent >= 100 ? 'text-danger' : 'text-text-muted'}`}>
-                            ${progress?.maxDrawdown?.toLocaleString() || '0'} ({Math.round(drawdownPercent)}%)
+                            {Math.round(drawdownPercent)}%
                           </span>
                         </div>
                         <div className="h-1.5 bg-glass rounded-full overflow-hidden">
@@ -599,10 +774,10 @@ export function TemplatesPage() {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-xs text-text-muted pt-1">
+                    <div className="flex items-center justify-between text-xs text-text-muted pt-2">
                       <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" /> {progress?.tradesCount || 0} trades</span>
-                      <span className="text-success">{progress?.winningTrades || 0}W</span>
-                      <span className="text-danger">{progress?.losingTrades || 0}L</span>
+                      <span className="text-success font-medium">{progress?.winningTrades || 0} Wins</span>
+                      <span className="text-danger font-medium">{progress?.losingTrades || 0} Losses</span>
                     </div>
 
 

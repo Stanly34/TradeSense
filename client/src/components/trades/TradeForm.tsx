@@ -261,7 +261,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
     stopLoss: initial?.stopLoss,
     takeProfit: initial?.takeProfit,
     quantity: initial?.quantity,
-    fees: initial?.fees ?? 0,
+    fees: initial?.fees ?? undefined,
     broker: initial?.broker || '',
     account: initial?.account || '',
     session: initial?.session,
@@ -275,6 +275,8 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
     reason: initial?.reason || '',
     mistakes: initial?.mistakes || '',
     templateId: initial?.templateId,
+    pipSize: initial?.pipSize,
+    pipValue: initial?.pipValue,
     checklistData: initial?.checklistData || {},
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -294,8 +296,33 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
   function validate(): boolean {
     const errs: Record<string, string> = {}
     if (!form.instrument) errs.instrument = 'Instrument is required'
+    if (!form.direction) errs.direction = 'Direction is required'
     if (!form.entryPrice) errs.entryPrice = 'Entry price is required'
+    else if (Number(form.entryPrice) <= 0) errs.entryPrice = 'Entry price must be greater than 0'
     if (!form.exitPrice) errs.exitPrice = 'Exit price is required'
+    else if (Number(form.exitPrice) <= 0) errs.exitPrice = 'Exit price must be greater than 0'
+    if (!form.quantity) errs.quantity = 'Quantity is required'
+    else if (Number(form.quantity) <= 0) errs.quantity = 'Quantity must be greater than 0'
+    else {
+      const qtyIsFutures = form.templateId
+        ? (accounts.find((a) => a.id === form.templateId)?.defaultValues as Record<string, unknown> | undefined)?.marketType === 'FUTURES'
+        : isFuturesRoot(form.instrument)
+      if (qtyIsFutures && !Number.isInteger(Number(form.quantity))) {
+        errs.quantity = 'Futures quantity must be a whole number'
+      } else if (qtyIsFutures && Number(form.quantity) < 1) {
+        errs.quantity = 'Minimum quantity is 1'
+      }
+    }
+    if (!form.stopLoss) errs.stopLoss = 'Stop loss is required'
+    else if (Number(form.stopLoss) <= 0) errs.stopLoss = 'Stop loss must be greater than 0'
+    if (!form.takeProfit) errs.takeProfit = 'Take profit is required'
+    else if (Number(form.takeProfit) <= 0) errs.takeProfit = 'Take profit must be greater than 0'
+    if (form.fees !== undefined && form.fees !== null && Number(form.fees) < 0) errs.fees = 'Fees cannot be negative'
+    if (!form.entryTime) errs.entryTime = 'Entry time is required'
+    if (!form.exitTime) errs.exitTime = 'Exit time is required'
+    if (form.entryTime && form.exitTime && new Date(form.exitTime) <= new Date(form.entryTime)) {
+      errs.exitTime = 'Exit time must be later than entry time'
+    }
     if (form.entryPrice && form.exitPrice && form.direction === 'LONG' && form.result === 'WIN' && form.exitPrice <= form.entryPrice) {
       errs.exitPrice = 'Exit must be above entry for LONG'
     }
@@ -305,10 +332,17 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
     setErrors(errs)
     const valid = Object.keys(errs).length === 0
     if (!valid) {
-      requestAnimationFrame(() => {
-        formRef.current?.closest('.overflow-y-auto')?.scrollTo({ top: 0, behavior: 'smooth' })
-          ?? formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      })
+      const firstKey = Object.keys(errs)[0]
+      const el = document.getElementById(firstKey)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.focus()
+      } else {
+        requestAnimationFrame(() => {
+          formRef.current?.closest('.overflow-y-auto')?.scrollTo({ top: 0, behavior: 'smooth' })
+            ?? formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        })
+      }
     }
     return valid
   }
@@ -482,13 +516,19 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
       defaultPipSize = 0.0001
       defaultPipValue = 10
     }
-    setForm((prev) => ({
-      ...prev,
-      broker: (dv.platform as string) || (dv.broker as string) || prev.broker,
-      account: (dv.accountLabel as string) || prev.account,
-      pipSize: prev.pipSize ?? defaultPipSize,
-      pipValue: prev.pipValue ?? defaultPipValue,
-    }))
+    const isFuturesTpl = tpl.type === 'PROP_FIRM' && marketType === 'FUTURES'
+    setForm((prev) => {
+      const next: Partial<typeof prev> = {
+        broker: (dv.platform as string) || (dv.broker as string) || prev.broker,
+        account: (dv.accountLabel as string) || prev.account,
+        pipSize: prev.pipSize ?? defaultPipSize,
+        pipValue: prev.pipValue ?? defaultPipValue,
+      }
+      if (prev.quantity === undefined && !initial) {
+        next.quantity = isFuturesTpl ? 1 : 0.01
+      }
+      return { ...prev, ...next }
+    })
     templateDefaultsRef.current = { pipSize: defaultPipSize, pipValue: defaultPipValue }
     if (tpl.type === 'PROP_FIRM') {
       templateService.getChallengeProgress(form.templateId).then(setProgress).catch(() => setProgress(null))
@@ -520,10 +560,10 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
       const ids = selectedTemplateIds.length > 0 ? selectedTemplateIds : (form.templateId ? [form.templateId] : [])
       const completePartialExits = partialExits.filter((pe): pe is { quantity: number; exitPrice: number; exitTime?: string } => pe.quantity != null && pe.exitPrice != null && pe.quantity > 0)
       for (const id of ids) {
-        await onSubmit({ ...form, templateId: id, _pendingImages: pendingFiles, _partialExits: completePartialExits.length > 0 ? completePartialExits : undefined })
+        await onSubmit({ ...form, fees: form.fees ?? 0, templateId: id, _pendingImages: pendingFiles, _partialExits: completePartialExits.length > 0 ? completePartialExits : undefined })
       }
       if (ids.length === 0) {
-        await onSubmit({ ...form, _pendingImages: pendingFiles, _partialExits: completePartialExits.length > 0 ? completePartialExits : undefined })
+        await onSubmit({ ...form, fees: form.fees ?? 0, _pendingImages: pendingFiles, _partialExits: completePartialExits.length > 0 ? completePartialExits : undefined })
       }
       if (willReset) {
         setForm({
@@ -534,7 +574,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
           stopLoss: undefined,
           takeProfit: undefined,
           quantity: undefined,
-          fees: 0,
+          fees: undefined,
           broker: '',
           account: '',
           session: undefined,
@@ -605,6 +645,8 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
 
   const selectedTemplate = accounts.find((a) => a.id === form.templateId)
   const selectedDV = selectedTemplate?.defaultValues || {}
+  const isFuturesAccount = selectedTemplate?.type === 'PROP_FIRM' && selectedDV.marketType === 'FUTURES'
+    || (!selectedTemplate && isFuturesRoot(form.instrument))
 
   const instrumentGroups = useMemo(() => getInstrumentGroups(), [])
 
@@ -787,6 +829,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
             onChange={(v) => { setErrors((p) => ({ ...p, instrument: '' })); set('instrument', v) }}
             groups={allowedGroups}
             favorites={favoriteInstruments}
+            error={errors.instrument}
             onToggleFavorite={async (instr) => {
               if (favoriteInstruments.includes(instr)) {
                 const existing = await favoriteInstrumentService.listFavoriteInstruments()
@@ -800,13 +843,12 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
                 setFavoriteInstruments((prev) => [...prev, instr])
               }
             }} />
-          {errors.instrument && <p className="text-xs text-danger mt-1">{errors.instrument}</p>}
         </div>
         <div className="space-y-1.5">
           <label className="block text-sm font-medium text-text-secondary">Direction</label>
           <div className="flex gap-2">
             {(['LONG', 'SHORT'] as const).map((d) => (
-              <button key={d} type="button" onClick={() => set('direction', d)}
+              <button key={d} type="button" onClick={() => { setErrors((p) => ({ ...p, direction: '' })); set('direction', d) }}
                 className={`flex-1 py-2.5 text-sm font-medium rounded-xl border transition-colors ${
                   form.direction === d
                     ? d === 'LONG' ? 'bg-success/10 border-success text-success' : 'bg-danger/10 border-danger text-danger'
@@ -816,22 +858,35 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
               </button>
             ))}
           </div>
+          {errors.direction && <p className="text-xs text-danger">{errors.direction}</p>}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <Input id="entryPrice" label="Entry Price" type="number" step="any" placeholder="0.00"
-            value={form.entryPrice ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, entryPrice: '' })); set('entryPrice', e.target.value ? parseFloat(e.target.value) : undefined) }} />
-          {errors.entryPrice && <p className="text-xs text-danger mt-1">{errors.entryPrice}</p>}
-        </div>
-        <div>
-          <Input id="exitPrice" label="Exit Price" type="number" step="any" placeholder="0.00"
-            value={form.exitPrice ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, exitPrice: '' })); set('exitPrice', e.target.value ? parseFloat(e.target.value) : undefined) }} />
-          {errors.exitPrice && <p className="text-xs text-danger mt-1">{errors.exitPrice}</p>}
-        </div>
-        <Input id="quantity" label="Quantity" type="number" min="0" step={isFuturesRoot(form.instrument) ? '1' : '0.01'} placeholder={isFuturesRoot(form.instrument) ? '1' : '0.01'}
-          value={form.quantity ?? ''} onChange={(e) => set('quantity', e.target.value ? (isFuturesRoot(form.instrument) ? parseInt(e.target.value) : parseFloat(e.target.value)) : undefined)} />
+        <Input id="entryPrice" label="Entry Price" type="number" step="any" placeholder="0.00"
+          value={form.entryPrice ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, entryPrice: '' })); set('entryPrice', e.target.value ? parseFloat(e.target.value) : undefined) }}
+          error={errors.entryPrice} />
+        <Input id="exitPrice" label="Exit Price" type="number" step="any" placeholder="0.00"
+          value={form.exitPrice ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, exitPrice: '' })); set('exitPrice', e.target.value ? parseFloat(e.target.value) : undefined) }}
+          error={errors.exitPrice} />
+        {isFuturesAccount ? (
+          <Input id="quantity" label="Quantity" type="text" inputMode="numeric" min="1" placeholder="1"
+            value={form.quantity ?? ''}
+            onChange={(e) => {
+              setErrors((p) => ({ ...p, quantity: '' }))
+              const digits = e.target.value.replace(/\D/g, '')
+              if (digits === '') { set('quantity', undefined); return }
+              const val = parseInt(digits, 10)
+              if (val === 0) { setErrors((p) => ({ ...p, quantity: 'Minimum quantity is 1.' })); return }
+              set('quantity', val)
+            }}
+            error={errors.quantity} />
+        ) : (
+          <Input id="quantity" label="Quantity" type="number" step="0.01" min="0.01" placeholder="0.01"
+            value={form.quantity ?? ''}
+            onChange={(e) => { setErrors((p) => ({ ...p, quantity: '' })); set('quantity', e.target.value ? parseFloat(e.target.value) : undefined) }}
+            error={errors.quantity} />
+        )}
       </div>
 
       <div className="border border-border rounded-xl">
@@ -901,11 +956,14 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Input id="stopLoss" label="Stop Loss" type="number" step="any" placeholder="0.00"
-          value={form.stopLoss ?? ''} onChange={(e) => set('stopLoss', e.target.value ? parseFloat(e.target.value) : undefined)} />
+          value={form.stopLoss ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, stopLoss: '' })); set('stopLoss', e.target.value ? parseFloat(e.target.value) : undefined) }}
+          error={errors.stopLoss} />
         <Input id="takeProfit" label="Take Profit" type="number" step="any" placeholder="0.00"
-          value={form.takeProfit ?? ''} onChange={(e) => set('takeProfit', e.target.value ? parseFloat(e.target.value) : undefined)} />
-        <Input id="fees" label="Fees" type="number" step="any" placeholder="0.00"
-          value={form.fees} onChange={(e) => set('fees', e.target.value === '' ? 0 : parseFloat(e.target.value))} />
+          value={form.takeProfit ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, takeProfit: '' })); set('takeProfit', e.target.value ? parseFloat(e.target.value) : undefined) }}
+          error={errors.takeProfit} />
+        <Input id="fees" label="Fees" type="number" step="any" placeholder="0"
+          value={form.fees ?? ''} onChange={(e) => { setErrors((p) => ({ ...p, fees: '' })); set('fees', e.target.value === '' ? undefined : parseFloat(e.target.value)) }}
+          error={errors.fees} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1026,10 +1084,23 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DateTimePicker label="Entry Time" value={form.entryTime} session={form.session}
-          onChange={(iso) => set('entryTime', iso)} />
-        <DateTimePicker label="Exit Time" value={form.exitTime} session={form.session}
-          onChange={(iso) => set('exitTime', iso)} />
+        <div>
+          <DateTimePicker id="entryTime" label="Entry Time" value={form.entryTime} session={form.session}
+            onChange={(iso) => {
+              setErrors((p) => ({ ...p, entryTime: '' }))
+              set('entryTime', iso)
+              if (iso && form.exitTime && new Date(form.exitTime) <= new Date(iso)) {
+                set('exitTime', undefined)
+                setErrors((p) => ({ ...p, exitTime: '' }))
+              }
+            }}
+            error={errors.entryTime} />
+        </div>
+        <div>
+          <DateTimePicker id="exitTime" label="Exit Time" value={form.exitTime} session={form.session} minDate={form.entryTime}
+            onChange={(iso) => { setErrors((p) => ({ ...p, exitTime: '' })); set('exitTime', iso) }}
+            error={errors.exitTime} />
+        </div>
       </div>
 
       <div className="space-y-1.5">

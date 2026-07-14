@@ -12,15 +12,18 @@ const SESSION_RANGES: Record<string, { start: number; end: number } | null> = {
 }
 
 interface DateTimePickerProps {
+  id?: string
   label?: string
   value?: string
   onChange?: (iso: string) => void
   session?: string | null
   defaultTab?: 'date' | 'time'
   disableFuture?: boolean
+  error?: string
+  minDate?: string
 }
 
-export function DateTimePicker({ label, value, onChange, session, defaultTab = 'date', disableFuture = true }: DateTimePickerProps) {
+export function DateTimePicker({ id, label, value, onChange, session, defaultTab = 'date', disableFuture = true, error, minDate }: DateTimePickerProps) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'date' | 'time'>(defaultTab)
   const [year, setYear] = useState(new Date().getFullYear())
@@ -53,12 +56,23 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
   }
 
   const selectedDate = value ? new Date(value) : null
+  const minDateObj = useMemo(() => minDate ? new Date(minDate) : null, [minDate])
+
+  function isBeforeMin(year: number, month: number, day: number): boolean {
+    if (!minDateObj) return false
+    const d = new Date(year, month - 1, day)
+    d.setHours(0, 0, 0, 0)
+    const m = new Date(minDateObj)
+    m.setHours(0, 0, 0, 0)
+    return d < m
+  }
 
   function localIso(hh: string, mm: string): string {
     const d = value ? new Date(value) : new Date()
     d.setHours(parseInt(hh))
     d.setMinutes(parseInt(mm))
     if (disableFuture && d > nowRef.current) return nowRef.current.toISOString()
+    if (minDateObj && d <= minDateObj) return minDateObj.toISOString()
     return d.toISOString()
   }
 
@@ -110,9 +124,14 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
 
   const selectDay = (day: number) => {
     if (disableFuture && new Date(year, month - 1, day) > nowRef.current) return
+    if (isBeforeMin(year, month, day)) return
     const h = parseInt(hours) || 0
     const m = parseInt(minutes) || 0
-    const d = new Date(year, month - 1, day, h, m)
+    let d = new Date(year, month - 1, day, h, m)
+    if (minDateObj && d <= minDateObj) {
+      d = new Date(minDateObj)
+      d.setMinutes(d.getMinutes() + 1)
+    }
     if (disableFuture && d > nowRef.current) return
     onChange?.(d.toISOString())
     setTab('time')
@@ -135,7 +154,7 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
     <div className="space-y-1.5" ref={ref}>
       {label && <label className="block text-sm font-medium text-text-secondary">{label}</label>}
       <div className="relative">
-          <div className="flex items-center gap-2.5 w-full rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary hover:border-primary/40 transition-all duration-200 cursor-text"
+          <div id={id} className={`flex items-center gap-2.5 w-full rounded-xl border px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary transition-all duration-200 cursor-text ${error ? 'border-danger' : 'border-border/80 hover:border-primary/40'}`}
             onClick={() => setOpen(true)}>
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary-light group-hover:bg-primary/20 transition-colors">
               {defaultTab === 'time' ? <Clock className="w-4 h-4" /> : <CalendarDays className="w-4 h-4" />}
@@ -144,6 +163,7 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
             <Clock className="w-3.5 h-3.5 text-text-muted shrink-0" />
           </div>
       </div>
+      {error && <p className="text-xs text-danger">{error}</p>}
 
       {open && (
         <div className="relative">
@@ -189,14 +209,15 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
                     const dateStr = dayDate.toDateString()
                     const isToday = dateStr === todayStr
                     const isFuture = disableFuture && dayDate > nowRef.current
+                    const isDisabled = isFuture || isBeforeMin(year, month, d)
                     const isSelected = selectedDate &&
                       selectedDate.getDate() === d &&
                       selectedDate.getMonth() === month - 1 &&
                       selectedDate.getFullYear() === year
                     return (
-                      <button key={d} type="button" onClick={() => !isFuture && selectDay(d)}
+                      <button key={d} type="button" onClick={() => !isDisabled && selectDay(d)}
                         className={`text-sm py-2 rounded-xl font-medium transition-all ${
-                          isFuture
+                          isDisabled
                             ? 'opacity-30 pointer-events-none'
                             : isSelected
                               ? 'bg-primary text-text-primary shadow-lg shadow-primary/25'
@@ -217,7 +238,9 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
                 <div className="flex items-center justify-center gap-3">
                   <div className="flex flex-col items-center gap-1">
                     <button type="button" {...makeHoldHandler(() => {
-                      const v = Math.max(0, parseInt(hours) - 1)
+                      const sameDayAsMin = minDateObj && selectedDate && selectedDate.toDateString() === minDateObj.toDateString()
+                      const minH = sameDayAsMin ? minDateObj!.getHours() : 0
+                      const v = Math.max(minH, parseInt(hours) - 1)
                       const hs = String(v).padStart(2, '0')
                       setHours(hs)
                       onChange?.(localIso(hs, minutes))
@@ -231,7 +254,9 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '').slice(-2)
                         const maxH = disableFuture && selectedDate?.toDateString() === todayStr ? Math.min(23, nowRef.current.getHours()) : 23
-                        const v = Math.min(maxH, Math.max(0, parseInt(raw || '0')))
+                        const sameDayAsMin = minDateObj && selectedDate && selectedDate.toDateString() === minDateObj.toDateString()
+                        const minH = sameDayAsMin ? minDateObj!.getHours() : 0
+                        const v = Math.min(maxH, Math.max(minH, parseInt(raw || '0')))
                         const hs = String(v).padStart(2, '0')
                         setHours(hs)
                         if (raw.length >= 2) minuteRef.current?.focus()
@@ -256,7 +281,9 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
                   <div className="flex flex-col items-center gap-1">
                     <button type="button" {...makeHoldHandler(() => {
                       const cur = parseInt(minutes) || 0
-                      const next = Math.max(0, cur - 1)
+                      const sameDayAsMin = minDateObj && selectedDate && selectedDate.toDateString() === minDateObj.toDateString()
+                      const minM = sameDayAsMin && parseInt(hours) === minDateObj!.getHours() ? Math.min(59, minDateObj!.getMinutes() + 1) : 0
+                      const next = Math.max(minM, cur - 1)
                       const ms = String(next).padStart(2, '0')
                       setMinutes(ms)
                       onChange?.(localIso(hours, ms))
@@ -270,7 +297,9 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '').slice(-2)
                         const maxM = disableFuture && selectedDate?.toDateString() === todayStr && parseInt(hours) === nowRef.current.getHours() ? nowRef.current.getMinutes() : 59
-                        const v = Math.min(maxM, Math.max(0, parseInt(raw || '0')))
+                        const sameDayAsMin = minDateObj && selectedDate && selectedDate.toDateString() === minDateObj.toDateString()
+                        const minM = sameDayAsMin && parseInt(hours) === minDateObj!.getHours() ? Math.min(59, minDateObj!.getMinutes() + 1) : 0
+                        const v = Math.min(maxM, Math.max(minM, parseInt(raw || '0')))
                         const ms = String(v).padStart(2, '0')
                         setMinutes(ms)
                         onChange?.(localIso(hours, ms))
@@ -279,8 +308,8 @@ export function DateTimePicker({ label, value, onChange, session, defaultTab = '
                     <button type="button" {...makeHoldHandler(() => {
                       const cur = parseInt(minutes) || 0
                       const maxM = disableFuture && selectedDate?.toDateString() === todayStr && parseInt(hours) === nowRef.current.getHours() ? nowRef.current.getMinutes() : 59
-                      const prev = Math.min(maxM, cur + 1)
-                      const ms = String(prev).padStart(2, '0')
+                      const next = Math.min(maxM, cur + 1)
+                      const ms = String(next).padStart(2, '0')
                       setMinutes(ms)
                       onChange?.(localIso(hours, ms))
                     }, minutesDownFnRef)}

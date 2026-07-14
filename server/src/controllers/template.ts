@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import * as templateService from '../services/template.js'
 import { sendSuccess, sendError } from '../utils/response.js'
+import { updateEodPeak } from '../services/template.js'
 
 export async function createTemplate(req: Request, res: Response) {
   try {
@@ -80,6 +81,7 @@ export async function getAllProgressStatuses(req: Request, res: Response) {
 
 export async function getChallengeProgress(req: Request, res: Response) {
   try {
+    await updateEodPeak(req.user!.userId, req.params.id)
     const progress = await templateService.getChallengeProgress(req.user!.userId, req.params.id)
     return sendSuccess(res, progress)
   } catch (err) {

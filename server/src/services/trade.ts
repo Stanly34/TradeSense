@@ -2,6 +2,7 @@ import { prisma } from '../lib/prisma.js'
 import type { Prisma } from '@prisma/client'
 import { getUserPlan } from './subscription.js'
 import { sendTradeSummary } from './email.js'
+import { updateEodPeak } from './template.js'
 
 const tradeInclude = {
   images: true,
@@ -26,11 +27,11 @@ function stripPartialExitsForUpdate(data: Record<string, unknown>) {
 async function syncAccountBalance(userId: string, templateId: string | null) {
   if (!templateId) { console.log('[syncAccountBalance] no templateId'); return }
   const template = await prisma.template.findUnique({ where: { id: templateId } })
-  if (!template || template.type !== 'PROP_FIRM') { console.log('[syncAccountBalance] not found or not PROP_FIRM'); return }
+  if (!template || (template.type !== 'PROP_FIRM' && template.type !== 'PERSONAL_ACCOUNT')) { console.log('[syncAccountBalance] not found or unsupported type'); return }
 
   const dv = (template.defaultValues || {}) as Record<string, unknown>
   const accountSize = (dv.accountSize as number) || 0
-  if (!accountSize) { console.log('[syncAccountBalance] no accountSize'); return }
+  if (template.type === 'PROP_FIRM' && !accountSize) { console.log('[syncAccountBalance] no accountSize'); return }
 
   const trades = await prisma.trade.findMany({
     where: { userId, templateId, isDeleted: false, status: 'COMPLETED' },
@@ -50,14 +51,17 @@ async function syncAccountBalance(userId: string, templateId: string | null) {
   const baseBalance = (dv.startingBalance as number) || accountSize
   const newBalance = Math.round((baseBalance + totalPnl) * 100) / 100
   console.log(`[syncAccountBalance] totalPnl=${totalPnl} baseBalance=${baseBalance} newBalance=${newBalance} oldBalance=${dv.currentAccountSize}`)
-  if (dv.currentAccountSize === newBalance) { console.log('[syncAccountBalance] no change'); return }
 
-  dv.currentAccountSize = newBalance
-  await prisma.template.update({
-    where: { id: templateId },
-    data: { defaultValues: dv as never },
-  })
-  console.log('[syncAccountBalance] updated!')
+  if (dv.currentAccountSize !== newBalance) {
+    dv.currentAccountSize = newBalance
+    await prisma.template.update({
+      where: { id: templateId },
+      data: { defaultValues: dv as never },
+    })
+    console.log('[syncAccountBalance] updated!')
+  }
+
+  await updateEodPeak(userId, templateId, { force: true })
 }
 
 export async function createTrade(userId: string, data: Record<string, unknown>) {
@@ -100,6 +104,7 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
   const tradeData: Prisma.TradeUncheckedCreateInput = {
     ...stripPartialExits(data),
     userId,
+    entryTime: data.entryTime ? new Date(data.entryTime as string) : new Date(),
     partialExits: partialExits.length > 0 ? {
       create: partialExits.map((pe) => ({
         quantity: pe.quantity,
@@ -107,6 +112,25 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
         exitTime: pe.exitTime ? new Date(pe.exitTime) : null,
       })),
     } : undefined,
+  }
+
+  if (tradeData.entryTime && tradeData.exitTime && new Date(tradeData.exitTime) <= new Date(tradeData.entryTime)) {
+    throw new Error('Exit time must be later than entry time')
+  }
+
+  const qty = tradeData.quantity
+  if (qty != null && tradeData.templateId) {
+    const tpl = await prisma.template.findUnique({ where: { id: tradeData.templateId as string }, select: { defaultValues: true } })
+    if (tpl?.defaultValues) {
+      const dv = tpl.defaultValues as Record<string, unknown>
+      const marketType = dv.marketType as string | undefined
+      if (marketType === 'FUTURES') {
+        if (!Number.isInteger(qty)) throw new Error('Futures quantity must be a whole number')
+        if (qty < 1) throw new Error('Minimum quantity for Futures is 1')
+      } else if (marketType === 'FOREX') {
+        if (qty < 0.01) throw new Error('Minimum quantity for Forex is 0.01')
+      }
+    }
   }
 
   const trade = await prisma.trade.create({
@@ -209,6 +233,30 @@ export async function updateTrade(userId: string, tradeId: string, data: Record<
           exitTime: pe.exitTime ? new Date(pe.exitTime) : null,
         })),
       })
+    }
+  }
+
+  const entryTime = data.entryTime ? new Date(data.entryTime as string) : trade.entryTime
+  const exitTime = data.exitTime ? new Date(data.exitTime as string) : trade.exitTime
+  if (entryTime && exitTime && exitTime <= entryTime) {
+    throw new Error('Exit time must be later than entry time')
+  }
+
+  const qty = data.quantity != null ? Number(data.quantity) : trade.quantity
+  if (qty != null) {
+    const templateId = trade.templateId
+    if (templateId) {
+      const tpl = await prisma.template.findUnique({ where: { id: templateId }, select: { defaultValues: true } })
+      if (tpl?.defaultValues) {
+        const dv = tpl.defaultValues as Record<string, unknown>
+        const marketType = dv.marketType as string | undefined
+        if (marketType === 'FUTURES') {
+          if (!Number.isInteger(qty)) throw new Error('Futures quantity must be a whole number')
+          if (qty < 1) throw new Error('Minimum quantity for Futures is 1')
+        } else if (marketType === 'FOREX') {
+          if (qty < 0.01) throw new Error('Minimum quantity for Forex is 0.01')
+        }
+      }
     }
   }
 

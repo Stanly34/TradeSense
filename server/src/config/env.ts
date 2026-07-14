@@ -6,7 +6,7 @@ export const env = {
   jwt: {
     secret: process.env.JWT_SECRET || 'dev-jwt-secret',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret',
-    accessExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
+    accessExpiry: process.env.JWT_ACCESS_EXPIRY || '24h',
     refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '30d',
   },
 

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const createTradeSchema = z.object({
+const baseTradeSchema = z.object({
   instrument: z.string().min(1).max(50),
   direction: z.enum(['LONG', 'SHORT']),
   entryPrice: z.number().positive().optional(),
@@ -32,7 +32,20 @@ export const createTradeSchema = z.object({
   })).optional(),
 })
 
-export const updateTradeSchema = createTradeSchema.partial()
+function timeRefinement(data: Record<string, unknown>) {
+  if (!data.entryTime || !data.exitTime) return true
+  return new Date(data.exitTime as string) > new Date(data.entryTime as string)
+}
+
+export const createTradeSchema = baseTradeSchema.refine(timeRefinement, {
+  message: 'Exit time must be later than entry time',
+  path: ['exitTime'],
+})
+
+export const updateTradeSchema = baseTradeSchema.partial().refine(timeRefinement, {
+  message: 'Exit time must be later than entry time',
+  path: ['exitTime'],
+})
 
 export const createTagSchema = z.object({
   name: z.string().min(1).max(30),

@@ -34,9 +34,7 @@ api.interceptors.response.use((response) => {
   const key = getCacheKey(response.config)
   if (key) cache.set(key, { data: response.data, expiry: Date.now() + TTL })
   if (response.config.method && !['get', 'head'].includes(response.config.method)) {
-    const base = response.config.url?.split('?')[0] ?? ''
-    const keys = Array.from(cache.keys()).filter(k => k.startsWith(base))
-    keys.forEach(k => cache.delete(k))
+    cache.clear()
   }
   return response
 })
