@@ -75,6 +75,24 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
     return d.toISOString()
   }
 
+  function snapToMinDate() {
+    if (!minDateObj || !selectedDate) return
+    if (selectedDate.toDateString() !== minDateObj.toDateString()) return
+    const h = parseInt(hours) || 0
+    const m = parseInt(minutes) || 0
+    const minH = minDateObj.getHours()
+    const minM = minDateObj.getMinutes()
+    if (h < minH || (h === minH && m <= minM)) {
+      const d = new Date(minDateObj)
+      d.setMinutes(d.getMinutes() + 1)
+      const hs = String(d.getHours()).padStart(2, '0')
+      const ms = String(d.getMinutes()).padStart(2, '0')
+      setHours(hs)
+      setMinutes(ms)
+      onChange?.(d.toISOString())
+    }
+  }
+
   useEffect(() => {
     if (selectedDate) {
       setYear(selectedDate.getFullYear())
@@ -129,6 +147,7 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
     let d = new Date(year, month - 1, day, h, m)
     if (minDateObj && d <= minDateObj) {
       d = new Date(minDateObj)
+      d.setMinutes(d.getMinutes() + 1)
     }
     if (disableFuture && d > nowRef.current) return
     onChange?.(d.toISOString())
@@ -249,6 +268,7 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
                     <input type="text" inputMode="numeric"
                       value={hours} placeholder="00"
                       onFocus={(e) => e.target.select()}
+                      onBlur={snapToMinDate}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '').slice(-2)
                         const maxH = disableFuture && selectedDate?.toDateString() === todayStr ? Math.min(23, nowRef.current.getHours()) : 23
@@ -290,6 +310,7 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
                     <input ref={minuteRef} type="text" inputMode="numeric"
                       value={minutes} placeholder="00"
                       onFocus={(e) => e.target.select()}
+                      onBlur={snapToMinDate}
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '').slice(-2)
                         const maxM = disableFuture && selectedDate?.toDateString() === todayStr && parseInt(hours) === nowRef.current.getHours() ? nowRef.current.getMinutes() : 59

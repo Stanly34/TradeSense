@@ -364,8 +364,8 @@ export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function Tr
     if (form.fees !== undefined && form.fees !== null && Number(form.fees) < 0) errs.fees = 'Fees cannot be negative'
     if (!form.entryTime) errs.entryTime = 'Entry time is required'
     if (!form.exitTime) errs.exitTime = 'Exit time is required'
-    if (form.entryTime && form.exitTime && new Date(form.exitTime) < new Date(form.entryTime)) {
-      errs.exitTime = 'Exit time must be later than or equal to entry time'
+    if (form.entryTime && form.exitTime && new Date(form.exitTime) <= new Date(form.entryTime)) {
+      errs.exitTime = 'Exit time must be later than entry time'
     }
     if (form.entryPrice && form.exitPrice && form.direction === 'LONG' && form.result === 'WIN' && form.exitPrice <= form.entryPrice) {
       errs.exitPrice = 'Exit must be above entry for LONG'
@@ -567,9 +567,6 @@ export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function Tr
         account: (dv.accountLabel as string) || prev.account,
         pipSize: prev.pipSize ?? defaultPipSize,
         pipValue: prev.pipValue ?? defaultPipValue,
-      }
-      if (prev.quantity === undefined && !initial) {
-        next.quantity = isFuturesTpl ? 1 : 0.01
       }
       return { ...prev, ...next }
     })
@@ -1133,7 +1130,7 @@ export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function Tr
             onChange={(iso) => {
               setErrors((p) => ({ ...p, entryTime: '' }))
               set('entryTime', iso)
-              if (iso && form.exitTime && new Date(form.exitTime) < new Date(iso)) {
+              if (iso && form.exitTime && new Date(form.exitTime) <= new Date(iso)) {
                 set('exitTime', undefined)
                 setErrors((p) => ({ ...p, exitTime: '' }))
               }
@@ -1141,7 +1138,7 @@ export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function Tr
             error={errors.entryTime} />
         </div>
         <div>
-          <DateTimePicker id="exitTime" label="Exit Time" value={form.exitTime} session={form.session}
+          <DateTimePicker id="exitTime" label="Exit Time" value={form.exitTime} session={form.session} minDate={form.entryTime}
             onChange={(iso) => { setErrors((p) => ({ ...p, exitTime: '' })); set('exitTime', iso) }}
             error={errors.exitTime} />
         </div>
@@ -1230,7 +1227,9 @@ export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function Tr
         <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-5">
         {renderFormContent()}
         <div className="flex justify-end gap-3 pt-2 border-t border-border">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+          {!saveAllMode && (
+            <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+          )}
           {!saveAllMode && (
             <Button type="submit" isLoading={isLoading} ref={submitRef}>
               {initial ? 'Update Journal' : 'Create Journal'}
@@ -1258,7 +1257,9 @@ export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function Tr
         <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-5">
             {renderFormContent()}
             <div className="flex justify-end gap-3 pt-2 border-t border-border">
-              <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+              {!saveAllMode && (
+                <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+              )}
               {!saveAllMode && (
                 <Button type="submit" isLoading={isLoading} ref={submitRef}>
                   {initial ? 'Update Journal' : 'Create Journal'}

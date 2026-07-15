@@ -34,16 +34,16 @@ const baseTradeSchema = z.object({
 
 function timeRefinement(data: Record<string, unknown>) {
   if (!data.entryTime || !data.exitTime) return true
-  return new Date(data.exitTime as string) >= new Date(data.entryTime as string)
+  return new Date(data.exitTime as string) > new Date(data.entryTime as string)
 }
 
 export const createTradeSchema = baseTradeSchema.refine(timeRefinement, {
-  message: 'Exit time must be later than or equal to entry time',
+  message: 'Exit time must be later than entry time',
   path: ['exitTime'],
 })
 
 export const updateTradeSchema = baseTradeSchema.partial().refine(timeRefinement, {
-  message: 'Exit time must be later than or equal to entry time',
+  message: 'Exit time must be later than entry time',
   path: ['exitTime'],
 })
 
