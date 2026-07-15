@@ -32,6 +32,7 @@ export const env = {
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
     from: process.env.EMAIL_FROM || 'TradeSense <noreply@tradesense.app>',
+    sendgridApiKey: process.env.SENDGRID_API_KEY || '',
   },
 
 

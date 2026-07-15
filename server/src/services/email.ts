@@ -1,14 +1,11 @@
 import nodemailer from 'nodemailer'
+import sgMail from '@sendgrid/mail'
 import { env } from '../config/env.js'
 import { prisma } from '../lib/prisma.js'
 
-if (!env.email.host || !env.email.user) {
-  console.warn('[EMAIL] SMTP not configured — emails will use Ethereal test service and will NOT be delivered')
-}
-
 async function createTransport() {
   if (env.email.host && env.email.user) {
-    console.log(`[EMAIL] Creating transport: host=${env.email.host} port=${env.email.port} user=${env.email.user} secure=${env.email.port === 465}`)
+    console.log(`[EMAIL] Creating SMTP transport: host=${env.email.host} port=${env.email.port}`)
     return nodemailer.createTransport({
       host: env.email.host,
       port: env.email.port,
@@ -19,6 +16,7 @@ async function createTransport() {
     })
   }
   const testAccount = await nodemailer.createTestAccount()
+  console.log('[EMAIL] No SMTP configured, using Ethereal test account')
   return nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
@@ -29,19 +27,25 @@ async function createTransport() {
 
 export async function sendEmail(to: string, subject: string, html: string) {
   try {
-    const transport = await createTransport()
-    const info = await transport.sendMail({
-      from: env.email.from || 'TradeSense <noreply@tradesense.app>',
-      to,
-      subject,
-      html,
-    })
-    const previewUrl = nodemailer.getTestMessageUrl(info)
-    if (previewUrl) {
-      console.log(`[EMAIL PREVIEW] ${previewUrl}`)
+    if (env.email.sendgridApiKey) {
+      sgMail.setApiKey(env.email.sendgridApiKey)
+      const from = env.email.from?.match(/<(.+)>/)?.[1] || env.email.from || 'tradesenseapp@gmail.com'
+      await sgMail.send({ to, from, subject, html })
+    } else {
+      const transport = await createTransport()
+      const info = await transport.sendMail({
+        from: env.email.from || 'TradeSense <noreply@tradesense.app>',
+        to,
+        subject,
+        html,
+      })
+      const previewUrl = nodemailer.getTestMessageUrl(info)
+      if (previewUrl) {
+        console.log(`[EMAIL PREVIEW] ${previewUrl}`)
+      }
     }
   } catch (err) {
-    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, err instanceof Error ? err.message : err)
+    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, err instanceof Error ? (err as any).response?.body?.errors?.[0]?.message || err.message : err)
   }
 }
 
