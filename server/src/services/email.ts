@@ -8,11 +8,14 @@ if (!env.email.host || !env.email.user) {
 
 async function createTransport() {
   if (env.email.host && env.email.user) {
+    console.log(`[EMAIL] Creating transport: host=${env.email.host} port=${env.email.port} user=${env.email.user} secure=${env.email.port === 465}`)
     return nodemailer.createTransport({
       host: env.email.host,
       port: env.email.port,
       secure: env.email.port === 465,
       auth: { user: env.email.user, pass: env.email.pass },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
     })
   }
   const testAccount = await nodemailer.createTestAccount()
