@@ -72,7 +72,6 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
     d.setHours(parseInt(hh))
     d.setMinutes(parseInt(mm))
     if (disableFuture && d > nowRef.current) return nowRef.current.toISOString()
-    if (minDateObj && d <= minDateObj) return minDateObj.toISOString()
     return d.toISOString()
   }
 
@@ -130,7 +129,6 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
     let d = new Date(year, month - 1, day, h, m)
     if (minDateObj && d <= minDateObj) {
       d = new Date(minDateObj)
-      d.setMinutes(d.getMinutes() + 1)
     }
     if (disableFuture && d > nowRef.current) return
     onChange?.(d.toISOString())
@@ -254,9 +252,7 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '').slice(-2)
                         const maxH = disableFuture && selectedDate?.toDateString() === todayStr ? Math.min(23, nowRef.current.getHours()) : 23
-                        const sameDayAsMin = minDateObj && selectedDate && selectedDate.toDateString() === minDateObj.toDateString()
-                        const minH = sameDayAsMin ? minDateObj!.getHours() : 0
-                        const v = Math.min(maxH, Math.max(minH, parseInt(raw || '0')))
+                        const v = Math.min(maxH, Math.max(0, parseInt(raw || '0')))
                         const hs = String(v).padStart(2, '0')
                         setHours(hs)
                         if (raw.length >= 2) minuteRef.current?.focus()
@@ -297,9 +293,7 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
                       onChange={(e) => {
                         const raw = e.target.value.replace(/\D/g, '').slice(-2)
                         const maxM = disableFuture && selectedDate?.toDateString() === todayStr && parseInt(hours) === nowRef.current.getHours() ? nowRef.current.getMinutes() : 59
-                        const sameDayAsMin = minDateObj && selectedDate && selectedDate.toDateString() === minDateObj.toDateString()
-                        const minM = sameDayAsMin && parseInt(hours) === minDateObj!.getHours() ? Math.min(59, minDateObj!.getMinutes() + 1) : 0
-                        const v = Math.min(maxM, Math.max(minM, parseInt(raw || '0')))
+                        const v = Math.min(maxM, Math.max(0, parseInt(raw || '0')))
                         const ms = String(v).padStart(2, '0')
                         setMinutes(ms)
                         onChange?.(localIso(hours, ms))

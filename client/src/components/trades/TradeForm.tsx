@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { X, Target, AlertTriangle, TrendingUp, Building2, User, DollarSign, ChevronDown, ChevronRight, CheckSquare, Upload, Image, Lock, Sparkles, Plus, ZoomIn, ZoomOut, RotateCcw, ChevronLeft, Trash2, Star } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Input } from '../ui/Input'
@@ -249,9 +249,16 @@ interface TradeFormProps {
   addAnother?: boolean
   noFrame?: boolean
   existingImagesCount?: number
+  saveAllMode?: boolean
 }
 
-export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', addAnother, noFrame, existingImagesCount = 0 }: TradeFormProps) {
+export interface TradeFormHandle {
+  getData: () => TradeFormData & { _pendingImages: File[]; _partialExits: Array<{ quantity?: number; exitPrice?: number; exitTime?: string }> }
+  validate: () => boolean
+  resetForm: () => void
+}
+
+export const TradeForm = forwardRef<TradeFormHandle, TradeFormProps>(function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', addAnother, noFrame, existingImagesCount = 0, saveAllMode }, ref) {
   const { isAtImageLimit, plan, isPro } = usePlan()
   const [form, setForm] = useState<TradeFormData>({
     instrument: initial?.instrument || '',
@@ -286,6 +293,43 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
   const [showPartialClose, setShowPartialClose] = useState(false)
   const submitRef = useRef<HTMLButtonElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  const getDataRef = useRef<() => TradeFormData & { _pendingImages: File[]; _partialExits: Array<{ quantity?: number; exitPrice?: number; exitTime?: string }> }>(() => ({ ...form, _pendingImages: pendingFiles, _partialExits: partialExits }))
+  getDataRef.current = () => ({ ...form, _pendingImages: pendingFiles, _partialExits: partialExits })
+
+  useImperativeHandle(ref, () => ({
+    getData: () => ({ ...form, _pendingImages: pendingFiles, _partialExits: partialExits }),
+    validate: () => validate(),
+    resetForm: () => {
+      setForm({
+        instrument: '',
+        direction: 'LONG',
+        entryPrice: undefined,
+        exitPrice: undefined,
+        stopLoss: undefined,
+        takeProfit: undefined,
+        quantity: undefined,
+        fees: undefined,
+        broker: '',
+        account: '',
+        session: undefined,
+        marketBias: undefined,
+        entryTime: undefined,
+        exitTime: undefined,
+        status: 'COMPLETED',
+        result: undefined,
+        riskReward: undefined,
+        notes: '',
+        reason: '',
+        mistakes: '',
+        templateId: undefined,
+        checklistData: {},
+      })
+      setPendingFiles([])
+      setPendingPreviews([])
+      setSelectedTemplateIds([])
+      setPartialExits([])
+    },
+  }))
 
   useEffect(() => {
     if (resetNext) {
@@ -320,8 +364,8 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
     if (form.fees !== undefined && form.fees !== null && Number(form.fees) < 0) errs.fees = 'Fees cannot be negative'
     if (!form.entryTime) errs.entryTime = 'Entry time is required'
     if (!form.exitTime) errs.exitTime = 'Exit time is required'
-    if (form.entryTime && form.exitTime && new Date(form.exitTime) <= new Date(form.entryTime)) {
-      errs.exitTime = 'Exit time must be later than entry time'
+    if (form.entryTime && form.exitTime && new Date(form.exitTime) < new Date(form.entryTime)) {
+      errs.exitTime = 'Exit time must be later than or equal to entry time'
     }
     if (form.entryPrice && form.exitPrice && form.direction === 'LONG' && form.result === 'WIN' && form.exitPrice <= form.entryPrice) {
       errs.exitPrice = 'Exit must be above entry for LONG'
@@ -1089,7 +1133,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
             onChange={(iso) => {
               setErrors((p) => ({ ...p, entryTime: '' }))
               set('entryTime', iso)
-              if (iso && form.exitTime && new Date(form.exitTime) <= new Date(iso)) {
+              if (iso && form.exitTime && new Date(form.exitTime) < new Date(iso)) {
                 set('exitTime', undefined)
                 setErrors((p) => ({ ...p, exitTime: '' }))
               }
@@ -1097,7 +1141,7 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
             error={errors.entryTime} />
         </div>
         <div>
-          <DateTimePicker id="exitTime" label="Exit Time" value={form.exitTime} session={form.session} minDate={form.entryTime}
+          <DateTimePicker id="exitTime" label="Exit Time" value={form.exitTime} session={form.session}
             onChange={(iso) => { setErrors((p) => ({ ...p, exitTime: '' })); set('exitTime', iso) }}
             error={errors.exitTime} />
         </div>
@@ -1187,9 +1231,11 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
         {renderFormContent()}
         <div className="flex justify-end gap-3 pt-2 border-t border-border">
           <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-          <Button type="submit" isLoading={isLoading} ref={submitRef}>
-            {initial ? 'Update Journal' : 'Create Journal'}
-          </Button>
+          {!saveAllMode && (
+            <Button type="submit" isLoading={isLoading} ref={submitRef}>
+              {initial ? 'Update Journal' : 'Create Journal'}
+            </Button>
+          )}
         </div>
       </form>
       {previewIndex !== null && pendingPreviews[previewIndex] && renderLightbox()}
@@ -1213,9 +1259,11 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
             {renderFormContent()}
             <div className="flex justify-end gap-3 pt-2 border-t border-border">
               <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
-              <Button type="submit" isLoading={isLoading} ref={submitRef}>
-                {initial ? 'Update Journal' : 'Create Journal'}
-              </Button>
+              {!saveAllMode && (
+                <Button type="submit" isLoading={isLoading} ref={submitRef}>
+                  {initial ? 'Update Journal' : 'Create Journal'}
+                </Button>
+              )}
             </div>
           </form>
         </div>
@@ -1224,4 +1272,4 @@ export function TradeForm({ initial, onSubmit, onClose, title = 'New Journal', a
       <UpgradeDialog open={showUpgradeDialog} onClose={() => setShowUpgradeDialog(false)} />
     </>
   )
-}
+})

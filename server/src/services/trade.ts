@@ -114,7 +114,7 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
     } : undefined,
   }
 
-  if (tradeData.entryTime && tradeData.exitTime && new Date(tradeData.exitTime) <= new Date(tradeData.entryTime)) {
+  if (tradeData.entryTime && tradeData.exitTime && new Date(tradeData.exitTime) < new Date(tradeData.entryTime)) {
     throw new Error('Exit time must be later than entry time')
   }
 
@@ -238,8 +238,8 @@ export async function updateTrade(userId: string, tradeId: string, data: Record<
 
   const entryTime = data.entryTime ? new Date(data.entryTime as string) : trade.entryTime
   const exitTime = data.exitTime ? new Date(data.exitTime as string) : trade.exitTime
-  if (entryTime && exitTime && exitTime <= entryTime) {
-    throw new Error('Exit time must be later than entry time')
+  if (entryTime && exitTime && exitTime < entryTime) {
+    throw new Error('Exit time must be later than or equal to entry time')
   }
 
   const qty = data.quantity != null ? Number(data.quantity) : trade.quantity

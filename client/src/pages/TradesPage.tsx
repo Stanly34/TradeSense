@@ -6,7 +6,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { SelectionBar } from '../components/ui/SelectionBar'
 import { UpgradeDialog } from '../components/ui/UpgradeDialog'
 import { TradeFilters } from '../components/trades/TradeFilters'
-import { TradeForm } from '../components/trades/TradeForm'
+import { TradeForm, type TradeFormHandle } from '../components/trades/TradeForm'
 import * as tradeService from '../services/trades'
 import { usePlan } from '../hooks/usePlan'
 import type { Trade, TradeListParams, TradeFormData } from '../types/trade'
@@ -35,6 +35,7 @@ export function TradesPage() {
   const [showForm, setShowForm] = useState(false)
   const [formTabs, setFormTabs] = useState<number[]>([0])
   const [activeFormTab, setActiveFormTab] = useState(0)
+  const formRefs = useRef<Record<number, TradeFormHandle | null>>({})
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const dateParam = searchParams.get('date')
@@ -115,6 +116,47 @@ export function TradesPage() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create trade')
       throw err
+    }
+  }
+
+  async function handleSaveAll() {
+    const entries: TradeFormData[] = []
+    for (let i = 0; i < formTabs.length; i++) {
+      const f = formRefs.current[i]
+      if (!f) continue
+      if (!f.validate()) {
+        setActiveFormTab(i)
+        return
+      }
+      entries.push(f.getData())
+    }
+    try {
+      let count = 0
+      for (const data of entries) {
+        const { _pendingImages, ...tradeData } = data
+        const trade = await tradeService.createTrade(tradeData)
+        if (_pendingImages && _pendingImages.length > 0) {
+          for (const file of _pendingImages) {
+            const fd = new FormData()
+            fd.append('image', file)
+            fd.append('tradeId', trade.id)
+            fd.append('category', 'ANALYSIS')
+            await fetch('/api/v1/upload/image', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${getAccessToken()}` },
+              body: fd,
+            })
+          }
+        }
+        setTrades((prev) => [trade, ...prev])
+        count++
+      }
+      setShowForm(false)
+      setFormTabs([0])
+      setActiveFormTab(0)
+      toast.success(`${count} journals created`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create trades')
     }
   }
 
@@ -583,12 +625,26 @@ export function TradesPage() {
             {formTabs.map((_, i) => (
               <div key={i} style={{ display: activeFormTab === i ? '' : 'none' }}>
                 <TradeForm
+                  ref={(el) => { formRefs.current[i] = el }}
                   noFrame
+                  saveAllMode={formTabs.length > 1}
                   onSubmit={handleCreate}
                   onClose={() => { setShowForm(false); setFormTabs([0]); setActiveFormTab(0) }}
                 />
               </div>
             ))}
+            {formTabs.length > 1 && (
+              <div className="px-6 pb-4 pt-2 border-t border-border">
+                <div className="flex justify-end gap-3">
+                  <Button type="button" variant="secondary" onClick={() => { setShowForm(false); setFormTabs([0]); setActiveFormTab(0) }}>
+                    Cancel
+                  </Button>
+                  <Button type="button" onClick={handleSaveAll}>
+                    Save All ({formTabs.length})
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
