@@ -2,6 +2,10 @@ import nodemailer from 'nodemailer'
 import { env } from '../config/env.js'
 import { prisma } from '../lib/prisma.js'
 
+if (!env.email.host || !env.email.user) {
+  console.warn('[EMAIL] SMTP not configured — emails will use Ethereal test service and will NOT be delivered')
+}
+
 async function createTransport() {
   if (env.email.host && env.email.user) {
     return nodemailer.createTransport({
@@ -21,16 +25,20 @@ async function createTransport() {
 }
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  const transport = await createTransport()
-  const info = await transport.sendMail({
-    from: env.email.from || 'TradeSense <noreply@tradesense.app>',
-    to,
-    subject,
-    html,
-  })
-  const previewUrl = nodemailer.getTestMessageUrl(info)
-  if (previewUrl) {
-    console.log(`[EMAIL PREVIEW] ${previewUrl}`)
+  try {
+    const transport = await createTransport()
+    const info = await transport.sendMail({
+      from: env.email.from || 'TradeSense <noreply@tradesense.app>',
+      to,
+      subject,
+      html,
+    })
+    const previewUrl = nodemailer.getTestMessageUrl(info)
+    if (previewUrl) {
+      console.log(`[EMAIL PREVIEW] ${previewUrl}`)
+    }
+  } catch (err) {
+    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, err instanceof Error ? err.message : err)
   }
 }
 

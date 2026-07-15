@@ -155,7 +155,7 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
     }
   }
 
-  sendTradeSummary(userId, trade).catch(() => {})
+  sendTradeSummary(userId, trade).catch(e => console.error('[TRADE SUMMARY EMAIL ERROR]', e))
   await syncAccountBalance(userId, trade.templateId)
 
   return trade
