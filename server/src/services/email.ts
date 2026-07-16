@@ -1,9 +1,7 @@
 import nodemailer from 'nodemailer'
-import { Resend } from 'resend'
+import axios from 'axios'
 import { env } from '../config/env.js'
 import { prisma } from '../lib/prisma.js'
-
-let resendClient: Resend | null = null
 
 async function createTransport() {
   if (env.email.host && env.email.user) {
@@ -27,22 +25,26 @@ async function createTransport() {
   })
 }
 
+function parseSender(from: string): { name: string; email: string } {
+  const match = from.match(/^(.+?) <(.+)>$/)
+  if (match) return { name: match[1], email: match[2] }
+  return { name: 'TradeSense', email: from }
+}
+
 export async function sendEmail(to: string, subject: string, html: string) {
   try {
-    if (env.email.resendApiKey) {
-      if (!resendClient) {
-        resendClient = new Resend(env.email.resendApiKey)
-      }
-      const from = env.email.from || 'TradeSense <onboarding@resend.dev>'
-      const { error } = await resendClient.emails.send({
-        from,
-        to: [to],
-        subject,
-        html,
-      })
-      if (error) {
-        console.error(`[EMAIL ERROR] Resend API error for "${subject}" to ${to}:`, error)
-      }
+    if (env.email.brevoApiKey) {
+      const sender = parseSender(env.email.from || 'TradeSense <tradesenseapp@gmail.com>')
+      await axios.post(
+        'https://api.brevo.com/v3/smtp/email',
+        {
+          sender,
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        },
+        { headers: { 'api-key': env.email.brevoApiKey, 'Content-Type': 'application/json' }, timeout: 30000 }
+      )
     } else {
       const transport = await createTransport()
       const info = await transport.sendMail({
@@ -57,7 +59,8 @@ export async function sendEmail(to: string, subject: string, html: string) {
       }
     }
   } catch (err) {
-    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, err instanceof Error ? err.message : err)
+    const msg = axios.isAxiosError(err) ? err.response?.data?.message || err.message : err instanceof Error ? err.message : String(err)
+    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, msg)
   }
 }
 
