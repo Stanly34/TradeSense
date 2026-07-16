@@ -1,7 +1,9 @@
 import nodemailer from 'nodemailer'
-import sgMail from '@sendgrid/mail'
+import { Resend } from 'resend'
 import { env } from '../config/env.js'
 import { prisma } from '../lib/prisma.js'
+
+let resendClient: Resend | null = null
 
 async function createTransport() {
   if (env.email.host && env.email.user) {
@@ -27,10 +29,20 @@ async function createTransport() {
 
 export async function sendEmail(to: string, subject: string, html: string) {
   try {
-    if (env.email.sendgridApiKey) {
-      sgMail.setApiKey(env.email.sendgridApiKey)
-      const from = env.email.from?.match(/<(.+)>/)?.[1] || env.email.from || 'tradesenseapp@gmail.com'
-      await sgMail.send({ to, from, subject, html })
+    if (env.email.resendApiKey) {
+      if (!resendClient) {
+        resendClient = new Resend(env.email.resendApiKey)
+      }
+      const from = env.email.from || 'TradeSense <onboarding@resend.dev>'
+      const { error } = await resendClient.emails.send({
+        from,
+        to: [to],
+        subject,
+        html,
+      })
+      if (error) {
+        console.error(`[EMAIL ERROR] Resend API error for "${subject}" to ${to}:`, error)
+      }
     } else {
       const transport = await createTransport()
       const info = await transport.sendMail({
@@ -45,7 +57,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
       }
     }
   } catch (err) {
-    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, err instanceof Error ? (err as any).response?.body?.errors?.[0]?.message || err.message : err)
+    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, err instanceof Error ? err.message : err)
   }
 }
 
