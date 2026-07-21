@@ -1,7 +1,7 @@
 import { useAuth } from './useAuth'
 
 export function usePlan() {
-  const { user } = useAuth()
+  const { user, refreshUser } = useAuth()
 
   const sub = user?.subscription
   const plan = sub?.plan
@@ -26,5 +26,6 @@ export function usePlan() {
     isAtChecklistLimit,
     isAtTradeLimit,
     hasWeeklyOutlook,
+    refresh: refreshUser,
   }
 }

@@ -10,7 +10,7 @@ import { TradeForm, type TradeFormHandle } from '../components/trades/TradeForm'
 import * as tradeService from '../services/trades'
 import { usePlan } from '../hooks/usePlan'
 import type { Trade, TradeListParams, TradeFormData } from '../types/trade'
-import { getAccessToken } from '../services/api'
+import api from '../services/api'
 import toast from 'react-hot-toast'
 
 const statusStyles: Record<string, string> = {
@@ -101,14 +101,15 @@ export function TradesPage() {
           formData.append('image', file)
           formData.append('tradeId', trade.id)
           formData.append('category', 'ANALYSIS')
-          await fetch('/api/v1/upload/image', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${getAccessToken()}` },
-            body: formData,
+          await api.post('/upload/image', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
           })
         }
+        const refreshed = await tradeService.getTrade(trade.id)
+        setTrades((prev) => [refreshed, ...prev])
+      } else {
+        setTrades((prev) => [trade, ...prev])
       }
-      setTrades((prev) => [trade, ...prev])
       setShowForm(false)
       setFormTabs([0])
       setActiveFormTab(0)
@@ -141,14 +142,15 @@ export function TradesPage() {
             fd.append('image', file)
             fd.append('tradeId', trade.id)
             fd.append('category', 'ANALYSIS')
-            await fetch('/api/v1/upload/image', {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${getAccessToken()}` },
-              body: fd,
+            await api.post('/upload/image', fd, {
+              headers: { 'Content-Type': 'multipart/form-data' },
             })
           }
+          const refreshed = await tradeService.getTrade(trade.id)
+          setTrades((prev) => [refreshed, ...prev])
+        } else {
+          setTrades((prev) => [trade, ...prev])
         }
-        setTrades((prev) => [trade, ...prev])
         count++
       }
       setShowForm(false)

@@ -7,7 +7,7 @@ import { TradeForm } from '../components/trades/TradeForm'
 import * as tradeService from '../services/trades'
 import * as tagService from '../services/tags'
 import toast from 'react-hot-toast'
-import { getAccessToken } from '../services/api'
+import api from '../services/api'
 import type { Trade } from '../types/trade'
 import { parseTagContent } from '../utils/tags'
 
@@ -123,10 +123,7 @@ export function TradeDetailPage() {
 
   async function handleDeleteImage(imageId: string) {
     if (!window.confirm('Delete this image?')) return
-    await fetch(`/api/v1/upload/image/${imageId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${getAccessToken()}` },
-    })
+    await api.delete(`/upload/image/${imageId}`)
     const updated = await tradeService.getTrade(t.id)
     setTrade(updated)
   }
@@ -438,10 +435,8 @@ export function TradeDetailPage() {
                   formData.append('image', file)
                   formData.append('tradeId', t.id)
                   formData.append('category', 'ANALYSIS')
-                  await fetch('/api/v1/upload/image', {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${getAccessToken()}` },
-                    body: formData,
+                  await api.post('/upload/image', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
                   })
                 }
                 const refreshed = await tradeService.getTrade(t.id)
