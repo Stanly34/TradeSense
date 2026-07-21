@@ -35,7 +35,6 @@ export function TradeDetailPage() {
       tagService.listTags(),
     ])
       .then(([tradeData, tagsData]) => {
-        console.log('[DIAG:TradeDetail] trade images:', tradeData.images?.map((i: any) => ({ id: i.id, url: i.imageUrl })))
         setTrade(tradeData)
         setTags(tagsData)
       })
@@ -363,10 +362,8 @@ export function TradeDetailPage() {
             <div className="space-y-4">
               {t.images.map((img) => (
                 <div key={img.id} className="relative group rounded-xl overflow-hidden border border-border cursor-pointer"
-                  onClick={() => { console.log('[DIAG:Image] clicked img id:', img.id, 'url:', img.imageUrl); setSelectedImage(img.imageUrl) }}>
-                  <img src={img.imageUrl} alt="" className="w-full h-80 object-cover"
-                    onError={() => console.log('[DIAG:Image] BROKEN IMAGE img id:', img.id, 'url:', img.imageUrl)}
-                    onLoad={() => console.log('[DIAG:Image] LOADED img id:', img.id, 'url:', img.imageUrl)} />
+                  onClick={() => setSelectedImage(img.imageUrl)}>
+                  <img src={img.imageUrl} alt="" className="w-full h-80 object-cover" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-sm text-white">Click to view</span>
                   </div>
@@ -391,8 +388,7 @@ export function TradeDetailPage() {
             <img src={selectedImage} alt="" draggable={false}
               className="max-w-full max-h-[85vh] rounded-lg transition-transform duration-100 select-none"
               style={{ transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`, cursor: zoom > 1 ? 'grab' : '' }}
-              onError={() => console.log('[DIAG:Image] VIEWER BROKEN selectedImage:', selectedImage)}
-              onLoad={() => console.log('[DIAG:Image] VIEWER LOADED selectedImage:', selectedImage)} />
+            />
             <div className="absolute top-3 right-3 flex gap-2">
               <button onClick={() => setZoom(z => { const idx = ZOOM_LEVELS.indexOf(z); if (idx >= ZOOM_LEVELS.length - 1) return z; setPan({ x: 0, y: 0 }); return ZOOM_LEVELS[idx + 1] })}
                 className="p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors">
@@ -444,14 +440,10 @@ export function TradeDetailPage() {
                     const uploadRes = await api.post('/upload/image', formData, {
                       headers: { 'Content-Type': 'multipart/form-data' },
                     })
-                    console.log('[DIAG:Upload] edit upload response:', uploadRes.data)
-                    console.log('[DIAG:Upload] edit stored imageUrl:', uploadRes.data?.data?.imageUrl)
                   } catch (uploadErr: any) {
-                    console.log('[DIAG:Upload] edit upload FAILED:', uploadErr?.response?.data || uploadErr.message)
                   }
                 }
                 const refreshed = await tradeService.getTrade(t.id)
-                console.log('[DIAG:Upload] refreshed trade images:', refreshed.images?.map((i: any) => ({ id: i.id, url: i.imageUrl })))
                 setTrade(refreshed)
               } else {
                 setTrade(updated)

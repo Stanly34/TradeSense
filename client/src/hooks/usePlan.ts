@@ -15,12 +15,6 @@ export function usePlan() {
   const isAtTradeLimit = !isPro
   const hasWeeklyOutlook = !!plan?.weeklyOutlook
 
-  console.log('[DIAG:usePlan] user?.subscription:', user?.subscription)
-  console.log('[DIAG:usePlan] sub:', sub)
-  console.log('[DIAG:usePlan] plan:', plan)
-  console.log('[DIAG:usePlan] plan?.name:', plan?.name)
-  console.log('[DIAG:usePlan] isPro:', isPro)
-  console.log('[DIAG:usePlan] isBasic:', isBasic)
 
   return {
     isPro,

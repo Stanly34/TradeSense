@@ -90,9 +90,6 @@ export async function logoutAll(req: Request, res: Response) {
 export async function getMe(req: Request, res: Response) {
   try {
     const user = await authService.getCurrentUser(req.user!.userId)
-    console.log('[DIAG:auth/me] user keys:', Object.keys(user))
-    console.log('[DIAG:auth/me] has subscription:', 'subscription' in user)
-    console.log('[DIAG:auth/me] subscription:', JSON.stringify((user as any).subscription, null, 2))
     return sendSuccess(res, user)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to get user'
