@@ -38,7 +38,7 @@ export async function uploadImage(
 
 export async function deleteImage(identifier: string) {
   if (hasCloudinary) {
-    await cloudinary.uploader.destroy(identifier)
+    try { await cloudinary.uploader.destroy(identifier) } catch { /* ignore Cloudinary errors on delete */ }
     return
   }
 

@@ -166,8 +166,11 @@ export function SettingsPage() {
                     const result = await authService.deleteAvatar()
                     updateUser(result as never)
                     toast.success('Avatar removed')
-                  } catch {
-                    toast.error('Failed to remove avatar')
+                  } catch (err: unknown) {
+                    const msg = err && typeof err === 'object' && 'response' in err
+                      ? (err as { response: { data: { error: { message: string } } } }).response?.data?.error?.message
+                      : 'Failed to remove avatar'
+                    toast.error(msg)
                   } finally {
                     setRemovingAvatar(false)
                   }
