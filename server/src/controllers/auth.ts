@@ -183,7 +183,9 @@ export async function uploadAvatar(req: Request, res: Response) {
     const user = await authService.uploadAvatar(req.user!.userId, url)
     return sendSuccess(res, user, 'Avatar uploaded')
   } catch (err) {
-    return sendError(res, err instanceof Error ? err.message : 'Avatar upload failed', 500)
+    console.error('[AVATAR ERROR]', err)
+    const message = err instanceof Error ? err.message : String(err)
+    return sendError(res, message, 500)
   }
 }
 
@@ -202,6 +204,8 @@ export async function deleteAvatar(req: Request, res: Response) {
     const updated = await authService.deleteAvatar(req.user!.userId)
     return sendSuccess(res, updated, 'Avatar removed')
   } catch (err) {
-    return sendError(res, err instanceof Error ? err.message : 'Failed to remove avatar', 500)
+    console.error('[AVATAR ERROR]', err)
+    const message = err instanceof Error ? err.message : String(err)
+    return sendError(res, message, 500)
   }
 }
