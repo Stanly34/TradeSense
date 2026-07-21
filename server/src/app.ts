@@ -12,7 +12,14 @@ const app = express()
 
 app.post('/api/v1/razorpay/webhook', express.raw({ type: 'application/json' }), handleRazorpayWebhook)
 
-app.use(helmet())
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'img-src': ["'self'", 'data:', 'https://res.cloudinary.com'],
+    },
+  },
+}))
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
