@@ -184,9 +184,25 @@ export async function uploadAvatar(req: Request, res: Response) {
     return sendSuccess(res, user, 'Avatar uploaded')
   } catch (err) {
     console.error('[AVATAR ERROR]', err)
-    const message = err instanceof Error ? err.message : String(err)
+    let message: string
+    if (err instanceof Error) {
+      message = err.message
+    } else if (err && typeof err === 'object') {
+      const obj = err as Record<string, unknown>
+      message = (obj as { error?: { message?: string } })?.error?.message
+        || (obj as { message?: string })?.message
+        || JSON.stringify(err)
+    } else {
+      message = String(err)
+    }
     return sendError(res, message, 500)
   }
+}
+
+function extractCloudinaryId(url: string): string {
+  return url.includes('cloudinary')
+    ? url.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+    : url.split('/').pop() || ''
 }
 
 export async function deleteAvatar(req: Request, res: Response) {
@@ -195,17 +211,24 @@ export async function deleteAvatar(req: Request, res: Response) {
     if (!user) return sendError(res, 'User not found', 404)
 
     if (user.profileImage) {
-      const publicId = user.profileImage.includes('cloudinary')
-        ? user.profileImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
-        : user.profileImage.split('/').pop() || ''
-      await uploadService.deleteImage(publicId)
+      await uploadService.deleteImage(extractCloudinaryId(user.profileImage))
     }
 
     const updated = await authService.deleteAvatar(req.user!.userId)
     return sendSuccess(res, updated, 'Avatar removed')
   } catch (err) {
     console.error('[AVATAR ERROR]', err)
-    const message = err instanceof Error ? err.message : String(err)
+    let message: string
+    if (err instanceof Error) {
+      message = err.message
+    } else if (err && typeof err === 'object') {
+      const obj = err as Record<string, unknown>
+      message = (obj as { error?: { message?: string } })?.error?.message
+        || (obj as { message?: string })?.message
+        || JSON.stringify(err)
+    } else {
+      message = String(err)
+    }
     return sendError(res, message, 500)
   }
 }
