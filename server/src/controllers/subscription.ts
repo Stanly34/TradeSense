@@ -8,6 +8,7 @@ import { env } from '../config/env.js'
 export async function getPlan(req: Request, res: Response) {
   try {
     const plan = await subscriptionService.getUserPlan(req.user!.userId)
+    console.log('[DIAG:subscriptions/plan] plan:', JSON.stringify(plan, null, 2))
     return sendSuccess(res, plan)
   } catch (err) {
     return sendError(res, err instanceof Error ? err.message : 'Failed to get plan', 500)

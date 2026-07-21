@@ -101,11 +101,18 @@ export function TradesPage() {
           formData.append('image', file)
           formData.append('tradeId', trade.id)
           formData.append('category', 'ANALYSIS')
-          await api.post('/upload/image', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          })
+          try {
+            const uploadRes = await api.post('/upload/image', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' },
+            })
+            console.log('[DIAG:Upload] upload response:', uploadRes.data)
+            console.log('[DIAG:Upload] stored imageUrl:', uploadRes.data?.data?.imageUrl)
+          } catch (uploadErr: any) {
+            console.log('[DIAG:Upload] upload FAILED:', uploadErr?.response?.data || uploadErr.message)
+          }
         }
         const refreshed = await tradeService.getTrade(trade.id)
+        console.log('[DIAG:Upload] refreshed trade images:', refreshed.images?.map((i: any) => ({ id: i.id, url: i.imageUrl })))
         setTrades((prev) => [refreshed, ...prev])
       } else {
         setTrades((prev) => [trade, ...prev])

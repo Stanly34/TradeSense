@@ -60,6 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (accessToken) {
         try {
           const userData = await authService.getMe()
+          console.log('[DIAG:AuthContext] getMe response:', JSON.stringify(userData, (k, v) => k === 'password' ? '***' : v, 2))
+          console.log('[DIAG:AuthContext] subscription field:', userData?.subscription)
+          console.log('[DIAG:AuthContext] subscription plan:', (userData as any)?.subscription?.plan)
           setUser(userData as AuthUser)
           setIsLoading(false)
           return
@@ -71,6 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAccessToken(data.data.accessToken)
       sessionStorage.setItem('refreshToken', data.data.refreshToken)
       const userData = await authService.getMe()
+      console.log('[DIAG:AuthContext] getMe after refresh:', JSON.stringify(userData, (k, v) => k === 'password' ? '***' : v, 2))
+      console.log('[DIAG:AuthContext] subscription after refresh:', userData?.subscription)
+      console.log('[DIAG:AuthContext] plan after refresh:', (userData as any)?.subscription?.plan)
       setUser(userData as AuthUser)
     } catch {
       sessionStorage.removeItem('refreshToken')

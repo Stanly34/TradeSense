@@ -26,6 +26,9 @@ export async function uploadTradeImage(req: Request, res: Response) {
     }
 
     const { url, publicId, width, height } = await uploadService.uploadImage(req.file.path)
+    console.log('[DIAG:Upload Server] url:', url)
+    console.log('[DIAG:Upload Server] publicId:', publicId)
+    console.log('[DIAG:Upload Server] hasCloudinary in uploadService:', !!(process.env.CLOUDINARY_NAME && process.env.CLOUDINARY_KEY && process.env.CLOUDINARY_SECRET))
 
     const image = await prisma.tradeImage.create({
       data: {
@@ -40,6 +43,7 @@ export async function uploadTradeImage(req: Request, res: Response) {
       },
     })
 
+    console.log('[DIAG:Upload Server] created tradeImage:', { id: image.id, imageUrl: image.imageUrl, tradeId: image.tradeId })
     return sendSuccess(res, image, 'Image uploaded', 201)
   } catch (err) {
     return sendError(res, err instanceof Error ? err.message : 'Failed to upload image', 500)
