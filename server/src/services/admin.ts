@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js'
 import * as auditLogService from './auditLog.js'
+import { authUserInclude } from './auth.js'
 
 export async function listUsers(page = 1, limit = 50) {
   const skip = (page - 1) * limit
@@ -32,7 +33,7 @@ export async function updateUser(userId: string, data: { role?: string; isActive
   const user = await prisma.user.findUnique({ where: { id: userId } })
   if (!user) throw new Error('User not found')
 
-  const updated = await prisma.user.update({ where: { id: userId }, data: data as never })
+  const updated = await prisma.user.update({ where: { id: userId }, data: data as never, include: authUserInclude })
 
   if (data.role !== undefined && data.role !== user.role) {
     await auditLogService.logAction(actingUserId, 'USER_ROLE_CHANGED', 'USER', userId, {

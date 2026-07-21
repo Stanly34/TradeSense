@@ -3,6 +3,14 @@ import { prisma } from '../lib/prisma.js'
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/tokens.js'
 import crypto from 'crypto'
 
+export const authUserInclude = {
+  subscription: {
+    include: {
+      plan: true,
+    },
+  },
+}
+
 function excludePassword(user: Record<string, unknown>) {
   const { password, ...rest } = user
   return rest
@@ -128,9 +136,7 @@ export async function login(emailOrUsername: string, password: string) {
     where: {
       OR: [{ email: emailOrUsername }, { username: emailOrUsername }],
     },
-    include: {
-      subscription: { include: { plan: true } },
-    },
+    include: authUserInclude,
   })
   if (!user) throw new Error('Invalid email or password')
   if (!user.isActive) throw new Error('Account is suspended')
@@ -256,11 +262,7 @@ export async function resetPassword(token: string, newPassword: string) {
 export async function getCurrentUser(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: {
-      subscription: {
-        include: { plan: true },
-      },
-    },
+    include: authUserInclude,
   })
   if (!user) throw new Error('User not found')
   return excludePassword(user as unknown as Record<string, unknown>)
@@ -284,6 +286,7 @@ export async function updateProfile(userId: string, data: { fullName?: string; u
   const user = await prisma.user.update({
     where: { id: userId },
     data,
+    include: authUserInclude,
   })
   return excludePassword(user as unknown as Record<string, unknown>)
 }
@@ -292,6 +295,7 @@ export async function uploadAvatar(userId: string, imageUrl: string) {
   const user = await prisma.user.update({
     where: { id: userId },
     data: { profileImage: imageUrl },
+    include: authUserInclude,
   })
   return excludePassword(user as unknown as Record<string, unknown>)
 }
@@ -314,6 +318,7 @@ export async function deleteAvatar(userId: string) {
   const user = await prisma.user.update({
     where: { id: userId },
     data: { profileImage: null },
+    include: authUserInclude,
   })
   return excludePassword(user as unknown as Record<string, unknown>)
 }
