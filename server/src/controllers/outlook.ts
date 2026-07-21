@@ -1,19 +1,8 @@
 import type { Request, Response } from 'express'
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import { prisma } from '../lib/prisma.js'
 import * as outlookService from '../services/outlook.js'
+import * as uploadService from '../services/upload.js'
 import { sendSuccess, sendError } from '../utils/response.js'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-function deleteImageFile(imageUrl: string | null | undefined) {
-  if (!imageUrl) return
-  const filename = path.basename(imageUrl)
-  const filepath = path.join(__dirname, '..', '..', 'uploads', filename)
-  fs.unlink(filepath, () => {})
-}
 
 export async function listOutlooks(req: Request, res: Response) {
   try {
@@ -63,19 +52,41 @@ export async function saveOutlook(req: Request, res: Response) {
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined
     if (files?.beforeImage?.[0]) {
-      data.beforeImage = `/uploads/${files.beforeImage[0].filename}`
-      deleteImageFile(existing?.beforeImage)
+      const { url } = await uploadService.uploadImage(files.beforeImage[0].path)
+      data.beforeImage = url
+      if (existing?.beforeImage) {
+        const pid = existing.beforeImage.includes('cloudinary')
+          ? existing.beforeImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+          : existing.beforeImage.split('/').pop() || ''
+        await uploadService.deleteImage(pid)
+      }
     } else if (req.body.clearBeforeImage === 'true') {
       data.beforeImage = null
-      deleteImageFile(existing?.beforeImage)
+      if (existing?.beforeImage) {
+        const pid = existing.beforeImage.includes('cloudinary')
+          ? existing.beforeImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+          : existing.beforeImage.split('/').pop() || ''
+        await uploadService.deleteImage(pid)
+      }
     }
 
     if (files?.afterImage?.[0]) {
-      data.afterImage = `/uploads/${files.afterImage[0].filename}`
-      deleteImageFile(existing?.afterImage)
+      const { url } = await uploadService.uploadImage(files.afterImage[0].path)
+      data.afterImage = url
+      if (existing?.afterImage) {
+        const pid = existing.afterImage.includes('cloudinary')
+          ? existing.afterImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+          : existing.afterImage.split('/').pop() || ''
+        await uploadService.deleteImage(pid)
+      }
     } else if (req.body.clearAfterImage === 'true') {
       data.afterImage = null
-      deleteImageFile(existing?.afterImage)
+      if (existing?.afterImage) {
+        const pid = existing.afterImage.includes('cloudinary')
+          ? existing.afterImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+          : existing.afterImage.split('/').pop() || ''
+        await uploadService.deleteImage(pid)
+      }
     }
 
     let entry
@@ -104,8 +115,18 @@ export async function deleteOutlook(req: Request, res: Response) {
       where: { id, userId: req.user!.userId },
     })
     if (!entry) return sendError(res, 'Outlook not found', 404)
-    deleteImageFile(entry.beforeImage)
-    deleteImageFile(entry.afterImage)
+    if (entry.beforeImage) {
+      const pid = entry.beforeImage.includes('cloudinary')
+        ? entry.beforeImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+        : entry.beforeImage.split('/').pop() || ''
+      await uploadService.deleteImage(pid)
+    }
+    if (entry.afterImage) {
+      const pid = entry.afterImage.includes('cloudinary')
+        ? entry.afterImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+        : entry.afterImage.split('/').pop() || ''
+      await uploadService.deleteImage(pid)
+    }
     await prisma.weeklyOutlook.delete({ where: { id } })
     return sendSuccess(res, null, 'Outlook deleted')
   } catch (err) {
@@ -122,8 +143,18 @@ export async function batchDeleteOutlooks(req: Request, res: Response) {
     })
     if (entries.length !== ids.length) return sendError(res, 'Some outlooks not found', 404)
     for (const entry of entries) {
-      deleteImageFile(entry.beforeImage)
-      deleteImageFile(entry.afterImage)
+      if (entry.beforeImage) {
+        const pid = entry.beforeImage.includes('cloudinary')
+          ? entry.beforeImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+          : entry.beforeImage.split('/').pop() || ''
+        await uploadService.deleteImage(pid)
+      }
+      if (entry.afterImage) {
+        const pid = entry.afterImage.includes('cloudinary')
+          ? entry.afterImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+          : entry.afterImage.split('/').pop() || ''
+        await uploadService.deleteImage(pid)
+      }
     }
     await prisma.weeklyOutlook.deleteMany({
       where: { id: { in: ids }, userId: req.user!.userId },

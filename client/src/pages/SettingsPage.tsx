@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { User, Bell, Save, Camera, Mail, Loader2, Shield } from 'lucide-react'
+import { User, Bell, Save, Camera, XCircle, Mail, Loader2, Shield } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 import { usePlan } from '../hooks/usePlan'
@@ -29,6 +29,7 @@ export function SettingsPage() {
   const [email, setEmail] = useState(user?.email || '')
   const [isSaving, setIsSaving] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [removingAvatar, setRemovingAvatar] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [preferences, setPreferences] = useState<notificationService.NotificationPreferences | null>(null)
   const [loadingPrefs, setLoadingPrefs] = useState(true)
@@ -157,6 +158,24 @@ export function SettingsPage() {
                 className="absolute bottom-0 right-0 p-1.5 bg-primary rounded-full text-text-inverse shadow-lg hover:bg-primary-dark transition-colors disabled:opacity-50">
                 <Camera className="w-3.5 h-3.5" />
               </button>
+              {user?.profileImage && (
+                <button disabled={removingAvatar} onClick={async () => {
+                  if (!window.confirm('Remove profile image?')) return
+                  setRemovingAvatar(true)
+                  try {
+                    const result = await authService.deleteAvatar()
+                    updateUser(result as never)
+                    toast.success('Avatar removed')
+                  } catch {
+                    toast.error('Failed to remove avatar')
+                  } finally {
+                    setRemovingAvatar(false)
+                  }
+                }}
+                  className="absolute top-0 right-0 p-1 bg-danger rounded-full text-white shadow-lg hover:bg-danger/80 transition-colors disabled:opacity-50">
+                  <XCircle className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3">

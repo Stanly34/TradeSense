@@ -726,7 +726,7 @@ export function OutlookPage() {
               {viewingEntry.notes && (
                 <div>
                   <label className="block text-xs font-medium text-text-muted mb-1">Notes</label>
-                  <p className="text-sm text-text-secondary whitespace-pre-wrap">{viewingEntry.notes}</p>
+                  <p className="text-sm text-text-secondary whitespace-pre-wrap break-words">{viewingEntry.notes}</p>
                 </div>
               )}
 
@@ -873,7 +873,7 @@ export function OutlookPage() {
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-text-secondary">Notes</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
-                  className="block w-full rounded-xl border border-border px-3.5 py-2.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all resize-none"
+                  className="block w-full rounded-xl border border-border px-3.5 py-2.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all resize-none break-words"
                   placeholder="Add your weekly notes..." />
               </div>
 

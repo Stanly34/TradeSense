@@ -309,3 +309,11 @@ export async function changePassword(userId: string, currentPassword: string, ne
     data: { password: hashedPassword },
   })
 }
+
+export async function deleteAvatar(userId: string) {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { profileImage: null },
+  })
+  return excludePassword(user as unknown as Record<string, unknown>)
+}

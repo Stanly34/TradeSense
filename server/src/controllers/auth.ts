@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import * as authService from '../services/auth.js'
+import * as uploadService from '../services/upload.js'
 import { prisma } from '../lib/prisma.js'
 import { sendSuccess, sendError } from '../utils/response.js'
 import { sendPasswordResetEmail, sendOtpEmail } from '../services/email.js'
@@ -178,10 +179,29 @@ export async function changePassword(req: Request, res: Response) {
 export async function uploadAvatar(req: Request, res: Response) {
   try {
     if (!req.file) return sendError(res, 'No image provided', 400)
-    const imageUrl = `/uploads/${req.file.filename}`
-    const user = await authService.uploadAvatar(req.user!.userId, imageUrl)
+    const { url } = await uploadService.uploadImage(req.file.path)
+    const user = await authService.uploadAvatar(req.user!.userId, url)
     return sendSuccess(res, user, 'Avatar uploaded')
   } catch (err) {
     return sendError(res, err instanceof Error ? err.message : 'Avatar upload failed', 500)
+  }
+}
+
+export async function deleteAvatar(req: Request, res: Response) {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user!.userId } })
+    if (!user) return sendError(res, 'User not found', 404)
+
+    if (user.profileImage) {
+      const publicId = user.profileImage.includes('cloudinary')
+        ? user.profileImage.split('/').slice(-2).join('/').replace(/\.[^.]+$/, '')
+        : user.profileImage.split('/').pop() || ''
+      await uploadService.deleteImage(publicId)
+    }
+
+    const updated = await authService.deleteAvatar(req.user!.userId)
+    return sendSuccess(res, updated, 'Avatar removed')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to remove avatar', 500)
   }
 }

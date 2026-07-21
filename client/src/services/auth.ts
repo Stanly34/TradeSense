@@ -95,3 +95,8 @@ export async function uploadAvatar(file: File): Promise<Record<string, unknown>>
   })
   return data.data
 }
+
+export async function deleteAvatar(): Promise<Record<string, unknown>> {
+  const { data } = await api.delete('/auth/avatar')
+  return data.data
+}

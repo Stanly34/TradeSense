@@ -28,5 +28,6 @@ router.post('/reset-password', validate(resetPasswordSchema), authController.res
 router.patch('/profile', authenticate, authController.updateProfile)
 router.patch('/change-password', authenticate, validate(changePasswordSchema), authController.changePassword)
 router.post('/avatar', authenticate, upload.single('image'), authController.uploadAvatar)
+router.delete('/avatar', authenticate, authController.deleteAvatar)
 
 export default router

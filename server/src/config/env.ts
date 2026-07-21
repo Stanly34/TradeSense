@@ -22,8 +22,8 @@ export const env = {
 
   cloudinary: {
     name: process.env.CLOUDINARY_NAME || '',
-    apiKey: process.env.CLOUDINARY_API_KEY || '',
-    apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+    apiKey: process.env.CLOUDINARY_KEY || '',
+    apiSecret: process.env.CLOUDINARY_SECRET || '',
   },
 
   email: {
