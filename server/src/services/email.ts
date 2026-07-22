@@ -32,6 +32,10 @@ function parseSender(from: string): { name: string; email: string } {
 }
 
 export async function sendEmail(to: string, subject: string, html: string) {
+  console.log('[DIAG:EMAIL] brevoApiKey present:', !!env.email.brevoApiKey)
+  console.log('[DIAG:EMAIL] SMTP config - host:', !!env.email.host, 'user:', !!env.email.user)
+  console.log('[DIAG:EMAIL] from address:', env.email.from)
+  console.log('[DIAG:EMAIL] clientUrl:', env.clientUrl)
   try {
     if (env.email.brevoApiKey) {
       const sender = parseSender(env.email.from || 'TradeSense <tradesenseapp@gmail.com>')
@@ -45,6 +49,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
         },
         { headers: { 'api-key': env.email.brevoApiKey, 'Content-Type': 'application/json' }, timeout: 30000 }
       )
+      console.log('[DIAG:EMAIL] Brevo API call succeeded')
     } else {
       const transport = await createTransport()
       const info = await transport.sendMail({
@@ -53,6 +58,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
         subject,
         html,
       })
+      console.log('[DIAG:EMAIL] Nodemailer send succeeded, messageId:', info.messageId)
       const previewUrl = nodemailer.getTestMessageUrl(info)
       if (previewUrl) {
         console.log(`[EMAIL PREVIEW] ${previewUrl}`)
@@ -60,7 +66,11 @@ export async function sendEmail(to: string, subject: string, html: string) {
     }
   } catch (err) {
     const msg = axios.isAxiosError(err) ? err.response?.data?.message || err.message : err instanceof Error ? err.message : String(err)
-    console.error(`[EMAIL ERROR] Failed to send "${subject}" to ${to}:`, msg)
+    console.error(`[DIAG:EMAIL] FAILED to send "${subject}" to ${to}:`, msg)
+    if (axios.isAxiosError(err) && err.response) {
+      console.error('[DIAG:EMAIL] Brevo response status:', err.response.status)
+      console.error('[DIAG:EMAIL] Brevo response body:', JSON.stringify(err.response.data))
+    }
   }
 }
 
