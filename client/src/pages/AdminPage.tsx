@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, Component, type ReactNode } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Shield, X, Plus, Search, User, Mail, Calendar, Activity, Zap, Clock, ChevronRight, CreditCard, Sparkles, Check, Pencil, Trash2, FileText, Image, Tags, Trophy, Brain, CalendarCheck, AlertTriangle, ChevronDown } from 'lucide-react'
+import { Shield, X, Plus, Search, User, Mail, Calendar, Activity, Zap, Clock, ChevronRight, CreditCard, Sparkles, Check, Pencil, Trash2, FileText, Image, Tags, Trophy, Brain, CalendarCheck, AlertTriangle, ChevronDown, RefreshCw } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import * as adminService from '../services/admin'
-import type { AdminUser, AdminPlan, AdminTrade, AdminCoupon, AuditLogEntry, AdminPlatform } from '../services/admin'
+import type { AdminUser, AdminPlan, AdminTrade, AdminCoupon, AuditLogEntry, AdminPlatform, AdminPropFirm, AdminPropFirmInput, AdminPropFirmPlan, AdminPropFirmPrice, AdminRuleRow } from '../services/admin'
 import { Input } from '../components/ui/Input'
 import toast from 'react-hot-toast'
 import { Select } from '../components/ui/Select'
@@ -48,7 +48,7 @@ function AdminPanel({ role }: { role: string }) {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [plans, setPlans] = useState<AdminPlan[]>([])
 
-  const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'platforms' | 'coupons' | 'activity'>('users')
+  const [tab, setTab] = useState<'users' | 'plans' | 'trades' | 'platforms' | 'coupons' | 'propFirms' | 'activity'>('users')
   const [planModal, setPlanModal] = useState<{ mode: 'create' | 'edit'; plan?: AdminPlan } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ type: 'user' | 'plan'; id: string; name: string } | null>(null)
 
@@ -59,6 +59,7 @@ function AdminPanel({ role }: { role: string }) {
     { key: 'activity' as const, label: 'Activity Log' },
     ...(isAdmin ? [{ key: 'platforms' as const, label: 'Platforms' }] : []),
     ...(isAdmin ? [{ key: 'coupons' as const, label: 'Coupons' }] : []),
+    ...(isAdmin ? [{ key: 'propFirms' as const, label: 'Prop Firms' }] : []),
   ]
 
   async function loadCore() {
@@ -137,6 +138,7 @@ function AdminPanel({ role }: { role: string }) {
 
           {isAdmin && <div className={tab === 'platforms' ? '' : 'hidden'}><ErrorBoundary><PlatformsTab /></ErrorBoundary></div>}
           {isAdmin && <div className={tab === 'coupons' ? '' : 'hidden'}><CouponsTab /></div>}
+          {isAdmin && <div className={tab === 'propFirms' ? '' : 'hidden'}><ErrorBoundary><PropFirmsTab /></ErrorBoundary></div>}
           <div className={tab === 'activity' ? '' : 'hidden'}><ActivityLogTab /></div>
         </>
 
@@ -254,7 +256,7 @@ function Dropdown({ value, options, onChange, small }: {
         setPos({ top: r.bottom + 6, left: r.left, width: r.width })
         setOpen(o => !o)
       }}
-        className={`flex items-center gap-1.5 ${small ? 'px-2.5 py-1 text-xs' : 'px-3 py-2 text-sm'} rounded-lg border border-border/80 bg-input/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/40 ${open ? 'border-primary shadow-[0_0_0_2px_rgba(124,58,237,0.12)]' : ''}`}>
+        className={`flex items-center gap-1.5 ${small ? 'px-2.5 py-1 text-xs' : 'px-3 py-2 text-sm'} rounded-lg border border-border/80 bg-input/60 backdrop-blur-sm transition-all duration-200 hover:border-primary/40 ${open ? 'border-primary shadow-[0_0_0_2px_rgba(79,70,229,0.12)]' : ''}`}>
         <span className="text-text-primary">{selected ? selected.label : value}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -895,7 +897,7 @@ function PlanModal({ mode, plan, onClose, onSave }: {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
     if (!form.name.trim()) newErrors.name = 'Name is required'
-    if (form.price === '' || form.price <= 0) newErrors.price = 'Price must be greater than 0'
+    if (form.price === '' || Number(form.price) <= 0) newErrors.price = 'Price must be greater than 0'
     for (const key of limitFields) {
       if (!unlimited[key] && (form[key] === null || form[key] === undefined)) {
         newErrors[key] = 'Set a limit or toggle ∞'
@@ -1018,11 +1020,9 @@ function AdminTradesTab() {
   const [trades, setTrades] = useState<AdminTrade[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
 
   async function load(pageNum: number) {
-    setIsLoading(true)
     try {
       const params: Record<string, string> = {}
       if (search) params.search = search
@@ -1031,7 +1031,6 @@ function AdminTradesTab() {
       setTotalPages(result.totalPages)
       setPage(pageNum)
     } catch {}
-    setIsLoading(false)
   }
 
   useEffect(() => { load(1) }, [])
@@ -1588,13 +1587,14 @@ function CouponModal({ mode, coupon, onClose, onSave }: {
     e.preventDefault()
     const newErrors: Record<string, string> = {}
     if (!form.code.trim()) newErrors.code = 'Code is required'
-    if (!form.discountValue || form.discountValue <= 0) newErrors.discountValue = 'Value must be greater than 0'
-    else if (form.discountType === 'PERCENTAGE' && form.discountValue > 100) newErrors.discountValue = 'Percentage cannot exceed 100'
+    if (!form.discountValue || Number(form.discountValue) <= 0) newErrors.discountValue = 'Value must be greater than 0'
+    else if (form.discountType === 'PERCENTAGE' && Number(form.discountValue) > 100) newErrors.discountValue = 'Percentage cannot exceed 100'
     if (Object.keys(newErrors).length) { setErrors(newErrors); scrollRef.current?.scrollTo(0,0); return }
     setErrors({})
     setSaving(true)
     const data: CouponFormData = {
       ...form,
+      discountValue: Number(form.discountValue),
       expiresAt: form.expiresAt || null,
       maxUsage: form.maxUsage || null,
     }
@@ -1724,6 +1724,462 @@ function ActivityLogTab() {
         </div>
       )}
     </div>
+  )
+}
+
+function PropFirmsTab() {
+  const [firms, setFirms] = useState<AdminPropFirm[]>([])
+  const [modal, setModal] = useState<{ mode: 'create' | 'edit'; firm?: AdminPropFirm } | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<AdminPropFirm | null>(null)
+  const [scanning, setScanning] = useState(false)
+
+  async function load() {
+    try {
+      const p = await adminService.listPropFirms()
+      setFirms(p)
+    } catch {}
+  }
+
+  useEffect(() => { load() }, [])
+
+  function toggleFlag(firm: AdminPropFirm, key: 'isFeatured' | 'isActive' | 'dailyPayouts' | 'noActivationFee' | 'oneTimeFee' | 'instantFunding') {
+    const prev = firm[key] as boolean
+    setFirms((prevList) => prevList.map((x) => x.id === firm.id ? { ...x, [key]: !prev } : x))
+    adminService.updatePropFirm(firm.id, { [key]: !prev }).catch(() => {
+      setFirms((prevList) => prevList.map((x) => x.id === firm.id ? { ...x, [key]: prev } : x))
+    })
+  }
+
+  function toggleAutomation(firm: AdminPropFirm) {
+    const next = firm.codeStatus === 'MANUAL' ? 'OK' : 'MANUAL'
+    setFirms((prevList) => prevList.map((x) => x.id === firm.id ? { ...x, codeStatus: next } : x))
+    adminService.updatePropFirm(firm.id, { codeStatus: next }).catch(() => load())
+  }
+
+  async function scanNow() {
+    setScanning(true)
+    try {
+      const result = await adminService.scanPropFirms()
+      toast.success(`Scan done — ${result.ok} verified, ${result.stale} stale, ${result.changed} changed`)
+      load()
+    } catch (err: any) {
+      const errorObj = err?.response?.data?.error
+      toast.error(typeof errorObj === 'string' ? errorObj : (errorObj?.message || err?.message || 'Failed to scan prop firms'))
+    } finally {
+      setScanning(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className="text-sm text-text-secondary">
+          {firms.length} firms &bull; {firms.filter((f) => f.isFeatured).length} featured &bull; {firms.filter((f) => f.codeStatus === 'OK').length} auto-tracked
+        </p>
+        <div className="flex items-center gap-2">
+          <button onClick={scanNow} disabled={scanning} className="flex items-center gap-2 px-4 py-2.5 bg-input border border-border text-text-primary rounded-xl text-sm font-semibold hover:border-primary/40 transition-all disabled:opacity-50">
+            <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
+            {scanning ? 'Scanning…' : 'Scan Codes Now'}
+          </button>
+          <button onClick={() => setModal({ mode: 'create' })} className="flex items-center gap-2 px-4 py-2.5 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all shadow-lg shadow-primary/20">
+            <Plus className="w-4 h-4" />
+            Add Prop Firm
+          </button>
+        </div>
+      </div>
+
+      <div className="card overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border bg-sidebar/50">
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Firm</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Rating</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Discount / Code</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Auto-Track</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Country</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Featured</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase">Active</th>
+              <th className="px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/50">
+            {firms.length === 0 ? (
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-text-muted">No prop firms found</td></tr>
+            ) : firms.map((f) => (
+              <tr key={f.id} className="hover:bg-hover">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-text-inverse text-xs font-bold" style={{ backgroundColor: f.logoColor }}>
+                      {f.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="font-medium text-text-primary">{f.name}</div>
+                      <div className="text-xs text-text-muted">{f.slug}</div>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-text-secondary">⭐ {f.rating}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5">
+                      {f.discountPercent > 0 && (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-green-500/10 text-green-400">{f.discountPercent}%</span>
+                      )}
+                      {f.promoCode && <span className="text-xs font-semibold px-2 py-0.5 rounded bg-primary/10 text-primary-light">{f.promoCode}</span>}
+                    </div>
+                    {f.codeStatus !== 'MANUAL' && (
+                      <span className={`text-[10px] font-medium ${f.codeStatus === 'OK' ? 'text-green-400' : 'text-amber-400'}`}>
+                        {f.codeStatus === 'OK' && f.lastCodeCheckAt ? `Verified ${new Date(f.lastCodeCheckAt).toLocaleString()}` : 'Re-checking…'}
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <label className="relative inline-flex items-center cursor-pointer" title={f.codeStatus === 'MANUAL' ? 'Automation off — code set manually' : 'Automation on — code re-verified every 6h'}>
+                    <input type="checkbox" checked={f.codeStatus !== 'MANUAL'} onChange={() => toggleAutomation(f)} className="sr-only peer" />
+                    <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                  </label>
+                </td>
+                <td className="px-4 py-3 text-text-secondary">{f.country}</td>
+                <td className="px-4 py-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={f.isFeatured} onChange={() => toggleFlag(f, 'isFeatured')} className="sr-only peer" />
+                    <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                  </label>
+                </td>
+                <td className="px-4 py-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={f.isActive} onChange={(e) => { e.stopPropagation(); toggleFlag(f, 'isActive') }} className="sr-only peer" />
+                    <div className="w-9 h-5 bg-hover rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" />
+                  </label>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2 justify-end">
+                    <button onClick={() => setModal({ mode: 'edit', firm: f })} className="p-1.5 text-text-muted hover:text-primary-light hover:bg-primary/10 rounded-lg transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setConfirmDelete(f)} className="p-1.5 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {modal && (
+        <PropFirmModal
+          mode={modal.mode}
+          firm={modal.firm}
+          onClose={() => setModal(null)}
+          onSave={async (data) => {
+            try {
+              if (modal.mode === 'create') await adminService.createPropFirm(data)
+              else if (modal.firm) await adminService.updatePropFirm(modal.firm.id, data)
+              setModal(null)
+              load()
+            } catch (err: any) {
+              const errorObj = err?.response?.data?.error
+              const msg = typeof errorObj === 'string' ? errorObj : (errorObj?.message || err?.message || 'Failed to save prop firm')
+              toast.error(msg)
+            }
+          }}
+        />
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)}>
+          <div className="bg-elevated rounded-2xl border border-border w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-text-primary">Delete Prop Firm</h2>
+            <p className="text-sm text-text-secondary mt-2">
+              Are you sure you want to delete <strong>{confirmDelete.name}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
+              <button onClick={async () => {
+                try {
+                  await adminService.deletePropFirm(confirmDelete.id)
+                  setConfirmDelete(null)
+                  load()
+                } catch (err: any) {
+                  const errorObj = err?.response?.data?.error
+                  const msg = typeof errorObj === 'string' ? errorObj : (errorObj?.message || err?.message || 'Failed to delete prop firm')
+                  toast.error(msg)
+                }
+              }} className="px-4 py-2 bg-danger text-text-inverse rounded-lg text-sm font-medium hover:bg-danger/80 transition-colors">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function RuleSetEditor({ title, rules, onChange }: {
+  title: string
+  rules: AdminRuleRow[]
+  onChange: (rules: AdminRuleRow[]) => void
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted">{title}</span>
+        <button type="button" onClick={() => onChange([...rules, { label: '', value: '' }])} className="flex items-center gap-1 text-[11px] text-primary-light hover:bg-primary/10 rounded px-1.5 py-0.5 transition-colors">
+          <Plus className="w-3 h-3" /> Add row
+        </button>
+      </div>
+      {rules.map((rule, ri) => (
+        <div key={ri} className="flex items-center gap-2">
+          <input value={rule.label} onChange={(e) => onChange(rules.map((x, i) => i === ri ? { ...x, label: e.target.value } : x))} placeholder="Label (e.g. Profit target)" className="w-40 bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          <input value={rule.value} onChange={(e) => onChange(rules.map((x, i) => i === ri ? { ...x, value: e.target.value } : x))} placeholder="Value (e.g. $5,000)" className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          <button type="button" onClick={() => onChange(rules.filter((_, i) => i !== ri))} className="p-2 text-text-muted hover:text-danger"><X className="w-4 h-4" /></button>
+        </div>
+      ))}
+      {rules.length === 0 && <p className="text-xs text-text-muted">No rows — add the rules shown on the firm's page.</p>}
+    </div>
+  )
+}
+
+function PropFirmModal({ mode, firm, onClose, onSave }: {
+  mode: 'create' | 'edit'
+  firm?: AdminPropFirm
+  onClose: () => void
+  onSave: (data: AdminPropFirmInput) => Promise<void>
+}) {
+  const [name, setName] = useState(firm?.name ?? '')
+  const [slug, setSlug] = useState(firm?.slug ?? '')
+  const [websiteUrl, setWebsiteUrl] = useState(firm?.websiteUrl ?? '')
+  const [description, setDescription] = useState(firm?.description ?? '')
+  const [rating, setRating] = useState(firm?.rating ?? 4.5)
+  const [country, setCountry] = useState(firm?.country ?? 'United States')
+  const [instruments, setInstruments] = useState(firm?.instruments ?? '')
+  const [profitSplit, setProfitSplit] = useState(firm?.profitSplit ?? 80)
+  const [payoutSpeed, setPayoutSpeed] = useState(firm?.payoutSpeed ?? '')
+  const [logoColor, setLogoColor] = useState(firm?.logoColor ?? '#2563eb')
+  const [discountPercent, setDiscountPercent] = useState(firm?.discountPercent ?? 0)
+  const [promoCode, setPromoCode] = useState(firm?.promoCode ?? '')
+  const [promoSourceUrl, setPromoSourceUrl] = useState(firm?.promoSourceUrl ?? '')
+  const [dealEndsAt, setDealEndsAt] = useState(() => {
+    if (!firm?.dealEndsAt) return ''
+    const d = new Date(firm.dealEndsAt)
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  })
+  const [codeStatus, setCodeStatus] = useState(firm?.codeStatus ?? 'MANUAL')
+  const [rulesSourceUrl, setRulesSourceUrl] = useState(firm?.rulesSourceUrl ?? '')
+  const [rulesStatus, setRulesStatus] = useState(firm?.rulesStatus ?? 'MANUAL')
+  const [openRules, setOpenRules] = useState<Record<string, boolean>>({})
+  const [plans, setPlans] = useState<AdminPropFirmPlan[]>(firm?.accountPrices ?? [])
+  const [dailyPayouts, setDailyPayouts] = useState(firm?.dailyPayouts ?? false)
+  const [noActivationFee, setNoActivationFee] = useState(firm?.noActivationFee ?? false)
+  const [oneTimeFee, setOneTimeFee] = useState(firm?.oneTimeFee ?? false)
+  const [instantFunding, setInstantFunding] = useState(firm?.instantFunding ?? false)
+  const [isFeatured, setIsFeatured] = useState(firm?.isFeatured ?? false)
+  const [isActive, setIsActive] = useState(firm?.isActive ?? true)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState(false)
+
+  function slugify(value: string) {
+    return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = 'Name is required'
+    if (!slug.trim()) newErrors.slug = 'Slug is required'
+    if (!websiteUrl.trim()) newErrors.websiteUrl = 'Website URL is required'
+    if (Object.keys(newErrors).length) { setErrors(newErrors); return }
+    setErrors({})
+    setSaving(true)
+    await onSave({
+      name: name.trim(),
+      slug: slugify(slug),
+      websiteUrl: websiteUrl.trim(),
+      description: description.trim() || null,
+      rating: Number(rating) || 0,
+      country: country.trim() || 'United States',
+      instruments: instruments.trim(),
+      profitSplit: Number(profitSplit) || 0,
+      payoutSpeed: payoutSpeed.trim(),
+      logoColor,
+      discountPercent: Number(discountPercent) || 0,
+      promoCode: promoCode.trim() || null,
+      promoSourceUrl: promoSourceUrl.trim() || null,
+      dealEndsAt: dealEndsAt ? new Date(dealEndsAt).toISOString() : null,
+      codeStatus,
+      rulesSourceUrl: rulesSourceUrl.trim() || null,
+      rulesStatus,
+      accountPrices: plans.length ? plans : null,
+      dailyPayouts,
+      noActivationFee,
+      oneTimeFee,
+      instantFunding,
+      isFeatured,
+      isActive,
+    })
+    setSaving(false)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-elevated rounded-2xl border border-border w-full max-w-2xl my-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-text-primary">{mode === 'create' ? 'Add Prop Firm' : 'Edit Prop Firm'}</h2>
+          <button onClick={onClose} className="p-1 text-text-muted hover:text-text-primary"><X className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Name" value={name} onChange={(e) => { setName(e.target.value); if (mode === 'create' && !firm) setSlug(slugify(e.target.value)) }} error={errors.name} placeholder="e.g., Tradeify" />
+            <Input label="Slug" value={slug} onChange={(e) => setSlug(slugify(e.target.value))} error={errors.slug} placeholder="tradeify" />
+          </div>
+          <Input label="Website URL" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} error={errors.websiteUrl} placeholder="https://www.tradeify.com" />
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-text-secondary">Description</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
+              className="w-full bg-input border border-border rounded-xl px-3.5 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-primary/40" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Input label="Rating" type="number" step="0.1" min="0" max="5" value={String(rating)} onChange={(e) => setRating(parseFloat(e.target.value))} placeholder="4.5" />
+            <Input label="Country" value={country} onChange={(e) => setCountry(e.target.value)} />
+            <Input label="Instruments" value={instruments} onChange={(e) => setInstruments(e.target.value)} placeholder="Futures" />
+            <Input label="Profit Split %" type="number" min="0" max="100" value={String(profitSplit)} onChange={(e) => setProfitSplit(parseInt(e.target.value))} />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Input label="Payout Speed" value={payoutSpeed} onChange={(e) => setPayoutSpeed(e.target.value)} placeholder="14 days" />
+            <div className="space-y-1.5">
+              <label className="block text-sm font-medium text-text-secondary">Logo Color</label>
+              <div className="flex items-center gap-2">
+                <input type="color" value={logoColor} onChange={(e) => setLogoColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer bg-input border border-border" />
+                <input value={logoColor} onChange={(e) => setLogoColor(e.target.value)} className="w-full bg-input border border-border rounded-lg px-3.5 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+              </div>
+            </div>
+            <Input label="Discount %" type="number" min="0" max="100" value={String(discountPercent)} onChange={(e) => setDiscountPercent(parseInt(e.target.value))} />
+            <Input label="Promo Code" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} placeholder="TAKE45" />
+          </div>
+          <Input label="Promo Source URL (scanner watches this page)" value={promoSourceUrl} onChange={(e) => setPromoSourceUrl(e.target.value)} placeholder="https://firm.com/promo" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input label="Deal Ends At (leave empty to clear)" type="datetime-local" value={dealEndsAt} onChange={(e) => setDealEndsAt(e.target.value)} />
+            <div className="flex items-end">
+              <button type="button" onClick={() => setDealEndsAt('')} className="w-full bg-input border border-border rounded-xl px-3.5 py-2.5 text-sm text-text-secondary hover:text-text-primary">Clear Deal End</button>
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Select
+              label="Code Automation"
+              value={codeStatus}
+              onChange={setCodeStatus}
+              options={[
+                { value: 'OK', label: 'Auto-track (re-verified every 6h)' },
+                { value: 'MANUAL', label: 'Manual (scanner skips this firm)' },
+                { value: 'STALE', label: 'Stale (keep last known until scan succeeds)' },
+              ]}
+            />
+            <p className="text-xs text-text-muted">When auto-tracking is on and the firm's code changes on its site, this site updates itself automatically.</p>
+          </div>
+          <Input label="Rules Source URL (scanner watches this page)" value={rulesSourceUrl} onChange={(e) => setRulesSourceUrl(e.target.value)} placeholder="https://firm.com/rules" />
+          <div className="space-y-1.5">
+            <Select
+              label="Rules Automation"
+              value={rulesStatus}
+              onChange={setRulesStatus}
+              options={[
+                { value: 'OK', label: 'Auto-track (re-verified every 6h)' },
+                { value: 'MANUAL', label: 'Manual (scanner skips this firm)' },
+                { value: 'STALE', label: 'Stale (keep last known until scan succeeds)' },
+              ]}
+            />
+            <p className="text-xs text-text-muted">The scanner reads the firm's rules tables and updates every size automatically. If it can't parse the page, it keeps the last known rules and flags STALE.</p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-text-secondary">Account Plans & Sizes</label>
+              <button type="button" onClick={() => setPlans([...plans, { plan: '', sizes: [{ size: '', price: 0, discounted: 0 }] }])} className="flex items-center gap-1.5 text-sm text-primary-light hover:bg-primary/10 rounded-lg px-2 py-1 transition-colors">
+                <Plus className="w-4 h-4" /> Add plan
+              </button>
+            </div>
+            {plans.length === 0 && (
+              <p className="text-xs text-text-muted">No plans yet — add an account plan (e.g. "2-Step Evaluation") with its sizes and prices.</p>
+            )}
+            {plans.map((pl, pi) => (
+              <div key={pi} className="rounded-xl border border-border bg-input/50 p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <input value={pl.plan} onChange={(e) => setPlans(plans.map((x, j) => j === pi ? { ...x, plan: e.target.value } : x))} placeholder="Plan name (e.g. 2-Step Evaluation)" className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                  <button type="button" onClick={() => setPlans(plans.filter((_, j) => j !== pi))} className="p-2 text-text-muted hover:text-danger"><Trash2 className="w-4 h-4" /></button>
+                </div>
+                <input value={pl.planDesc ?? ''} onChange={(e) => setPlans(plans.map((x, j) => j === pi ? { ...x, planDesc: e.target.value } : x))} placeholder="One-line description shown under the plan (e.g. 1-step, 90% split, no daily loss)" className="w-full bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                {pl.sizes.map((s, si) => {
+                  const openKey = `${pi}:${si}`
+                  const patchSize = (patch: Partial<AdminPropFirmPrice>) =>
+                    setPlans(plans.map((x, j) => j === pi ? { ...x, sizes: x.sizes.map((y, k) => k === si ? { ...y, ...patch } : y) } : x))
+                  const patchRules = (kind: 'evalRules' | 'fundedRules', rules: AdminRuleRow[]) =>
+                    patchSize({ [kind]: rules } as Partial<AdminPropFirmPrice>)
+                  return (
+                    <div key={si} className="rounded-lg border border-border bg-elevated/50 p-2 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input value={s.size} onChange={(e) => patchSize({ size: e.target.value })} placeholder="50k" className="w-20 bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                        <input type="number" value={String(s.price)} onChange={(e) => patchSize({ price: parseInt(e.target.value) })} placeholder="145" className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                        <input type="number" value={String(s.discounted)} onChange={(e) => patchSize({ discounted: parseInt(e.target.value) })} placeholder="87" className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/40" />
+                        <button type="button" onClick={() => setPlans(plans.map((x, j) => j === pi ? { ...x, sizes: x.sizes.filter((_, k) => k !== si) } : x))} className="p-2 text-text-muted hover:text-danger"><Trash2 className="w-4 h-4" /></button>
+                        <button type="button" onClick={() => setOpenRules({ ...openRules, [openKey]: !openRules[openKey] })} className={`p-2 transition-all ${openRules[openKey] ? 'text-primary rotate-180' : 'text-text-muted hover:text-text-primary'}`} title="Edit rules"><ChevronDown className="w-4 h-4" /></button>
+                      </div>
+                      {openRules[openKey] && (
+                        <div className="space-y-3 pt-1">
+                          <RuleSetEditor
+                            title="Evaluation Rules"
+                            rules={s.evalRules ?? []}
+                            onChange={(rules) => patchRules('evalRules', rules)}
+                          />
+                          <RuleSetEditor
+                            title="Funded Account Rules"
+                            rules={s.fundedRules ?? []}
+                            onChange={(rules) => patchRules('fundedRules', rules)}
+                          />
+                          <p className="text-[11px] text-text-muted">Shown on the public page for this exact size. When rules automation is auto-track, the scanner refreshes these from the firm's site every 6h.</p>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                <button type="button" onClick={() => setPlans(plans.map((x, j) => j === pi ? { ...x, sizes: [...x.sizes, { size: '', price: 0, discounted: 0 }] } : x))} className="flex items-center gap-1.5 text-xs text-primary-light hover:bg-primary/10 rounded-lg px-2 py-1 transition-colors">
+                  <Plus className="w-3.5 h-3.5" /> Add size
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <ToggleRow label="Daily Payouts" value={dailyPayouts} onChange={setDailyPayouts} />
+            <ToggleRow label="No Activation Fee" value={noActivationFee} onChange={setNoActivationFee} />
+            <ToggleRow label="One-Time Fee" value={oneTimeFee} onChange={setOneTimeFee} />
+            <ToggleRow label="Instant Funding" value={instantFunding} onChange={setInstantFunding} />
+            <ToggleRow label="Featured" value={isFeatured} onChange={setIsFeatured} />
+            <ToggleRow label="Active" value={isActive} onChange={setIsActive} />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary transition-colors">Cancel</button>
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-primary text-text-inverse rounded-xl text-sm font-semibold hover:bg-primary-dark transition-all disabled:opacity-50">
+              {saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Save'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" onClick={() => onChange(!value)} className={`flex items-center justify-between px-3 py-2.5 rounded-lg border text-sm transition-colors ${value ? 'bg-primary/10 border-primary/30 text-text-primary' : 'bg-input border-border text-text-secondary hover:bg-hover'}`}>
+      <span className="font-medium">{label}</span>
+      <span className={`w-8 h-4.5 rounded-full transition-colors ${value ? 'bg-primary' : 'bg-hover'}`} />
+    </button>
   )
 }
 

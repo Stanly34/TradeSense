@@ -42,7 +42,7 @@ export async function getUserPlan(userId: string) {
         entryTime: { gte: startOfToday },
       },
     }),
-    prisma.template.count({
+    prisma.account.count({
       where: { userId },
     }),
     prisma.tag.count({

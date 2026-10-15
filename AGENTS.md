@@ -35,7 +35,7 @@
 - `--env-file=.env` required in dev script
 - Prisma at `server/prisma/schema.prisma`
 - Vite proxies `/api` and `/uploads` → `localhost:5000`
-- Admin credentials: `admin@tradesense.demo` / `Admin123!`
+- Admin credentials: `tradesenseapp@gmail.com` / `Admin123!` (demo user: `demo@tradesense.app` / `Demo123!`)
 - Gmail SMTP configured: `tradesenseapp@gmail.com` with App Password in `.env`
 
 ## Client quirks

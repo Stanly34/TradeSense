@@ -14,7 +14,7 @@ module.exports = {
       name: 'tradesense-client',
       cwd: './client',
       script: 'node',
-      args: './node_modules/vite/bin/vite.js --host',
+      args: '../node_modules/vite/bin/vite.js --host',
       exec_mode: 'fork',
       env: {
         PORT: 5173,

@@ -9,3 +9,8 @@ uploads/
 server.err
 check_*.mjs
 list_*.mjs
+*.db
+*.log.err
+lint_*.txt
+tsc_*.txt
+tmp.txt

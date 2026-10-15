@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { User, Bell, Save, Camera, XCircle, Mail, Loader2, Shield } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
+import { PageHeader } from '../components/ui/PageHeader'
 import { usePlan } from '../hooks/usePlan'
 import * as authService from '../services/auth'
 import * as notificationService from '../services/notifications'
@@ -103,10 +104,7 @@ export function SettingsPage() {
 
   return (
     <div className="p-6 lg:p-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
-        <p className="text-text-secondary mt-1">Manage your account and preferences.</p>
-      </div>
+      <PageHeader title="Settings" subtitle="Make it yours." />
 
       <div className="flex gap-1 card p-1 w-fit flex-wrap">
         {tabs.map((tab) => {
@@ -203,7 +201,7 @@ export function SettingsPage() {
               <input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all"
+                className="w-full px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.2)] transition-all"
               />
             </div>
             <div>
@@ -213,7 +211,7 @@ export function SettingsPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={user?.role !== 'ADMIN'}
                 className={`w-full px-3 py-2 text-sm bg-input border rounded-lg placeholder:text-text-muted focus:outline-none transition-all ${
-                  user?.role !== 'ADMIN' ? 'text-text-muted cursor-not-allowed border-border' : usernameError ? 'text-text-primary border-danger' : 'text-text-primary border-border focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)]'
+                  user?.role !== 'ADMIN' ? 'text-text-muted cursor-not-allowed border-border' : usernameError ? 'text-text-primary border-danger' : 'text-text-primary border-border focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.2)]'
                 }`}
               />
               {user?.role !== 'ADMIN' && <p className="text-xs text-text-muted mt-1">Username cannot be changed</p>}

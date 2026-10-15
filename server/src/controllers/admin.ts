@@ -2,6 +2,9 @@ import { Request, Response } from 'express'
 import * as adminService from '../services/admin.js'
 import * as couponService from '../services/coupon.js'
 import * as platformService from '../services/platform.js'
+import * as propFirmService from '../services/propFirm.js'
+import { scanAllPropFirms } from '../services/promoScanner.js'
+import { scanAllFirmsRules } from '../services/rulesScanner.js'
 import * as auditLogService from '../services/auditLog.js'
 import { sendSuccess, sendError } from '../utils/response.js'
 
@@ -256,5 +259,53 @@ export async function getAuditLogs(req: Request, res: Response) {
     return sendSuccess(res, result)
   } catch {
     return sendError(res, 'Failed to list audit logs', 500)
+  }
+}
+
+export async function listPropFirms(_req: Request, res: Response) {
+  try {
+    const firms = await propFirmService.listAllPropFirms()
+    return sendSuccess(res, firms)
+  } catch {
+    return sendError(res, 'Failed to list prop firms', 500)
+  }
+}
+
+export async function createPropFirm(req: Request, res: Response) {
+  try {
+    const firm = await propFirmService.createPropFirm(req.body)
+    await auditLogService.logAction(req.user?.userId ?? '', 'PROP_FIRM_CREATED', 'PROP_FIRM', firm.id, { name: firm.name })
+    return sendSuccess(res, firm, 'Prop firm created', 201)
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to create prop firm', 400)
+  }
+}
+
+export async function updatePropFirm(req: Request, res: Response) {
+  try {
+    const firm = await propFirmService.updatePropFirm(req.params.id, req.body)
+    await auditLogService.logAction(req.user?.userId ?? '', 'PROP_FIRM_EDITED', 'PROP_FIRM', firm.id)
+    return sendSuccess(res, firm, 'Prop firm updated')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to update prop firm', 400)
+  }
+}
+
+export async function deletePropFirm(req: Request, res: Response) {
+  try {
+    await propFirmService.deletePropFirm(req.params.id)
+    await auditLogService.logAction(req.user?.userId ?? '', 'PROP_FIRM_DELETED', 'PROP_FIRM', req.params.id)
+    return sendSuccess(res, null, 'Prop firm deleted')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to delete prop firm', 400)
+  }
+}
+
+export async function scanPropFirms(_req: Request, res: Response) {
+  try {
+    const [promo, rules] = await Promise.all([scanAllPropFirms(), scanAllFirmsRules()])
+    return sendSuccess(res, { ...promo, rules }, 'Promo code and rules scan complete')
+  } catch (err) {
+    return sendError(res, err instanceof Error ? err.message : 'Failed to scan prop firms', 500)
   }
 }

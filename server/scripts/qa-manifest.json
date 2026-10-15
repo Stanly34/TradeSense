@@ -1,0 +1,7113 @@
+[
+ {
+  "id": "2be48972-f7c4-406b-b513-7d50287b7e54",
+  "name": "FTMO FTMO Challenge (1-Step) 10k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (1-Step)",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "1d601e50-d386-41a9-bc90-d7d14791a611",
+  "name": "FTMO FTMO Challenge (1-Step) 25k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (1-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "e64b9928-6d46-49ae-ab9c-2d9a0172e20d",
+  "name": "FTMO FTMO Challenge (1-Step) 50k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (1-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "1eaf0614-1e36-4b32-826b-20ccc24a1521",
+  "name": "FTMO FTMO Challenge (1-Step) 100k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (1-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "20e1285c-8621-4063-aa5c-b1e67314bf5f",
+  "name": "FTMO FTMO Challenge (1-Step) 200k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (1-Step)",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "4c50bb5c-2c46-4934-ac32-1a57043484d9",
+  "name": "FTMO FTMO Challenge (2-Step) 10k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (2-Step)",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4 (both steps)"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "1b324002-be39-4c5f-a624-4200d39d33a8",
+  "name": "FTMO FTMO Challenge (2-Step) 25k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (2-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4 (both steps)"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "848f8095-3afa-4a93-b1d7-4c4aeef19a4a",
+  "name": "FTMO FTMO Challenge (2-Step) 50k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (2-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4 (both steps)"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "f38c49ef-3327-4cfc-b477-2a1b867931fd",
+  "name": "FTMO FTMO Challenge (2-Step) 100k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (2-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4 (both steps)"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "454aceae-642c-45eb-85dc-5e84516b303f",
+  "name": "FTMO FTMO Challenge (2-Step) 200k",
+  "firm": "FTMO",
+  "slug": "ftmo",
+  "plan": "FTMO Challenge (2-Step)",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "4 (both steps)"
+   },
+   {
+    "label": "Time limit",
+    "value": "Unlimited"
+   }
+  ]
+ },
+ {
+  "id": "6bd25d49-6bb8-4bd6-994d-069015ccd678",
+  "name": "Tradeify Growth Evaluation 25k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Growth Evaluation",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$600 (increases to $1,000 at 6% profit)",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$600 (increases to $1,000 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "7883ae8f-b879-46af-a2c1-c507e84f7842",
+  "name": "Tradeify Growth Evaluation 50k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Growth Evaluation",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$1,250 (increases to $2,000 at 6% profit)",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,250 (increases to $2,000 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4"
+   }
+  ]
+ },
+ {
+  "id": "402b9c49-f14d-4159-9002-1b76e9d90b31",
+  "name": "Tradeify Growth Evaluation 100k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Growth Evaluation",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,500 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$2,500 (increases to $3,500 at 6% profit)",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,500 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$2,500 (increases to $3,500 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "8"
+   }
+  ]
+ },
+ {
+  "id": "0aab5d7b-4135-4930-a881-1d72d2fc1cba",
+  "name": "Tradeify Growth Evaluation 150k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Growth Evaluation",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$5,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$3,750 (increases to $5,000 at 6% profit)",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$5,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$3,750 (increases to $5,000 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "12"
+   }
+  ]
+ },
+ {
+  "id": "abec1288-bdbb-49fb-be4e-3b37c511d678",
+  "name": "Tradeify Select Evaluation 25k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Select Evaluation",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None (eval); Flex: None, Daily: $500 (funded)",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None (eval); Flex: None, Daily: $500 (funded)"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4"
+   }
+  ]
+ },
+ {
+  "id": "db047b6b-8405-44ad-ae4e-50d0d3b3cd28",
+  "name": "Tradeify Select Evaluation 50k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Select Evaluation",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None (eval); Flex: None, Daily: $1,000 (funded)",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None (eval); Flex: None, Daily: $1,000 (funded)"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "6"
+   }
+  ]
+ },
+ {
+  "id": "7d5c2751-0912-4ad2-b2dd-0b87f6bc53b3",
+  "name": "Tradeify Select Evaluation 100k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Select Evaluation",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None (eval); Flex: None, Daily: $1,250 (funded)",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None (eval); Flex: None, Daily: $1,250 (funded)"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "10"
+   }
+  ]
+ },
+ {
+  "id": "59163748-a8f3-4313-b322-d1d335e5841b",
+  "name": "Tradeify Select Evaluation 150k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Select Evaluation",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None (eval); Flex: None, Daily: $1,750 (funded)",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None (eval); Flex: None, Daily: $1,750 (funded)"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "15"
+   }
+  ]
+ },
+ {
+  "id": "1b153f54-f099-4aaf-b9f9-b2f3e0d107b0",
+  "name": "Tradeify Lightning Evaluation 25k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Lightning Evaluation",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$600 (increases to $1,000 at 6% profit)",
+  "profitTarget": "Progressive — $1,500 first goal",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "Progressive — $1,500 first goal"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$600 (increases to $1,000 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 per level"
+   },
+   {
+    "label": "Max contracts",
+    "value": "2"
+   }
+  ]
+ },
+ {
+  "id": "98a6d880-ba83-4437-adfd-8cac83effb1d",
+  "name": "Tradeify Lightning Evaluation 50k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Lightning Evaluation",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$1,250 (increases to $2,000 at 6% profit)",
+  "profitTarget": "Progressive — $3,000 first goal",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "Progressive — $3,000 first goal"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,250 (increases to $2,000 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 per level"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4"
+   }
+  ]
+ },
+ {
+  "id": "57b28d15-f8d3-4905-8807-5d4ff9b2e8a0",
+  "name": "Tradeify Lightning Evaluation 100k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Lightning Evaluation",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$2,500 (increases to $3,500 at 6% profit)",
+  "profitTarget": "Progressive — $6,000 first goal",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "Progressive — $6,000 first goal"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$2,500 (increases to $3,500 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 per level"
+   },
+   {
+    "label": "Max contracts",
+    "value": "8"
+   }
+  ]
+ },
+ {
+  "id": "42aea3a1-e30d-493d-ac27-aa7f9b82a1b1",
+  "name": "Tradeify Lightning Evaluation 150k",
+  "firm": "Tradeify",
+  "slug": "tradeify",
+  "plan": "Lightning Evaluation",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$5,250 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$3,000 (increases to $5,000 at 6% profit)",
+  "profitTarget": "Progressive — $9,000 first goal",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "Progressive — $9,000 first goal"
+   },
+   {
+    "label": "Max loss",
+    "value": "$5,250 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$3,000 (increases to $5,000 at 6% profit)"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 per level"
+   },
+   {
+    "label": "Max contracts",
+    "value": "13"
+   }
+  ]
+ },
+ {
+  "id": "1e995308-7c0a-456d-8805-5ef46697bc58",
+  "name": "The5ers High Stakes Challenge 2.5k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "2.5k",
+  "sizeNum": 2500,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f1f2aec9-d8e7-4fdd-903a-9e2d54133b24",
+  "name": "The5ers High Stakes Challenge 5k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "3d1b7175-c7aa-4a04-8f7d-5f34d3f10c53",
+  "name": "The5ers High Stakes Challenge 10k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "59dcd4d7-172d-47d4-af21-f298586d03be",
+  "name": "The5ers High Stakes Challenge 25k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "8cc33270-2574-42ab-ac41-90d3f52b57f4",
+  "name": "The5ers High Stakes Challenge 50k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "c2dc2037-8b48-41a0-a117-b4312cb5478a",
+  "name": "The5ers High Stakes Challenge 100k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "ba6aa2f6-03b6-4d8f-9142-3007f83d069f",
+  "name": "The5ers High Stakes Challenge 200k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "High Stakes Challenge",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "3% (EOD trailing)",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "dc72b882-401f-463b-b79d-327a6ec6595f",
+  "name": "The5ers Hyper Growth Fund 5k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "Hyper Growth Fund",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "6%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 profitable days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "c4828cf8-48cb-4e1a-a96f-3536888af545",
+  "name": "The5ers Hyper Growth Fund 10k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "Hyper Growth Fund",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "6%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 profitable days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "27fac54c-302d-467b-a431-f36033450457",
+  "name": "The5ers Hyper Growth Fund 20k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "Hyper Growth Fund",
+  "size": "20k",
+  "sizeNum": 20000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "6%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 profitable days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "73c2a101-257c-4c5f-9252-f9349962b3a2",
+  "name": "The5ers Hyper Growth Fund 50k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "Hyper Growth Fund",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "6%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 profitable days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "9d914c2f-733c-4d9b-877a-c244618ca3be",
+  "name": "The5ers Summer Plan 100k",
+  "firm": "The5ers",
+  "slug": "the5ers",
+  "plan": "Summer Plan",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "10%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "362c28ee-4ddc-400c-bb52-0c2b0046ef47",
+  "name": "FundedNext USD Stellar 2-Step 6k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 2-Step",
+  "size": "6k",
+  "sizeNum": 6000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial balance",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "3fb737e5-69f7-4c0f-a946-f5683131fdfb",
+  "name": "FundedNext USD Stellar 2-Step 15k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 2-Step",
+  "size": "15k",
+  "sizeNum": 15000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial balance",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "8bc8d892-e6d4-4eed-af89-3e3f354168e9",
+  "name": "FundedNext USD Stellar 2-Step 25k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 2-Step",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial balance",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "a1ea51cc-88cb-4b2b-a680-079b89e0506a",
+  "name": "FundedNext USD Stellar 2-Step 50k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 2-Step",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial balance",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "4001e009-9416-4fa2-9a77-9fb0ffe7e3f1",
+  "name": "FundedNext USD Stellar 2-Step 100k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 2-Step",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial balance",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "e4cf813e-18c6-4748-ac0e-9440d7ff393c",
+  "name": "FundedNext USD Stellar 2-Step 200k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 2-Step",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial balance",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "52848e37-35a6-4a1e-b416-6b6dca0cc227",
+  "name": "FundedNext USD Stellar 1-Step 6k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 1-Step",
+  "size": "6k",
+  "sizeNum": 6000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial balance",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "316a1f16-3f53-4693-abb4-e3668bc46ad5",
+  "name": "FundedNext USD Stellar 1-Step 15k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 1-Step",
+  "size": "15k",
+  "sizeNum": 15000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial balance",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "52dfcbc5-db1b-42c7-97b9-6abcc6b05646",
+  "name": "FundedNext USD Stellar 1-Step 25k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 1-Step",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial balance",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "45ceae0b-f097-4bf7-8146-497f57b9b545",
+  "name": "FundedNext USD Stellar 1-Step 50k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 1-Step",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial balance",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "76db521a-bea6-42ce-bb57-2775cd2beaa2",
+  "name": "FundedNext USD Stellar 1-Step 100k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 1-Step",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial balance",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "7950bacf-e817-4b32-afa5-870b51fe3686",
+  "name": "FundedNext USD Stellar 1-Step 200k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar 1-Step",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial balance",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "439a7a42-f1a3-44b9-b359-50ecb1b90264",
+  "name": "FundedNext USD Stellar Lite 5k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Lite",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "8% trailing — locks to initial balance",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "4%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "18fc8216-1e6a-4483-8052-5326b76291db",
+  "name": "FundedNext USD Stellar Lite 10k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Lite",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "8% trailing — locks to initial balance",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "4%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "e4226430-4fb3-403c-ba9c-548274299a70",
+  "name": "FundedNext USD Stellar Lite 25k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Lite",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "8% trailing — locks to initial balance",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "4%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "e308b366-148e-490e-a164-fd5b26a773f9",
+  "name": "FundedNext USD Stellar Lite 50k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Lite",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "8% trailing — locks to initial balance",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "4%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "56393b8d-048f-44f0-972e-82bad5177542",
+  "name": "FundedNext USD Stellar Lite 100k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Lite",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "8% trailing — locks to initial balance",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "4%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "71853440-d389-4c89-9f78-ac4899a7cc4c",
+  "name": "FundedNext USD Stellar Lite 200k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Lite",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "8% trailing — locks to initial balance",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "4%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8% trailing — locks to initial balance"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "ae451661-f400-42d4-998a-3e3c12b91004",
+  "name": "FundedNext USD Stellar Instant 2k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Instant",
+  "size": "2k",
+  "sizeNum": 2000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "Trailing",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "bde2fca1-04e6-4c56-b6bc-55e715dc0ab8",
+  "name": "FundedNext USD Stellar Instant 5k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Instant",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "Trailing",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "4698f625-fd29-44a5-a86d-1d6f308e3c51",
+  "name": "FundedNext USD Stellar Instant 10k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Instant",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "Trailing",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "84f8e1be-9380-4932-9f4f-c2d8a8c3dddc",
+  "name": "FundedNext USD Stellar Instant 20k",
+  "firm": "FundedNext USD",
+  "slug": "fundednext-usd",
+  "plan": "Stellar Instant",
+  "size": "20k",
+  "sizeNum": 20000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "Trailing",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "c3c9bb71-84bb-412e-a440-ab12074c09ae",
+  "name": "FundedNext Futures Rapid Pro (1-Step) 25k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Rapid Pro (1-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "2 mini / 20 micro"
+   }
+  ]
+ },
+ {
+  "id": "c54cd0a9-1068-4690-9f4d-5152ac4c0388",
+  "name": "FundedNext Futures Rapid Pro (1-Step) 50k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Rapid Pro (1-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4 mini / 40 micro"
+   }
+  ]
+ },
+ {
+  "id": "5fe11095-bf83-4449-94bb-1ed4b6270e73",
+  "name": "FundedNext Futures Rapid Pro (1-Step) 100k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Rapid Pro (1-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "5% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$5,000 (5%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$5,000 (5%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "6 mini / 60 micro"
+   }
+  ]
+ },
+ {
+  "id": "b8526fa0-e545-4c68-97dc-90e05191209e",
+  "name": "FundedNext Futures Rapid Daily (1-Step) 25k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Rapid Daily (1-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "$500",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$500"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "2 mini / 20 micro"
+   }
+  ]
+ },
+ {
+  "id": "5a16f847-4236-49cd-9071-26a2a01be15c",
+  "name": "FundedNext Futures Rapid Daily (1-Step) 50k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Rapid Daily (1-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "6% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "$1,000",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,000"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4 mini / 40 micro"
+   }
+  ]
+ },
+ {
+  "id": "39536d02-dd1a-4a55-865e-f758618ed279",
+  "name": "FundedNext Futures Rapid Daily (1-Step) 100k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Rapid Daily (1-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "5% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "$1,250",
+  "profitTarget": "$5,000 (5%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$5,000 (5%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,250"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   },
+   {
+    "label": "Max contracts",
+    "value": "6 mini / 60 micro"
+   }
+  ]
+ },
+ {
+  "id": "d65504f9-6c87-4743-8759-95a9ae4ab9cc",
+  "name": "FundedNext Futures Flex (1-Step) 50k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Flex (1-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "5% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$2,500 (5%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$2,500 (5%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "3 mini / 30 micro"
+   }
+  ]
+ },
+ {
+  "id": "b2d92a88-164a-4657-8e6a-8c6c9496016b",
+  "name": "FundedNext Futures Flex (1-Step) 100k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Flex (1-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "5% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$5,000 (5%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$5,000 (5%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "5 mini / 50 micro"
+   }
+  ]
+ },
+ {
+  "id": "36ed6d83-cf6d-4fc0-a166-afbc84f360f4",
+  "name": "FundedNext Futures Flex (1-Step) 150k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Flex (1-Step)",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "5.3% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$8,000 (5.3%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$8,000 (5.3%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "5.3% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "8 mini / 80 micro"
+   }
+  ]
+ },
+ {
+  "id": "3b11107b-e084-49fc-802e-62183c84b8d0",
+  "name": "FundedNext Futures Legacy 25k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Legacy",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$1,250",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,250"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 benchmark days"
+   },
+   {
+    "label": "Max contracts",
+    "value": "2 mini / 20 micro"
+   }
+  ]
+ },
+ {
+  "id": "86827fc0-5969-4da3-aefa-ce1e6632f4da",
+  "name": "FundedNext Futures Legacy 50k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Legacy",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$3,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 benchmark days"
+   },
+   {
+    "label": "Max contracts",
+    "value": "3 mini / 30 micro"
+   }
+  ]
+ },
+ {
+  "id": "0d1c87ca-ebe1-4faf-8725-e00d1b9fb9e4",
+  "name": "FundedNext Futures Legacy 100k",
+  "firm": "FundedNext Futures",
+  "slug": "fundednext-futures",
+  "plan": "Legacy",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "10% trailing — locks to initial + $100 after 1st payout",
+  "maxDaily": "None",
+  "profitTarget": "$6,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% trailing — locks to initial + $100 after 1st payout"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "40% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 benchmark days"
+   },
+   {
+    "label": "Max contracts",
+    "value": "5 mini / 50 micro"
+   }
+  ]
+ },
+ {
+  "id": "e06056b7-f4ff-459a-b283-65f4e81a06c1",
+  "name": "Lucid Trading LucidPro 25k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidPro",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$1,250",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,250"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "1ddda0c8-8e2c-4725-9825-aac5390fa9cf",
+  "name": "Lucid Trading LucidPro 50k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidPro",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$3,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "6a2df384-b3d2-4642-9c6b-9b1c4614b4ff",
+  "name": "Lucid Trading LucidPro 100k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidPro",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$6,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "2bd582dc-22a1-4230-9fce-923b99170cc5",
+  "name": "Lucid Trading LucidPro 150k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidPro",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$9,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "8feaa49d-59f1-44ed-8b64-22078e12ec3a",
+  "name": "Lucid Trading LucidFlex 25k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidFlex",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$1,250",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,250"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "6f48b94d-aa2b-4f51-b077-da85f35aec0f",
+  "name": "Lucid Trading LucidFlex 50k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidFlex",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$3,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "4ae00bb6-a0be-4205-890f-e26ecc4a0897",
+  "name": "Lucid Trading LucidFlex 100k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidFlex",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$6,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "30c6b153-9832-4045-9b83-afae8f5b5c07",
+  "name": "Lucid Trading LucidFlex 150k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidFlex",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "$9,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "73282e8b-50d7-400a-85fd-23f328be9f3a",
+  "name": "Lucid Trading LucidDaily 25k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDaily",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$700",
+  "profitTarget": "$1,250",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,250"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$700"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "57cd95ac-91cb-452e-957b-cbe15a0cfaac",
+  "name": "Lucid Trading LucidDaily 50k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDaily",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$1,200",
+  "profitTarget": "$3,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,200"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "5dfdd6f8-adbc-48db-88ea-01e7a985309b",
+  "name": "Lucid Trading LucidDaily 100k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDaily",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$1,800",
+  "profitTarget": "$6,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,800"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "ee5fd5f4-b618-46e5-8037-a535a8ce16c9",
+  "name": "Lucid Trading LucidDaily 150k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDaily",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "$2,700",
+  "profitTarget": "$9,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$2,700"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1"
+   }
+  ]
+ },
+ {
+  "id": "faf11468-05b4-4abc-a141-b69ec2e4ffea",
+  "name": "Lucid Trading LucidDirect 25k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDirect",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "20% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "10"
+   }
+  ]
+ },
+ {
+  "id": "fa4371b8-3c34-46c8-a625-6fec362aca89",
+  "name": "Lucid Trading LucidDirect 50k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDirect",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "20% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "10"
+   }
+  ]
+ },
+ {
+  "id": "26c64fe7-f993-4fbc-be69-959d180344eb",
+  "name": "Lucid Trading LucidDirect 100k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDirect",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "20% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "10"
+   }
+  ]
+ },
+ {
+  "id": "9c67fc0a-cb5b-41dc-83ba-9d889526f812",
+  "name": "Lucid Trading LucidDirect 150k",
+  "firm": "Lucid Trading",
+  "slug": "lucid-trading",
+  "plan": "LucidDirect",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing — locks to balance at $100 above start",
+  "maxDaily": "None",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing — locks to balance at $100 above start"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "20% of profit"
+   },
+   {
+    "label": "Min trading days",
+    "value": "10"
+   }
+  ]
+ },
+ {
+  "id": "73de3927-623a-447f-8c9c-61a45b54ff25",
+  "name": "Take Profit Trader Test (1-Step) 25k",
+  "firm": "Take Profit Trader",
+  "slug": "takeprofit-trader",
+  "plan": "Test (1-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,500 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,500 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "3"
+   }
+  ]
+ },
+ {
+  "id": "38466900-ee4f-4d1e-a767-17fc3eab94b0",
+  "name": "Take Profit Trader Test (1-Step) 50k",
+  "firm": "Take Profit Trader",
+  "slug": "takeprofit-trader",
+  "plan": "Test (1-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "6"
+   }
+  ]
+ },
+ {
+  "id": "c3580b3f-82d6-4774-9c90-5f3aff6b4494",
+  "name": "Take Profit Trader Test (1-Step) 75k",
+  "firm": "Take Profit Trader",
+  "slug": "takeprofit-trader",
+  "plan": "Test (1-Step)",
+  "size": "75k",
+  "sizeNum": 75000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$4,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$4,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "9"
+   }
+  ]
+ },
+ {
+  "id": "700aaa93-0ff6-4d4a-8838-49ee6cf9794f",
+  "name": "Take Profit Trader Test (1-Step) 100k",
+  "firm": "Take Profit Trader",
+  "slug": "takeprofit-trader",
+  "plan": "Test (1-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "12"
+   }
+  ]
+ },
+ {
+  "id": "fc4c687b-7b36-4d8c-9547-66821ea257e4",
+  "name": "Take Profit Trader Test (1-Step) 150k",
+  "firm": "Take Profit Trader",
+  "slug": "takeprofit-trader",
+  "plan": "Test (1-Step)",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% of profit in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3"
+   },
+   {
+    "label": "Max contracts",
+    "value": "15"
+   }
+  ]
+ },
+ {
+  "id": "a082d20e-c622-42c2-a7e9-f85885bdf2d3",
+  "name": "Apex Trader Funding 4.0 Intraday Trail 25k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 Intraday Trail",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "STATIC",
+  "maxTotal": "None — intraday equity only",
+  "maxDaily": "None",
+  "profitTarget": "$1,500",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500"
+   },
+   {
+    "label": "Max loss",
+    "value": "None — intraday equity only"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4"
+   }
+  ]
+ },
+ {
+  "id": "e063b453-6473-49db-8639-c064dc71c1c0",
+  "name": "Apex Trader Funding 4.0 Intraday Trail 50k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 Intraday Trail",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "STATIC",
+  "maxTotal": "None — intraday equity only",
+  "maxDaily": "None",
+  "profitTarget": "$3,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "None — intraday equity only"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "6"
+   }
+  ]
+ },
+ {
+  "id": "c44d98d8-14a0-468f-bedd-e4c27a4bbfbd",
+  "name": "Apex Trader Funding 4.0 Intraday Trail 100k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 Intraday Trail",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "STATIC",
+  "maxTotal": "None — intraday equity only",
+  "maxDaily": "None",
+  "profitTarget": "$6,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "None — intraday equity only"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "8"
+   }
+  ]
+ },
+ {
+  "id": "139659a5-a520-42ac-b04b-04c4a858896d",
+  "name": "Apex Trader Funding 4.0 Intraday Trail 150k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 Intraday Trail",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "STATIC",
+  "maxTotal": "None — intraday equity only",
+  "maxDaily": "None",
+  "profitTarget": "$9,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "None — intraday equity only"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "12"
+   }
+  ]
+ },
+ {
+  "id": "44a85ac2-5ac3-4006-be75-ea9abe9b3b17",
+  "name": "Apex Trader Funding 4.0 EOD Trail 25k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 EOD Trail",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing",
+  "maxDaily": "$500",
+  "profitTarget": "$1,500",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$500"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "4"
+   }
+  ]
+ },
+ {
+  "id": "3ac7f1b2-ed22-40cb-a091-f9083e49594e",
+  "name": "Apex Trader Funding 4.0 EOD Trail 50k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 EOD Trail",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing",
+  "maxDaily": "$1,000",
+  "profitTarget": "$3,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,000"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "6"
+   }
+  ]
+ },
+ {
+  "id": "cda0fba5-032a-47bf-84c8-ac5f568cdffb",
+  "name": "Apex Trader Funding 4.0 EOD Trail 100k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 EOD Trail",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing",
+  "maxDaily": "$1,500",
+  "profitTarget": "$6,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$1,500"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "8"
+   }
+  ]
+ },
+ {
+  "id": "52646fa7-2936-48d4-86a5-aad9543484d0",
+  "name": "Apex Trader Funding 4.0 EOD Trail 150k",
+  "firm": "Apex Trader Funding",
+  "slug": "apex-trader-funding",
+  "plan": "4.0 EOD Trail",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,000 EOD trailing",
+  "maxDaily": "$2,000",
+  "profitTarget": "$9,000",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "$2,000"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Max contracts",
+    "value": "12"
+   }
+  ]
+ },
+ {
+  "id": "287ac9b1-9255-443b-984a-b8de460681f5",
+  "name": "AquaFunded 2-Step Evaluation 5k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "2-Step Evaluation",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "a37be37a-0791-41d2-87a0-9b1fdb1b4d5c",
+  "name": "AquaFunded 2-Step Evaluation 10k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "2-Step Evaluation",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "95bcb09e-fcbe-4861-89c1-208b93fc8462",
+  "name": "AquaFunded 2-Step Evaluation 25k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "2-Step Evaluation",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "7ac0107a-4785-4b6a-a001-813348737a51",
+  "name": "AquaFunded 2-Step Evaluation 50k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "2-Step Evaluation",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "0b19100c-4b65-4f55-9c47-43ad91f57120",
+  "name": "AquaFunded 2-Step Evaluation 100k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "2-Step Evaluation",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "970fab6f-706a-40a2-a387-3e5c96268ccc",
+  "name": "AquaFunded 2-Step Evaluation 200k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "2-Step Evaluation",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "4%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "80336fc8-1e65-4969-8652-eed9b2fdf672",
+  "name": "AquaFunded 1-Step Evaluation 5k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "1-Step Evaluation",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "3a7d608d-d350-48dc-aba0-80abd7be64b6",
+  "name": "AquaFunded 1-Step Evaluation 10k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "1-Step Evaluation",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "bf523cc9-c8ce-42cb-b99a-32e42033e5e5",
+  "name": "AquaFunded 1-Step Evaluation 25k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "1-Step Evaluation",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "9ef1c1dc-0d2b-4005-b9ca-382dbd9cf402",
+  "name": "AquaFunded 1-Step Evaluation 50k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "1-Step Evaluation",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "e682de6e-f777-455e-b604-14d618715efc",
+  "name": "AquaFunded 1-Step Evaluation 100k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "1-Step Evaluation",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "3%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f5cdbf52-d69d-4522-a501-a11d3bbff9c2",
+  "name": "AquaFunded Instant Funding 2.5k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "Instant Funding",
+  "size": "2.5k",
+  "sizeNum": 2500,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "Dollar-based",
+  "maxDaily": "Dollar-based",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "28643cf7-bae2-4560-a527-20fac880f857",
+  "name": "AquaFunded Instant Funding 5k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "Instant Funding",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "Dollar-based",
+  "maxDaily": "Dollar-based",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "ac6482a2-e2fd-4be3-8c84-844e7883bebf",
+  "name": "AquaFunded Instant Funding 10k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "Instant Funding",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "Dollar-based",
+  "maxDaily": "Dollar-based",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "3c2c091a-f24b-4709-aee0-7f7fc8ad8748",
+  "name": "AquaFunded Instant Funding 25k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "Instant Funding",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "Dollar-based",
+  "maxDaily": "Dollar-based",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "cd24c4e6-5df9-46b0-9cb6-4617055f6e9b",
+  "name": "AquaFunded Instant Funding 50k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "Instant Funding",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "Dollar-based",
+  "maxDaily": "Dollar-based",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "862dbeb1-dceb-4095-a65b-7adbf8a6f41c",
+  "name": "AquaFunded Instant Funding 100k",
+  "firm": "AquaFunded",
+  "slug": "aquafunded",
+  "plan": "Instant Funding",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "Dollar-based",
+  "maxDaily": "Dollar-based",
+  "profitTarget": "None — instant funding",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "None — instant funding"
+   },
+   {
+    "label": "Max loss",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "Dollar-based"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "6411afaf-96fd-4c0c-8725-d7168bafac1b",
+  "name": "Goat Funded Trader 1-Step GOAT 15k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "1-Step GOAT",
+  "size": "15k",
+  "sizeNum": 15000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "6%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "05128c54-3168-40f6-948b-1c5ab3de58d0",
+  "name": "Goat Funded Trader 1-Step GOAT 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "1-Step GOAT",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "6%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "243c49cc-15a0-41f2-a3a1-c4352a49784b",
+  "name": "Goat Funded Trader 1-Step GOAT 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "1-Step GOAT",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "6%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "150ead06-44a8-422c-9994-b8468141c7fb",
+  "name": "Goat Funded Trader 1-Step GOAT 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "1-Step GOAT",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "6%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "3c771e2c-076e-4d81-9969-1a0f5fc7319c",
+  "name": "Goat Funded Trader 1-Step GOAT 200k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "1-Step GOAT",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "6% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "6%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "6% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f5fc8d91-0be9-4ee9-8783-54c074cc2ec8",
+  "name": "Goat Funded Trader 2-Step GOAT 5k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step GOAT",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f1a31466-2f86-4af3-996a-cfc630f374fa",
+  "name": "Goat Funded Trader 2-Step GOAT 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step GOAT",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "21224aa7-daa2-4859-8fd4-ba1e9fc50b9e",
+  "name": "Goat Funded Trader 2-Step GOAT 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step GOAT",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "7a34f259-be3a-4ca5-8c8e-505828da6e62",
+  "name": "Goat Funded Trader 2-Step GOAT 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step GOAT",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "7c3ba5d7-98dc-4f32-b0b6-6ae251f2ba84",
+  "name": "Goat Funded Trader 2-Step GOAT 150k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step GOAT",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "4% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "780db919-be25-4161-83cd-834c74a50507",
+  "name": "Goat Funded Trader 2-Step Standard 5k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Standard",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "5% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "4a60a2e9-786c-46ba-943d-f07ea1871869",
+  "name": "Goat Funded Trader 2-Step Standard 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Standard",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "5% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "0fb15f71-3da9-4394-a085-b59becb98a88",
+  "name": "Goat Funded Trader 2-Step Standard 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Standard",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "5% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "14b51fc8-df48-4640-b094-6c85a2484747",
+  "name": "Goat Funded Trader 2-Step Standard 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Standard",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "5% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "3acadfd5-98da-4497-b4df-207d08d0033e",
+  "name": "Goat Funded Trader 2-Step Standard 200k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Standard",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "5% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "ef0abb98-91d9-4db3-a3ce-3cffb102306b",
+  "name": "Goat Funded Trader 2-Step Pro 5k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Pro",
+  "size": "5k",
+  "sizeNum": 5000,
+  "market": "FOREX",
+  "type": "EOD_TRAILING",
+  "maxTotal": "10% (Static)",
+  "maxDaily": "5% (EOD trailing)",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "10% (Static)"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5% (EOD trailing)"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "04161a31-6216-4696-b4c3-9e295b82e0fb",
+  "name": "Goat Funded Trader 2-Step Pro 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Pro",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "3% daily / 8% overall",
+  "maxDaily": "3%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily / 8% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "1e96c826-1f6c-4c19-98cc-ac791d406622",
+  "name": "Goat Funded Trader 2-Step Pro 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Pro",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "3% daily / 8% overall",
+  "maxDaily": "3%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily / 8% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "b4092e9f-ecd1-431e-9ba7-fe9b21bea808",
+  "name": "Goat Funded Trader 2-Step Pro 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Pro",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "3% daily / 8% overall",
+  "maxDaily": "3%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily / 8% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "cd2bbec0-892b-4fc8-99f5-4504fe8cd344",
+  "name": "Goat Funded Trader 2-Step Pro 200k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "2-Step Pro",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "3% daily / 8% overall",
+  "maxDaily": "3%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily / 8% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "3 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "24b6fbf4-02cb-426c-aafc-c106f68be83c",
+  "name": "Goat Funded Trader 3-Step 10k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "3-Step",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "5% daily / 10% overall",
+  "maxDaily": "5%",
+  "profitTarget": "6%",
+  "planSteps": 3,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 3 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% daily / 10% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "2dbb3e28-9ac5-40bb-88d4-6e2d45bec32b",
+  "name": "Goat Funded Trader 3-Step 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "3-Step",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "5% daily / 10% overall",
+  "maxDaily": "5%",
+  "profitTarget": "6%",
+  "planSteps": 3,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 3 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% daily / 10% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "d9f8b582-fefa-42f4-8f4a-0b3d66bb62fa",
+  "name": "Goat Funded Trader 3-Step 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "3-Step",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "5% daily / 10% overall",
+  "maxDaily": "5%",
+  "profitTarget": "6%",
+  "planSteps": 3,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 3 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% daily / 10% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "fdacca6e-420d-4d52-9a8f-2ee15821cb3c",
+  "name": "Goat Funded Trader 3-Step 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "3-Step",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "5% daily / 10% overall",
+  "maxDaily": "5%",
+  "profitTarget": "6%",
+  "planSteps": 3,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 3 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% daily / 10% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "9c37ff11-9bd5-430e-80cc-0709331296ab",
+  "name": "Goat Funded Trader 3-Step 200k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "3-Step",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "5% daily / 10% overall",
+  "maxDaily": "5%",
+  "profitTarget": "6%",
+  "planSteps": 3,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "6%"
+   },
+   {
+    "label": "Step 3 target",
+    "value": "5%"
+   },
+   {
+    "label": "Max loss",
+    "value": "5% daily / 10% overall"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2 (each step)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "89729d53-9bf3-45fc-b1a2-13cbe1339892",
+  "name": "Goat Funded Trader Instant Funding GOAT 15k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Funding GOAT",
+  "size": "15k",
+  "sizeNum": 15000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "3% daily trailing / 6% overall trailing",
+  "maxDaily": "3% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily trailing / 6% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f70e33cf-70a4-4f82-a73b-26b15653e107",
+  "name": "Goat Funded Trader Instant Funding GOAT 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Funding GOAT",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "3% daily trailing / 6% overall trailing",
+  "maxDaily": "3% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily trailing / 6% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "22c6d888-d142-4563-a327-7a9dd1482ce4",
+  "name": "Goat Funded Trader Instant Funding GOAT 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Funding GOAT",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "3% daily trailing / 6% overall trailing",
+  "maxDaily": "3% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily trailing / 6% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "e9d25617-7800-4227-9141-b5a640680c7d",
+  "name": "Goat Funded Trader Instant Funding GOAT 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Funding GOAT",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "3% daily trailing / 6% overall trailing",
+  "maxDaily": "3% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily trailing / 6% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "65e888fd-02e1-462c-b051-08b56eec2028",
+  "name": "Goat Funded Trader Instant Funding GOAT 150k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Funding GOAT",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "3% daily trailing / 6% overall trailing",
+  "maxDaily": "3% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily trailing / 6% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "c2e10b17-452b-4afe-a8b7-fb120e0e4450",
+  "name": "Goat Funded Trader Instant Funding GOAT 200k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Funding GOAT",
+  "size": "200k",
+  "sizeNum": 200000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "3% daily trailing / 6% overall trailing",
+  "maxDaily": "3% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "3% daily trailing / 6% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "3% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "15%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f0b143ec-afdc-4de2-8765-ed34af1effee",
+  "name": "Goat Funded Trader Instant Pro 2.5k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Pro",
+  "size": "2.5k",
+  "sizeNum": 2500,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "2% daily trailing / 5% overall trailing",
+  "maxDaily": "2% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "2% daily trailing / 5% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "29fc61a2-5f38-48e4-9e61-71514882a433",
+  "name": "Goat Funded Trader Instant Pro 10k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Pro",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "2% daily trailing / 5% overall trailing",
+  "maxDaily": "2% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "2% daily trailing / 5% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "6d4d5c9e-8a11-4cf4-a54c-4f1fa573bf57",
+  "name": "Goat Funded Trader Instant Pro 25k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Pro",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "2% daily trailing / 5% overall trailing",
+  "maxDaily": "2% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "2% daily trailing / 5% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "7a02144f-b527-4d5d-b39f-8a289c0489ea",
+  "name": "Goat Funded Trader Instant Pro 50k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Pro",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "2% daily trailing / 5% overall trailing",
+  "maxDaily": "2% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "2% daily trailing / 5% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "0014fbc0-403d-4649-b7f5-e45fb6d9e541",
+  "name": "Goat Funded Trader Instant Pro 100k",
+  "firm": "Goat Funded Trader",
+  "slug": "goat-funded-trader",
+  "plan": "Instant Pro",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "TRAILING",
+  "maxTotal": "2% daily trailing / 5% overall trailing",
+  "maxDaily": "2% trailing",
+  "profitTarget": "All-in-one-profit",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "All-in-one-profit"
+   },
+   {
+    "label": "Max loss",
+    "value": "2% daily trailing / 5% overall trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2% trailing"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 valid days"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "ccd6d7ad-e718-400f-a28e-73a41d432a44",
+  "name": "Goat Funded EOD Challenge 50k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "EOD Challenge",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "EOD trailing 4%",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "EOD trailing 4%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "7 winning days"
+   }
+  ]
+ },
+ {
+  "id": "b795f57f-9bb0-46e0-a884-448c5983c2e9",
+  "name": "Goat Funded EOD Challenge 100k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "EOD Challenge",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "EOD trailing 3%",
+  "maxDaily": "None",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "EOD trailing 3%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "7 winning days"
+   }
+  ]
+ },
+ {
+  "id": "29d04901-fa28-41c5-a2d8-7a4e5c507308",
+  "name": "Goat Funded EOD Challenge 150k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "EOD Challenge",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "EOD trailing 3%",
+  "maxDaily": "None",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "EOD trailing 3%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "7 winning days"
+   }
+  ]
+ },
+ {
+  "id": "0146c563-806f-4ad8-97b2-fba3ee4d1b7d",
+  "name": "Goat Funded Sprint Challenge 25k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Sprint Challenge",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 2.4%",
+  "maxDaily": "2.4%",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 2.4%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2.4%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "6ff2b141-c7cf-4938-bce3-a73071508cbe",
+  "name": "Goat Funded Sprint Challenge 50k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Sprint Challenge",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 2.2%",
+  "maxDaily": "2.2%",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 2.2%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2.2%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "f327aa4e-a88f-4878-aa99-fd5f271e566b",
+  "name": "Goat Funded Sprint Challenge 100k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Sprint Challenge",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 2%",
+  "maxDaily": "2%",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 2%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "2%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "1 — pass in one day"
+   }
+  ]
+ },
+ {
+  "id": "e782ada4-8e7b-4000-86e0-9c1123289292",
+  "name": "Goat Funded Flex Challenge 50k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Flex Challenge",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "EOD trailing $2,000",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "EOD trailing $2,000"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   }
+  ]
+ },
+ {
+  "id": "1558f323-aaef-472f-b958-bd2685f9cabe",
+  "name": "Goat Funded Flex Challenge 100k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Flex Challenge",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "EOD trailing $3,000",
+  "maxDaily": "None",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "EOD trailing $3,000"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   }
+  ]
+ },
+ {
+  "id": "a93da00b-0fbd-45a6-9b13-f95af7a13d1d",
+  "name": "Goat Funded Flex Challenge 150k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Flex Challenge",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "EOD trailing $4,500",
+  "maxDaily": "None",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "EOD trailing $4,500"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% in eval"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   }
+  ]
+ },
+ {
+  "id": "f199d89a-7067-438c-aef1-16b85439d45b",
+  "name": "Goat Funded Instant Funded 25k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Instant Funded",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 5%",
+  "maxDaily": "5%",
+  "profitTarget": "$1,750 (7%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,750 (7%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 5%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "12fdc07b-1f41-4e34-8f26-199b9b7628ee",
+  "name": "Goat Funded Instant Funded 50k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Instant Funded",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 5%",
+  "maxDaily": "5%",
+  "profitTarget": "$3,500 (7%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,500 (7%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 5%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "bf52117a-8e6d-464d-9a2b-6e288cbb4187",
+  "name": "Goat Funded Instant Funded 100k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Instant Funded",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 5%",
+  "maxDaily": "5%",
+  "profitTarget": "$7,000 (7%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$7,000 (7%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 5%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "024bc90f-2ead-4376-98f0-e10884583ee7",
+  "name": "Goat Funded Instant Funded 150k",
+  "firm": "Goat Funded",
+  "slug": "goat-funded-futures",
+  "plan": "Instant Funded",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "TRAILING",
+  "maxTotal": "Intraday trailing 5%",
+  "maxDaily": "5%",
+  "profitTarget": "$10,500 (7%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$10,500 (7%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "Intraday trailing 5%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "1ab8254b-0da5-4767-be8a-3ddc11569a07",
+  "name": "E8 FX FX Evaluation (1-Step) 25k",
+  "firm": "E8 FX",
+  "slug": "e8-fx",
+  "plan": "FX Evaluation (1-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "8%",
+  "maxDaily": "4%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "bdaa09c3-0e18-4bef-89d1-1e3fdcbcd448",
+  "name": "E8 FX FX Evaluation (1-Step) 50k",
+  "firm": "E8 FX",
+  "slug": "e8-fx",
+  "plan": "FX Evaluation (1-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "8%",
+  "maxDaily": "4%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "c1fff2c3-0dba-4e40-9845-3332c05fa2bd",
+  "name": "E8 FX FX Evaluation (1-Step) 100k",
+  "firm": "E8 FX",
+  "slug": "e8-fx",
+  "plan": "FX Evaluation (1-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "8%",
+  "maxDaily": "4%",
+  "profitTarget": "10%",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "10%"
+   },
+   {
+    "label": "Max loss",
+    "value": "8%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "4%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "None"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "61b227ef-785e-4c00-b055-a1524b94fb62",
+  "name": "Funded Trading Plus FTP Evaluation (2-Step) 10k",
+  "firm": "Funded Trading Plus",
+  "slug": "funded-trading-plus",
+  "plan": "FTP Evaluation (2-Step)",
+  "size": "10k",
+  "sizeNum": 10000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5% — 1 day"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 (step 1)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "ccf51654-e36e-4add-b4d9-fa9549419eaa",
+  "name": "Funded Trading Plus FTP Evaluation (2-Step) 25k",
+  "firm": "Funded Trading Plus",
+  "slug": "funded-trading-plus",
+  "plan": "FTP Evaluation (2-Step)",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5% — 1 day"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 (step 1)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "5179cb46-ef32-465b-9885-8dc474fdb72a",
+  "name": "Funded Trading Plus FTP Evaluation (2-Step) 50k",
+  "firm": "Funded Trading Plus",
+  "slug": "funded-trading-plus",
+  "plan": "FTP Evaluation (2-Step)",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5% — 1 day"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 (step 1)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "f2c07efd-0052-4c31-9a95-d2d03e1f44c1",
+  "name": "Funded Trading Plus FTP Evaluation (2-Step) 100k",
+  "firm": "Funded Trading Plus",
+  "slug": "funded-trading-plus",
+  "plan": "FTP Evaluation (2-Step)",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FOREX",
+  "type": "STATIC",
+  "maxTotal": "10%",
+  "maxDaily": "5%",
+  "profitTarget": "8%",
+  "planSteps": 2,
+  "evalRules": [
+   {
+    "label": "Step 1 target",
+    "value": "8%"
+   },
+   {
+    "label": "Step 2 target",
+    "value": "5% — 1 day"
+   },
+   {
+    "label": "Max loss",
+    "value": "10%"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "5%"
+   },
+   {
+    "label": "Min trading days",
+    "value": "5 (step 1)"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "8a402f0f-82ba-4027-b84c-a2b1d55ec5b0",
+  "name": "My Funded Futures Flex 25k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Flex",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% in eval only"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "197564b5-ae6a-44cb-a30c-517c603de2e6",
+  "name": "My Funded Futures Flex 50k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Flex",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "50% in eval only"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "2def53bc-8a21-4394-9afd-93b5254b4ccc",
+  "name": "My Funded Futures Rapid 25k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Rapid",
+  "size": "25k",
+  "sizeNum": 25000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$1,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$1,500 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$1,500 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$1,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "a49269bd-c5ca-4034-90b9-3070d72b87f2",
+  "name": "My Funded Futures Rapid 50k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Rapid",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "fd7d09b1-6f78-4858-8e31-07f689ce554c",
+  "name": "My Funded Futures Rapid 100k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Rapid",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "180ce7fb-873f-424f-917b-718baf86bc90",
+  "name": "My Funded Futures Rapid 150k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Rapid",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "c122539e-3f7d-4f2b-9641-21171fb449c5",
+  "name": "My Funded Futures Pro 50k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Pro",
+  "size": "50k",
+  "sizeNum": 50000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$2,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$3,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$3,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$2,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "a1817008-5f76-43c7-966e-9eb2e18d6c50",
+  "name": "My Funded Futures Pro 100k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Pro",
+  "size": "100k",
+  "sizeNum": 100000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$3,000 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$6,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$6,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$3,000 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ },
+ {
+  "id": "7b3dbbff-6756-490e-9534-addcf8f78a0e",
+  "name": "My Funded Futures Pro 150k",
+  "firm": "My Funded Futures",
+  "slug": "my-funded-futures",
+  "plan": "Pro",
+  "size": "150k",
+  "sizeNum": 150000,
+  "market": "FUTURES",
+  "type": "EOD_TRAILING",
+  "maxTotal": "$4,500 EOD trailing",
+  "maxDaily": "None",
+  "profitTarget": "$9,000 (6%)",
+  "planSteps": 1,
+  "evalRules": [
+   {
+    "label": "Profit target",
+    "value": "$9,000 (6%)"
+   },
+   {
+    "label": "Max loss",
+    "value": "$4,500 EOD trailing"
+   },
+   {
+    "label": "Daily loss limit",
+    "value": "None"
+   },
+   {
+    "label": "Consistency",
+    "value": "None"
+   },
+   {
+    "label": "Min trading days",
+    "value": "2"
+   },
+   {
+    "label": "Time limit",
+    "value": "None"
+   }
+  ]
+ }
+]

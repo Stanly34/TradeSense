@@ -34,26 +34,27 @@ export interface InstrumentPerformance {
   winRate: number
 }
 
-function buildParams(templateId?: string, startDate?: string, endDate?: string): Record<string, string | number> {
+function buildParams(accountId?: string, startDate?: string, endDate?: string, phase?: string): Record<string, string | number> {
   const params: Record<string, string | number> = {}
-  if (templateId) params.templateId = templateId
+  if (accountId) params.accountId = accountId
   if (startDate) params.startDate = startDate
   if (endDate) params.endDate = endDate
+  if (phase) params.phase = phase
   return params
 }
 
-export async function getStats(templateId?: string, startDate?: string, endDate?: string): Promise<DashboardStats> {
-  const { data } = await api.get('/dashboard/stats', { params: buildParams(templateId, startDate, endDate) })
+export async function getStats(accountId?: string, startDate?: string, endDate?: string, phase?: string): Promise<DashboardStats> {
+  const { data } = await api.get('/dashboard/stats', { params: buildParams(accountId, startDate, endDate, phase) })
   return data.data
 }
 
-export async function getMonthlyPerformance(templateId?: string, startDate?: string, endDate?: string): Promise<MonthlyPerformance[]> {
-  const { data } = await api.get('/dashboard/monthly-performance', { params: buildParams(templateId, startDate, endDate) })
+export async function getMonthlyPerformance(accountId?: string, startDate?: string, endDate?: string): Promise<MonthlyPerformance[]> {
+  const { data } = await api.get('/dashboard/monthly-performance', { params: buildParams(accountId, startDate, endDate) })
   return data.data
 }
 
-export async function getResultDistribution(templateId?: string, startDate?: string, endDate?: string): Promise<ResultDistribution> {
-  const { data } = await api.get('/dashboard/result-distribution', { params: buildParams(templateId, startDate, endDate) })
+export async function getResultDistribution(accountId?: string, startDate?: string, endDate?: string): Promise<ResultDistribution> {
+  const { data } = await api.get('/dashboard/result-distribution', { params: buildParams(accountId, startDate, endDate) })
   return data.data
 }
 
@@ -65,14 +66,14 @@ export interface CalendarDay {
   losses: number
 }
 
-export async function getCalendarData(year: number, month: number, templateId?: string, startDate?: string, endDate?: string): Promise<CalendarDay[]> {
-  const params: Record<string, string | number> = { year, month, ...buildParams(templateId, startDate, endDate) }
+export async function getCalendarData(year: number, month: number, accountId?: string, startDate?: string, endDate?: string, phase?: string): Promise<CalendarDay[]> {
+  const params: Record<string, string | number> = { year, month, ...buildParams(accountId, startDate, endDate, phase) }
   const { data } = await api.get('/dashboard/calendar', { params })
   return data.data
 }
 
-export async function getInstrumentPerformance(templateId?: string, startDate?: string, endDate?: string): Promise<InstrumentPerformance[]> {
-  const { data } = await api.get('/dashboard/instrument-performance', { params: buildParams(templateId, startDate, endDate) })
+export async function getInstrumentPerformance(accountId?: string, startDate?: string, endDate?: string): Promise<InstrumentPerformance[]> {
+  const { data } = await api.get('/dashboard/instrument-performance', { params: buildParams(accountId, startDate, endDate) })
   return data.data
 }
 
@@ -89,8 +90,8 @@ export interface RecentTrade {
   tags: { tag: { id: string; name: string; color: string | null } }[]
 }
 
-export async function getRecentTrades(templateId?: string, limit = 15, startDate?: string, endDate?: string): Promise<RecentTrade[]> {
-  const params: Record<string, string | number> = { limit, ...buildParams(templateId, startDate, endDate) }
+export async function getRecentTrades(accountId?: string, limit = 15, startDate?: string, endDate?: string): Promise<RecentTrade[]> {
+  const params: Record<string, string | number> = { limit, ...buildParams(accountId, startDate, endDate) }
   const { data } = await api.get('/dashboard/recent-trades', { params })
   return data.data
 }

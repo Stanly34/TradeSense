@@ -110,7 +110,7 @@ export function OtpVerificationPage() {
               type="text" inputMode="numeric" maxLength={1} value={d}
               onChange={(e) => handleDigit(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className={`w-11 h-12 text-center text-lg font-semibold rounded-xl border bg-input text-text-primary transition-all focus:outline-none focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] ${
+              className={`w-11 h-12 text-center text-lg font-semibold rounded-xl border bg-input text-text-primary transition-all focus:outline-none focus:shadow-[0_0_0_2px_rgba(79,70,229,0.12)] ${
                 error ? 'border-danger focus:border-danger' : 'border-border focus:border-primary'
               }`} />
           ))}

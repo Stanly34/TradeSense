@@ -3,6 +3,7 @@ import { BookOpen, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import * as journalService from '../services/journals'
 import type { JournalEntry } from '../services/journals'
+import { eventBus } from '../lib/eventBus'
 
 export function JournalPage() {
   const navigate = useNavigate()
@@ -12,6 +13,10 @@ export function JournalPage() {
     journalService.listJournals()
       .then(setJournals)
       .catch(() => setJournals([]))
+    const offTrades = eventBus.on('trades:changed', () => {
+      journalService.listJournals().then(setJournals).catch(() => {})
+    })
+    return () => offTrades()
   }, [])
 
   const getResultIcon = (result?: string | null) => {
@@ -80,15 +85,10 @@ export function JournalPage() {
                         {entry.content || <span className="text-text-muted">--</span>}
                       </td>
                       <td className="px-4 py-3">
-                        {entry.lessons && entry.lessons.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {entry.lessons.slice(0, 2).map((lesson, i) => (
-                              <span key={i} className="text-xs bg-hover text-text-secondary px-2 py-0.5 rounded-full">{lesson}</span>
-                            ))}
-                            {entry.lessons.length > 2 && (
-                              <span className="text-xs text-text-muted">+{entry.lessons.length - 2}</span>
-                            )}
-                          </div>
+                        {entry.trade?.lesson ? (
+                          <span className="inline-block max-w-[220px] truncate text-xs bg-hover text-text-secondary px-2.5 py-0.5 rounded-full">
+                            {entry.trade.lesson}
+                          </span>
                         ) : (
                           <span className="text-text-muted">--</span>
                         )}

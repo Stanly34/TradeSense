@@ -19,12 +19,12 @@ const prefetchRoutes = [
   '/dashboard/recent-trades',
   '/trades?limit=20&page=1&sortBy=createdAt&sortOrder=desc',
   '/journals',
-  '/templates',
+  '/accounts',
   '/tags',
-  '/plans',
-  '/plans/current',
+  '/subscriptions/plans',
+  '/subscriptions/plan',
   '/notifications/preferences',
-  '/outlooks',
+  '/outlook/list',
   '/dashboard/calendar',
 ]
 

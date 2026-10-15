@@ -8,9 +8,11 @@ import { InstrumentSelect } from '../components/ui/InstrumentSelect'
 import { WeekPicker } from '../components/ui/WeekPicker'
 import * as outlookService from '../services/outlook'
 import * as favoriteInstrumentService from '../services/favoriteInstruments'
+import { PageHeader } from '../components/ui/PageHeader'
 import { usePlan } from '../hooks/usePlan'
 import type { WeeklyOutlook } from '../services/outlook'
 import toast from 'react-hot-toast'
+import { eventBus } from '../lib/eventBus'
 
 const MONTH_CODES = ['F', 'G', 'H', 'J', 'K', 'M', 'N', 'Q', 'U', 'V', 'X', 'Z']
 
@@ -23,7 +25,7 @@ const CYCLE_MAP = {
 
 type CycleKey = keyof typeof CYCLE_MAP
 
-function getContractMonths(months: number[], count: number): string[] {
+function getContractMonths(months: readonly number[], count: number): string[] {
   const now = new Date()
   const res: string[] = []
   const year = now.getFullYear()
@@ -33,81 +35,6 @@ function getContractMonths(months: number[], count: number): string[] {
     res.push(`${MONTH_CODES[m]}${y}`)
   }
   return res
-}
-
-interface InstrumentPreset {
-  pointValue: number
-  tickSize: number
-  tickValue: number
-  isFutures?: boolean
-}
-
-function instrumentPreset(tickSize: number, tickValue: number, pointValue: number): InstrumentPreset {
-  return { pointValue, tickSize, tickValue, isFutures: true }
-}
-
-const INSTRUMENT_PRESETS: Record<string, InstrumentPreset> = {
-  'EUR/USD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'GBP/USD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'USD/JPY': { pointValue: 100000, tickSize: 0.001, tickValue: 1.1 },
-  'AUD/USD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'USD/CAD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'NZD/USD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'EUR/JPY': { pointValue: 100000, tickSize: 0.001, tickValue: 1.07 },
-  'GBP/JPY': { pointValue: 100000, tickSize: 0.001, tickValue: 1.07 },
-  'EUR/GBP': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'CHF/JPY': { pointValue: 100000, tickSize: 0.001, tickValue: 1.07 },
-  'USD/CHF': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'AUD/JPY': { pointValue: 100000, tickSize: 0.001, tickValue: 1.07 },
-  'NZD/JPY': { pointValue: 100000, tickSize: 0.001, tickValue: 1.07 },
-  'EUR/AUD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'GBP/AUD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'AUD/CAD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'AUD/NZD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'EUR/NZD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'GBP/NZD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'EUR/CAD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'GBP/CAD': { pointValue: 100000, tickSize: 0.00001, tickValue: 1 },
-  'XAU/USD': { pointValue: 100, tickSize: 0.01, tickValue: 1 },
-  'XAG/USD': { pointValue: 5000, tickSize: 0.0001, tickValue: 0.5 },
-  'BTC/USD': { pointValue: 1, tickSize: 1, tickValue: 1 },
-  'ETH/USD': { pointValue: 1, tickSize: 0.1, tickValue: 0.1 },
-  ES: instrumentPreset(0.25, 12.5, 50),
-  MES: instrumentPreset(0.25, 1.25, 5),
-  NQ: instrumentPreset(0.25, 5, 20),
-  MNQ: instrumentPreset(0.25, 0.5, 2),
-  YM: instrumentPreset(1, 5, 5),
-  MYM: instrumentPreset(1, 0.5, 0.5),
-  RTY: instrumentPreset(0.1, 5, 50),
-  M2K: instrumentPreset(0.1, 0.5, 5),
-  CL: instrumentPreset(0.01, 10, 1000),
-  MCL: instrumentPreset(0.01, 1, 100),
-  NG: instrumentPreset(0.001, 10, 10000),
-  MNG: instrumentPreset(0.001, 1, 1000),
-  GC: instrumentPreset(0.1, 10, 100),
-  MGC: instrumentPreset(0.1, 1, 10),
-  SI: instrumentPreset(0.005, 25, 5000),
-  SIL: instrumentPreset(0.005, 2.5, 500),
-  '6E': instrumentPreset(0.00005, 6.25, 125000),
-  'M6E': instrumentPreset(0.00005, 0.625, 12500),
-  '6B': instrumentPreset(0.0001, 6.25, 62500),
-  'M6B': instrumentPreset(0.0001, 0.625, 6250),
-  '6J': instrumentPreset(0.0000005, 6.25, 12500000),
-  'M6J': instrumentPreset(0.0000005, 0.625, 1250000),
-  '6A': instrumentPreset(0.0001, 10, 100000),
-  'M6A': instrumentPreset(0.0001, 1, 10000),
-  '6C': instrumentPreset(0.0001, 10, 100000),
-  'M6C': instrumentPreset(0.0001, 1, 10000),
-  '6S': instrumentPreset(0.0001, 12.5, 125000),
-  'M6S': instrumentPreset(0.0001, 1.25, 12500),
-  BTC: instrumentPreset(5, 25, 5),
-  MBT: instrumentPreset(5, 2.5, 0.5),
-  ETH: instrumentPreset(0.25, 0.5, 2),
-  MET: instrumentPreset(0.25, 0.05, 0.2),
-  NAS100: { pointValue: 10, tickSize: 0.1, tickValue: 1 },
-  US100: { pointValue: 10, tickSize: 0.1, tickValue: 1 },
-  US30: { pointValue: 10, tickSize: 0.1, tickValue: 1 },
-  SPX500: { pointValue: 10, tickSize: 0.1, tickValue: 1 },
 }
 
 interface RootDef {
@@ -252,7 +179,7 @@ function formatWeekRange(weekStart: string): string {
 }
 
 export function OutlookPage() {
-  const { isPro, plan } = usePlan()
+  const { isPro } = usePlan()
   const [entries, setEntries] = useState<WeeklyOutlook[]>([])
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -266,7 +193,7 @@ export function OutlookPage() {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
   const [viewingEntry, setViewingEntry] = useState<WeeklyOutlook | null>(null)
 
-  const longTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const longTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const longPressTriggeredRef = useRef(false)
   const beforeInputRef = useRef<HTMLInputElement>(null)
   const afterInputRef = useRef<HTMLInputElement>(null)
@@ -306,6 +233,11 @@ export function OutlookPage() {
     if (!isPro) return
     fetchEntries()
   }, [isPro, fetchEntries])
+
+  useEffect(() => {
+    const off = eventBus.on('outlook:changed', () => fetchEntries())
+    return () => off()
+  }, [fetchEntries])
 
   useEffect(() => {
     favoriteInstrumentService.listFavoriteInstruments()
@@ -514,10 +446,7 @@ export function OutlookPage() {
   if (!isPro) {
     return (
       <div className="p-6 lg:p-8 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Outlook</h1>
-          <p className="text-text-secondary mt-1">Weekly market outlook and analysis.</p>
-        </div>
+        <PageHeader title="Outlook" subtitle="This week's pairs, mapped before Monday." />
         <div className="card p-12 text-center text-text-muted">
           <CalendarCheck className="w-10 h-10 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Weekly outlook is a Pro feature.</p>
@@ -531,10 +460,7 @@ export function OutlookPage() {
   return (
     <div className="p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Outlook</h1>
-          <p className="text-text-secondary mt-1">Weekly market outlook and analysis.</p>
-        </div>
+        <PageHeader title="Outlook" subtitle="This week's pairs, mapped before Monday." />
         <Button onClick={() => { resetForm(); setShowForm(true) }} leftIcon={<Plus className="w-4 h-4" />}>
           New Outlook
         </Button>
@@ -548,7 +474,6 @@ export function OutlookPage() {
       ) : (
         <>
           <SelectionBar
-            selecting={selecting}
             count={selectedIds.size}
             onCancel={cancelSelect}
             onDelete={() => setBatchDeleteCount(selectedIds.size)}
@@ -873,7 +798,7 @@ export function OutlookPage() {
               <div className="space-y-1.5">
                 <label className="block text-sm font-medium text-text-secondary">Notes</label>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={4}
-                  className="block w-full rounded-xl border border-border px-3.5 py-2.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all resize-none break-words"
+                  className="block w-full rounded-xl border border-border px-3.5 py-2.5 text-sm bg-input text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.12)] transition-all resize-none break-words"
                   placeholder="Add your weekly notes..." />
               </div>
 

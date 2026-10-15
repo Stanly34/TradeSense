@@ -1,7 +1,12 @@
 import { prisma } from '../lib/prisma.js'
 
-function withTemplate(where: Record<string, unknown>, templateId?: string) {
-  if (templateId) where.templateId = templateId
+function withAccount(where: Record<string, unknown>, accountId?: string) {
+  if (accountId) where.accountId = accountId
+  return where
+}
+
+function withPhase(where: Record<string, unknown>, phase?: string) {
+  if (phase) where.phase = phase
   return where
 }
 
@@ -14,10 +19,10 @@ function withDateRange(where: Record<string, unknown>, startDate?: Date, endDate
   return where
 }
 
-export async function getStats(userId: string, templateId?: string, startDate?: Date, endDate?: Date) {
+export async function getStats(userId: string, accountId?: string, startDate?: Date, endDate?: Date, phase?: string) {
   const trades = await prisma.trade.findMany({
-    where: withDateRange(withTemplate({ userId, isDeleted: false, status: 'COMPLETED' }, templateId), startDate, endDate),
-    select: { result: true, entryPrice: true, exitPrice: true, direction: true, fees: true, entryTime: true, quantity: true, pipSize: true, pipValue: true },
+    where: withPhase(withDateRange(withAccount({ userId, isDeleted: false, status: 'COMPLETED' }, accountId), startDate, endDate), phase),
+    select: { result: true, entryPrice: true, exitPrice: true, direction: true, fees: true, entryTime: true, dayKey: true, quantity: true, pipSize: true, pipValue: true },
   })
 
   const total = trades.length
@@ -48,7 +53,7 @@ export async function getStats(userId: string, templateId?: string, startDate?: 
   const dailyPnL: Record<string, number> = {}
   trades.forEach((t) => {
     if (t.entryPrice && t.exitPrice) {
-      const dateKey = t.entryTime ? t.entryTime.toISOString().slice(0, 10) : 'unknown'
+      const dateKey = t.dayKey || 'unknown'
       const diff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
       const pips = (t.pipSize && t.pipSize !== 0 ? diff / t.pipSize : diff)
       const grossPnl = pips * (t.pipValue || 1) * (t.quantity || 1)
@@ -67,16 +72,16 @@ export async function getStats(userId: string, templateId?: string, startDate?: 
   return { total, wins, losses, breakEvens, winRate, pnl: Math.round(pnl * 100) / 100, avgReturn: Math.round(avgReturn * 100) / 100, bestDay, worstDay, profitFactor }
 }
 
-export async function getMonthlyPerformance(userId: string, templateId?: string, startDate?: Date, endDate?: Date) {
+export async function getMonthlyPerformance(userId: string, accountId?: string, startDate?: Date, endDate?: Date) {
   const trades = await prisma.trade.findMany({
-    where: withDateRange(withTemplate({ userId, isDeleted: false, status: 'COMPLETED' }, templateId), startDate, endDate),
-    select: { entryPrice: true, exitPrice: true, direction: true, entryTime: true, quantity: true, pipSize: true, pipValue: true, fees: true },
+    where: withDateRange(withAccount({ userId, isDeleted: false, status: 'COMPLETED' }, accountId), startDate, endDate),
+    select: { entryPrice: true, exitPrice: true, direction: true, entryTime: true, dayKey: true, quantity: true, pipSize: true, pipValue: true, fees: true },
   })
 
   const monthly: Record<string, { pnl: number; trades: number; wins: number }> = {}
 
   trades.forEach((t) => {
-    const monthKey = t.entryTime ? t.entryTime.toISOString().slice(0, 7) : 'unknown'
+    const monthKey = t.dayKey ? t.dayKey.slice(0, 7) : 'unknown'
     if (!monthly[monthKey]) monthly[monthKey] = { pnl: 0, trades: 0, wins: 0 }
     monthly[monthKey].trades++
 
@@ -96,9 +101,9 @@ export async function getMonthlyPerformance(userId: string, templateId?: string,
     }))
 }
 
-export async function getResultDistribution(userId: string, templateId?: string, startDate?: Date, endDate?: Date) {
+export async function getResultDistribution(userId: string, accountId?: string, startDate?: Date, endDate?: Date) {
   const base: Record<string, unknown> = { userId, isDeleted: false }
-  if (templateId) base.templateId = templateId
+  if (accountId) base.accountId = accountId
   if (startDate || endDate) {
     base.entryTime = {}
     if (startDate) (base.entryTime as Record<string, unknown>).gte = startDate
@@ -113,9 +118,9 @@ export async function getResultDistribution(userId: string, templateId?: string,
   return { wins, losses, breakEvens, drafts }
 }
 
-export async function getRecentTrades(userId: string, templateId?: string, limit = 10, startDate?: Date, endDate?: Date) {
+export async function getRecentTrades(userId: string, accountId?: string, limit = 10, startDate?: Date, endDate?: Date) {
   return prisma.trade.findMany({
-    where: withDateRange(withTemplate({ userId, isDeleted: false }, templateId), startDate, endDate),
+    where: withDateRange(withAccount({ userId, isDeleted: false }, accountId), startDate, endDate),
     orderBy: { entryTime: 'desc' },
     take: limit,
     include: {
@@ -125,7 +130,7 @@ export async function getRecentTrades(userId: string, templateId?: string, limit
   })
 }
 
-export async function getCalendarData(userId: string, year: number, month: number, templateId?: string, startDate?: Date, endDate?: Date) {
+export async function getCalendarData(userId: string, year: number, month: number, accountId?: string, startDate?: Date, endDate?: Date, phase?: string) {
   const monthStart = new Date(year, month - 1, 1)
   const monthEnd = new Date(year, month, 0, 23, 59, 59)
 
@@ -138,17 +143,18 @@ export async function getCalendarData(userId: string, year: number, month: numbe
     status: 'COMPLETED',
     entryTime: { gte: effectiveStart, lte: effectiveEnd },
   }
-  if (templateId) where.templateId = templateId
+  if (accountId) where.accountId = accountId
+  if (phase) where.phase = phase
 
   const trades = await prisma.trade.findMany({
     where,
-    select: { result: true, entryPrice: true, exitPrice: true, direction: true, entryTime: true, fees: true, quantity: true, pipSize: true, pipValue: true, partialExits: { select: { quantity: true, exitPrice: true } } },
+    select: { result: true, entryPrice: true, exitPrice: true, direction: true, entryTime: true, dayKey: true, fees: true, quantity: true, pipSize: true, pipValue: true, partialExits: { select: { quantity: true, exitPrice: true } } },
   })
 
   const daily: Record<string, { pnl: number; trades: number; wins: number; losses: number }> = {}
 
   trades.forEach((t) => {
-    const dateKey = t.entryTime ? t.entryTime.toISOString().slice(0, 10) : 'unknown'
+    const dateKey = t.dayKey || 'unknown'
     if (!daily[dateKey]) daily[dateKey] = { pnl: 0, trades: 0, wins: 0, losses: 0 }
     daily[dateKey].trades++
 
@@ -185,9 +191,9 @@ export async function getCalendarData(userId: string, year: number, month: numbe
   return result.sort((a, b) => a.date.localeCompare(b.date))
 }
 
-export async function getInstrumentPerformance(userId: string, templateId?: string, startDate?: Date, endDate?: Date) {
+export async function getInstrumentPerformance(userId: string, accountId?: string, startDate?: Date, endDate?: Date) {
   const trades = await prisma.trade.findMany({
-    where: withDateRange(withTemplate({ userId, isDeleted: false, status: 'COMPLETED' }, templateId), startDate, endDate),
+    where: withDateRange(withAccount({ userId, isDeleted: false, status: 'COMPLETED' }, accountId), startDate, endDate),
     select: { instrument: true, result: true, entryPrice: true, exitPrice: true, direction: true },
   })
 

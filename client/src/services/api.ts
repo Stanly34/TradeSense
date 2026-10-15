@@ -56,18 +56,34 @@ export function getAccessToken() {
   return accessToken
 }
 
-let isRefreshing = false
-let failedQueue: Array<{
-  resolve: (token: string) => void
-  reject: (err: Error) => void
-}> = []
+let refreshSessionPromise: Promise<{ accessToken: string; refreshToken: string } | null> | null = null
 
-function processQueue(error: Error | null, token: string | null = null) {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error)
-    else resolve(token!)
-  })
-  failedQueue = []
+export function refreshSession() {
+  if (!refreshSessionPromise) {
+    const stored = sessionStorage.getItem('refreshToken')
+    if (!stored) {
+      refreshSessionPromise = Promise.resolve(null)
+    } else {
+      const attempt = axios
+        .post('/api/v1/auth/refresh', { refreshToken: stored })
+        .then(({ data }) => {
+          const result = data?.data
+          if (!result?.accessToken || !result?.refreshToken) return null
+          setAccessToken(result.accessToken)
+          sessionStorage.setItem('refreshToken', result.refreshToken)
+          return result
+        })
+        .catch(() => {
+          setAccessToken(null)
+          sessionStorage.removeItem('refreshToken')
+          return null
+        })
+      refreshSessionPromise = attempt.finally(() => {
+        refreshSessionPromise = null
+      })
+    }
+  }
+  return refreshSessionPromise
 }
 
 api.interceptors.response.use(
@@ -80,37 +96,19 @@ api.interceptors.response.use(
       if (isAuthRequest) {
         return Promise.reject(error)
       }
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`
-          return api(originalRequest)
-        })
-      }
 
       originalRequest._retry = true
-      isRefreshing = true
 
-      try {
-        const { data } = await axios.post('/api/v1/auth/refresh', {
-          refreshToken: sessionStorage.getItem('refreshToken'),
-        })
-        const newToken = data.data.accessToken
-        setAccessToken(newToken)
-        sessionStorage.setItem('refreshToken', data.data.refreshToken)
-        processQueue(null, newToken)
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
+      const refreshed = await refreshSession()
+      if (refreshed) {
+        originalRequest.headers.Authorization = `Bearer ${refreshed.accessToken}`
         return api(originalRequest)
-      } catch (err) {
-        processQueue(err as Error)
-        setAccessToken(null)
-        sessionStorage.removeItem('refreshToken')
-        window.location.href = '/login'
-        return Promise.reject(err)
-      } finally {
-        isRefreshing = false
       }
+
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login'
+      }
+      return Promise.reject(error)
     }
 
     return Promise.reject(error)

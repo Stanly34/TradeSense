@@ -1,4 +1,5 @@
 import { getAccessToken } from './api'
+import { eventBus } from '../lib/eventBus'
 
 const BASE = '/api/v1/outlook'
 
@@ -43,6 +44,7 @@ export async function saveOutlook(weekStart: string, instrument: string, formDat
   })
   const json = await res.json()
   if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to save outlook')
+  eventBus.emit('outlook:changed', undefined)
 }
 
 export async function deleteOutlook(id: string): Promise<void> {
@@ -53,6 +55,7 @@ export async function deleteOutlook(id: string): Promise<void> {
   })
   const json = await res.json()
   if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to delete outlook')
+  eventBus.emit('outlook:changed', undefined)
 }
 
 export async function batchDeleteOutlooks(ids: string[]): Promise<void> {
@@ -64,4 +67,5 @@ export async function batchDeleteOutlooks(ids: string[]): Promise<void> {
   })
   const json = await res.json()
   if (!json.success) throw new Error(json.error?.message || json.message || 'Failed to delete outlooks')
+  eventBus.emit('outlook:changed', undefined)
 }

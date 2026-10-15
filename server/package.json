@@ -12,7 +12,8 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "promo:scan": "tsx src/scripts/scanPromos.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",

@@ -1,0 +1,212 @@
+[
+ {
+  "acct": "The5ers High Stakes Challenge 2.5k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "status exp=PASSED got=ACTIVE",
+   "floor exp=2700 got=2350"
+  ]
+ },
+ {
+  "acct": "The5ers High Stakes Challenge 5k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=5050 got=4700"
+  ]
+ },
+ {
+  "acct": "The5ers High Stakes Challenge 10k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=9750 got=9400"
+  ]
+ },
+ {
+  "acct": "The5ers High Stakes Challenge 25k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=23850 got=23500"
+  ]
+ },
+ {
+  "acct": "The5ers High Stakes Challenge 50k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=47350 got=47000"
+  ]
+ },
+ {
+  "acct": "The5ers High Stakes Challenge 100k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=94350 got=94000"
+  ]
+ },
+ {
+  "acct": "The5ers High Stakes Challenge 200k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=188350 got=188000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 1-Step GOAT 15k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=14450 got=14100"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 1-Step GOAT 25k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=23850 got=23500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 1-Step GOAT 50k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=47350 got=47000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 1-Step GOAT 100k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=94350 got=94000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 1-Step GOAT 200k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=188350 got=188000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step GOAT 5k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=4850 got=4500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step GOAT 25k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=22850 got=22500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step GOAT 50k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=45350 got=45000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step GOAT 100k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=90350 got=90000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step GOAT 150k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=135350 got=135000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step Standard 5k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=4850 got=4500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step Standard 25k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=22850 got=22500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step Standard 50k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=45350 got=45000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step Standard 100k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=90350 got=90000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step Standard 200k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=180350 got=180000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader 2-Step Pro 5k",
+  "type": "EOD_TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=4850 got=4500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader Instant Funding GOAT 15k",
+  "type": "TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=15050 got=15000"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader Instant Pro 2.5k",
+  "type": "TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "status exp=FAILED got=ACTIVE",
+   "floor exp=2950 got=2500"
+  ]
+ },
+ {
+  "acct": "Goat Funded Trader Instant Pro 10k",
+  "type": "TRAILING",
+  "market": "FOREX",
+  "diffs": [
+   "floor exp=10300 got=10000"
+  ]
+ }
+]

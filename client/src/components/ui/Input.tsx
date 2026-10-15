@@ -9,7 +9,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, id, onWheel, startAdornment, endAdornment, ...props }, ref) => {
+  ({ className, label, error, id, onWheel, onKeyDown, startAdornment, endAdornment, ...props }, ref) => {
     const inputRef = useRef<HTMLInputElement | null>(null)
 
     const setRef = useCallback((el: HTMLInputElement | null) => {
@@ -38,13 +38,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               if ((e.target as HTMLInputElement).type === 'number') {
                 e.preventDefault()
                 ;(e.target as HTMLInputElement).blur()
+              } else {
+                onWheel?.(e)
+              }
+            }}
+            onKeyDown={(e) => {
+              if ((e.target as HTMLInputElement).type === 'number' && ['e', 'E', '+', '-'].includes(e.key)) {
+                e.preventDefault()
+              } else {
+                onKeyDown?.(e)
               }
             }}
             className={cn(
               'block w-full rounded-xl border border-border/80 px-3.5 py-2.5',
               'text-sm text-text-primary placeholder:text-text-muted/60',
               'bg-input/60 backdrop-blur-sm',
-              'focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)]',
+              'focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.12)]',
               'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-all duration-200',
               error && 'border-danger focus:border-danger focus:shadow-[0_0_0_2px_rgba(239,68,68,0.2)]',

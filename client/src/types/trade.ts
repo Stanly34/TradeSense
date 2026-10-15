@@ -23,9 +23,16 @@ export interface Trade {
   notes: string | null
   reason: string | null
   mistakes: string | null
-  templateId: string | null
+  lesson: string | null
+  emotion: string | null
+  confidence: number | null
+  executionRating: number | null
+  patienceRating: number | null
+  disciplineRating: number | null
+  setup: string | null
+  accountId: string | null
   checklistData: Record<string, string[]> | null
-  template: { id: string; name: string; type: string; defaultValues: Record<string, unknown> | null } | null
+  tradeAccount: { id: string; name: string; type: string; defaultValues: Record<string, unknown> | null } | null
   isDeleted: boolean
   createdAt: string
   updatedAt: string
@@ -103,9 +110,16 @@ export interface TradeFormData {
   notes?: string
   reason?: string
   mistakes?: string
-  templateId?: string
+  lesson?: string
+  emotion?: string
+  confidence?: number
+  executionRating?: number
+  patienceRating?: number
+  disciplineRating?: number
+  setup?: string
+  accountId?: string
   checklistData?: Record<string, string[]>
-  _pendingImages?: File[]
+  _pendingImages?: Array<{ file: File; category: string }>
   _partialExits?: Array<{ quantity: number; exitPrice: number; exitTime?: string }>
 }
 
@@ -117,7 +131,7 @@ export interface TradeListParams {
   direction?: string
   instrument?: string
   date?: string
-  templateId?: string
+  accountId?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }

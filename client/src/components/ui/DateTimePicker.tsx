@@ -1,15 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { CalendarDays, Clock, ChevronUp, ChevronDown } from 'lucide-react'
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-
-const SESSION_RANGES: Record<string, { start: number; end: number } | null> = {
-  ASIA: { start: 18, end: 24 },
-  LONDON: { start: 2, end: 5 },
-  NEW_YORK: { start: 8, end: 17 },
-  CUSTOM: null,
-}
 
 interface DateTimePickerProps {
   id?: string
@@ -23,7 +17,7 @@ interface DateTimePickerProps {
   minDate?: string
 }
 
-export function DateTimePicker({ id, label, value, onChange, session, defaultTab = 'date', disableFuture = true, error, minDate }: DateTimePickerProps) {
+export function DateTimePicker({ id, label, value, onChange, defaultTab = 'date', disableFuture = true, error, minDate }: DateTimePickerProps) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'date' | 'time'>(defaultTab)
   const [year, setYear] = useState(new Date().getFullYear())
@@ -31,9 +25,24 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
   const [hours, setHours] = useState('12')
   const [minutes, setMinutes] = useState('00')
   const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+
+  function updatePos() {
+    const el = triggerRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const W = 320
+    const estH = 440
+    const left = Math.min(Math.max(8, r.left), window.innerWidth - W - 8)
+    let top = r.bottom + 8
+    if (top + estH > window.innerHeight - 8) top = Math.max(8, r.top - estH - 8)
+    setPos({ top, left })
+  }
   const minuteRef = useRef<HTMLInputElement>(null)
-  const holdTimerRef = useRef<ReturnType<typeof setTimeout>>()
-  const holdIntervalRef = useRef<ReturnType<typeof setInterval>>()
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const holdIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   const hoursUpFnRef = useRef<() => void>(() => {})
   const hoursDownFnRef = useRef<() => void>(() => {})
   const minutesUpFnRef = useRef<() => void>(() => {})
@@ -103,28 +112,27 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
   }, [value])
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    if (!open) return
+    updatePos()
+    const onScroll = () => updatePos()
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node
+      if (triggerRef.current?.contains(t) || panelRef.current?.contains(t)) return
+      setOpen(false)
     }
-    if (open) document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onScroll)
+    document.addEventListener('mousedown', onDown)
+    return () => {
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onScroll)
+      document.removeEventListener('mousedown', onDown)
+    }
   }, [open])
 
   const daysInMonth = new Date(year, month, 0).getDate()
   const firstDayOfWeek = new Date(year, month - 1, 1).getDay()
   const todayStr = new Date().toDateString()
-
-  const sessionRange = session ? SESSION_RANGES[session] : null
-
-  const allowedHours = useMemo(() => {
-    if (!sessionRange) return Array.from({ length: 24 }, (_, i) => i)
-    if (sessionRange.start < sessionRange.end) {
-      return Array.from({ length: sessionRange.end - sessionRange.start }, (_, i) => sessionRange.start + i)
-    }
-    return Array.from({ length: 24 - sessionRange.start + sessionRange.end }, (_, i) =>
-      (sessionRange.start + i) % 24
-    )
-  }, [sessionRange])
 
   const prevMonth = () => {
     if (month === 1) { setYear(y => y - 1); setMonth(12) }
@@ -171,20 +179,22 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
     <div className="space-y-1.5" ref={ref}>
       {label && <label className="block text-sm font-medium text-text-secondary">{label}</label>}
       <div className="relative">
-          <div id={id} className={`flex items-center gap-2.5 w-full rounded-xl border px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary transition-all duration-200 cursor-text ${error ? 'border-danger' : 'border-border/80 hover:border-primary/40'}`}
-            onClick={() => setOpen(true)}>
-            <div className="p-1.5 rounded-lg bg-primary/10 text-primary-light group-hover:bg-primary/20 transition-colors">
-              {defaultTab === 'time' ? <Clock className="w-4 h-4" /> : <CalendarDays className="w-4 h-4" />}
-            </div>
-            <span className="flex-1 text-text-primary font-medium">{formatDisplay(value) || (defaultTab === 'time' ? 'Pick time' : 'Pick date & time')}</span>
-            <Clock className="w-3.5 h-3.5 text-text-muted shrink-0" />
+        <button type="button" ref={triggerRef} id={id}
+          className={`flex items-center gap-2.5 w-full text-left rounded-xl border px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary transition-all duration-200 cursor-pointer ${error ? 'border-danger' : 'border-border/80 hover:border-primary/40'}`}
+          onClick={() => { updatePos(); setOpen((v) => !v) }}>
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary-light group-hover:bg-primary/20 transition-colors">
+            {defaultTab === 'time' ? <Clock className="w-4 h-4" /> : <CalendarDays className="w-4 h-4" />}
           </div>
+          <span className="flex-1 text-text-primary font-medium">{formatDisplay(value) || (defaultTab === 'time' ? 'Pick time' : 'Pick date & time')}</span>
+          <Clock className="w-3.5 h-3.5 text-text-muted shrink-0" />
+        </button>
       </div>
       {error && <p className="text-xs text-danger">{error}</p>}
 
-      {open && (
-        <div className="relative">
-          <div className="absolute z-50 top-1 left-0 w-80 bg-glass/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-5 space-y-4">
+      {open && pos && createPortal(
+        <div ref={panelRef}
+          style={{ position: 'fixed', top: pos.top, left: pos.left, width: 320 }}
+          className="z-[70] bg-elevated border border-border rounded-2xl shadow-2xl p-5 space-y-4">
             {defaultTab !== 'time' && (
               <div className="flex items-center justify-between">
                 <div className="flex gap-1">
@@ -237,7 +247,7 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
                           isDisabled
                             ? 'opacity-30 pointer-events-none'
                             : isSelected
-                              ? 'bg-primary text-text-primary shadow-lg shadow-primary/25'
+                              ? 'bg-primary text-white shadow-lg shadow-primary/25'
                               : isToday
                                 ? 'bg-primary/10 text-primary-light'
                                 : 'text-text-secondary hover:bg-card'
@@ -336,8 +346,8 @@ export function DateTimePicker({ id, label, value, onChange, session, defaultTab
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </div>,
+        document.body
       )}
     </div>
   )
