@@ -1,0 +1,44 @@
+[
+ {
+  "scenario": "DLL forex breach -> FAILED",
+  "acct": "FTMO FTMO Challenge (2-Step) 100k",
+  "before": "FAILED",
+  "after": "FAILED",
+  "pass": true
+ },
+ {
+  "scenario": "DLL futures breach -> DAILY_PAUSED",
+  "acct": "Goat Funded Sprint Challenge 25k",
+  "before": "ACTIVE",
+  "after": "FAILED",
+  "pass": false
+ },
+ {
+  "scenario": "Hard floor breach -> FAILED",
+  "acct": "Lucid Trading LucidPro 25k",
+  "before": "ACTIVE",
+  "after": "FAILED",
+  "pass": true
+ },
+ {
+  "scenario": "1-step target -> FUNDED",
+  "acct": "FTMO FTMO Challenge (1-Step) 100k",
+  "before": "ACTIVE/PHASE1",
+  "after": "ACTIVE/FUNDED",
+  "pass": true
+ },
+ {
+  "scenario": "2-step target -> PHASE2",
+  "acct": "FTMO FTMO Challenge (2-Step) 50k",
+  "before": "ACTIVE/PHASE2",
+  "after": "ACTIVE/PHASE2",
+  "pass": true
+ },
+ {
+  "scenario": "Idempotent reconcile (FUNDED + PHASE2)",
+  "acct": "AquaFunded 100k + FTMO 50k",
+  "before": "100000/50000",
+  "after": "100000/50000",
+  "pass": true
+ }
+]

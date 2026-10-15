@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { resetPassword } from '../../services/auth'
 import { AuthLayout } from '../../components/layout/AuthLayout'
 import { Input } from '../../components/ui/Input'
@@ -9,7 +9,6 @@ import toast from 'react-hot-toast'
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
   const token = searchParams.get('token') || ''
 
   const [form, setForm] = useState({ password: '', confirmPassword: '' })

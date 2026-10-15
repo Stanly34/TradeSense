@@ -124,7 +124,7 @@ export function InstrumentSelect({ value, onChange, groups, favorites = [], onTo
         onKeyDown={handleKeyDown}
         placeholder="Search or type instrument..."
         className={`block w-full rounded-xl border px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none transition-all ${
-          error ? 'border-danger focus:border-danger focus:shadow-[0_0_0_2px_rgba(239,68,68,0.12)]' : 'border-border/80 focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)]'
+          error ? 'border-danger focus:border-danger focus:shadow-[0_0_0_2px_rgba(239,68,68,0.12)]' : 'border-border/80 focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.12)]'
         }`}
       />
       {error && <p className="text-xs text-danger mt-1">{error}</p>}

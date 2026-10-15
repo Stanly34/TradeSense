@@ -2,6 +2,8 @@ import cron from 'node-cron'
 import { prisma } from '../lib/prisma.js'
 import { sendEmail } from './email.js'
 import { createNotification } from './notification.js'
+import { scanAllPropFirms } from './promoScanner.js'
+import { scanAllFirmsRules } from './rulesScanner.js'
 
 const UTC5_OFFSET = -5 * 60 * 60 * 1000
 const DAY_MS = 86400000
@@ -182,6 +184,13 @@ export function startCronJobs() {
     sendTradeReminders().catch((err) => console.error('[cron] Trade reminder error:', err))
   }, { timezone: 'Etc/GMT+5' })
 
+  cron.schedule('0 */6 * * *', () => {
+    scanAllPropFirms().catch((err) => console.error('[cron] Promo scan error:', err))
+    scanAllFirmsRules().catch((err) => console.error('[cron] Rules scan error:', err))
+  }, { timezone: 'Etc/GMT+5' })
+
   console.log('[cron] Weekly report: Sunday 18:00 UTC-5')
   console.log('[cron] Journal reminder: Daily 11:00 UTC-5')
+  console.log('[cron] Prop firm promo scan: every 6 hours')
+  console.log('[cron] Prop firm rules scan: every 6 hours')
 }

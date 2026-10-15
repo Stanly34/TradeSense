@@ -25,7 +25,7 @@ enum DiscountType {
   FIXED
 }
 
-enum TemplateType {
+enum AccountType {
   JOURNAL
   PROP_FIRM
   PERSONAL_ACCOUNT
@@ -71,6 +71,11 @@ enum MarketBias {
   NEUTRAL
 }
 
+enum TimeFormat {
+  H12
+  H24
+}
+
 model User {
   id             String   @id @default(uuid()) @db.Uuid
   fullName       String
@@ -82,6 +87,9 @@ model User {
   isVerified     Boolean  @default(false)
   isActive       Boolean  @default(true)
   lastLogin      DateTime?
+  timezone       String?  @default("America/New_York")
+  timeFormat     TimeFormat? @default(H12)
+  locale         String?  @default("en-US")
   subscriptionId String?  @db.Uuid
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -90,7 +98,7 @@ model User {
   trades         Trade[]
   journals       JournalEntry[]
   tags           Tag[]
-  templates      Template[]
+  accounts       Account[]
   aiReviews      AIReview[]
   aiChats        AIChat[]
   notifications      Notification[]
@@ -202,13 +210,22 @@ model Trade {
   marketBias  MarketBias?
   entryTime   DateTime?
   exitTime    DateTime?
+  dayKey      String?
+  phase       String?
   status      TradeStatus   @default(DRAFT)
   result      TradeResult?
   riskReward  Float?
   notes       String?
   reason      String?
   mistakes    String?
-  templateId      String?       @db.Uuid
+  lesson      String?
+  emotion     String?
+  confidence  Int?
+  executionRating Int?
+  patienceRating  Int?
+  disciplineRating Int?
+  setup       String?
+  accountId   String?       @db.Uuid
   checklistData   Json?
   isDeleted       Boolean       @default(false)
   deletedAt   DateTime?
@@ -216,7 +233,7 @@ model Trade {
   updatedAt   DateTime      @updatedAt
 
   user        User           @relation(fields: [userId], references: [id])
-  template    Template?      @relation(fields: [templateId], references: [id])
+  tradeAccount Account?      @relation(fields: [accountId], references: [id])
   images      TradeImage[]
   partialExits PartialExit[]
   timeline    TradeTimeline[]
@@ -227,6 +244,8 @@ model Trade {
   @@index([userId])
   @@index([instrument])
   @@index([createdAt])
+  @@index([dayKey])
+  @@index([phase])
 }
 
 model PartialExit {
@@ -328,21 +347,64 @@ model FavoriteInstrument {
   @@index([userId])
 }
 
-model Template {
+model Account {
   id            String       @id @default(uuid()) @db.Uuid
   userId        String       @db.Uuid
   name          String
   description   String?
-  type          TemplateType @default(JOURNAL)
+  type          AccountType  @default(JOURNAL)
+  phase         String       @default("PHASE1")
+  status        String       @default("ACTIVE")
+  pausedUntil   DateTime?
+  propFirmId    String?      @db.Uuid
   defaultValues Json?
   isFavorite    Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  user   User    @relation(fields: [userId], references: [id])
-  trades Trade[]
+  user       User               @relation(fields: [userId], references: [id])
+  propFirm   PropFirm?          @relation(fields: [propFirmId], references: [id])
+  trades     Trade[]
+  events     AccountEvent[]
+  daySnapshots AccountDaySnapshot[]
 
   @@index([userId])
+  @@index([propFirmId])
+}
+
+model AccountEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  accountId String   @db.Uuid
+  type      String
+  phase     String?
+  title     String
+  message   String?
+  balance   Float?
+  createdAt DateTime @default(now())
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([createdAt])
+}
+
+model AccountDaySnapshot {
+  id           String  @id @default(uuid()) @db.Uuid
+  accountId    String  @db.Uuid
+  day          String
+  phase        String
+  startBalance Float
+  endBalance   Float
+  pnl          Float
+  peakBalance  Float
+  floor        Float?
+  breached     Boolean @default(false)
+  endedAt      DateTime
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, day])
+  @@index([accountId])
 }
 
 model AIReview {
@@ -492,6 +554,41 @@ model Platform {
   updatedAt  DateTime @updatedAt
 
   @@unique([name, marketType])
+}
+
+model PropFirm {
+  id              String   @id @default(uuid()) @db.Uuid
+  name            String
+  slug            String   @unique
+  websiteUrl      String
+  description     String?
+  rating          Float    @default(0)
+  country         String   @default("US")
+  instruments     String   @default("FUTURES")
+  profitSplit     Int      @default(80)
+  payoutSpeed     String   @default("Bi-Weekly")
+  logoColor       String   @default("#7C3AED")
+  accountPrices   Json?
+  discountPercent Int      @default(0)
+  promoCode       String?
+  dailyPayouts    Boolean  @default(false)
+  noActivationFee Boolean  @default(false)
+  oneTimeFee      Boolean  @default(false)
+  instantFunding  Boolean  @default(false)
+  isFeatured      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  promoSourceUrl  String?
+  lastCodeCheckAt DateTime?
+  codeStatus      String   @default("MANUAL")
+  dealEndsAt      DateTime?
+  rulesSourceUrl  String?
+  lastRulesCheckAt DateTime?
+  rulesStatus     String   @default("MANUAL")
+  createdByUserId String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  accounts Account[]
 }
 
 model PendingRegistration {

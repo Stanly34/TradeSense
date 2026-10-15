@@ -1,21 +1,26 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { TrendingUp, Target, DollarSign, BarChart3, Activity, ExternalLink, Star, ChevronDown, TrendingDown } from 'lucide-react'
+import { TrendingUp, Target, DollarSign, BarChart3, Activity, ExternalLink, Star, ChevronDown, TrendingDown, Flame, Award, CalendarDays } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
+import { ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts'
 import * as dashboardService from '../services/dashboard'
-import * as templateService from '../services/templates'
+import * as accountService from '../services/accounts'
 import type { DashboardStats, MonthlyPerformance, ResultDistribution, InstrumentPerformance, RecentTrade } from '../services/dashboard'
-import type { Template, ChallengeProgress } from '../services/templates'
+import type { Account } from '../services/accounts'
+import { eventBus } from '../lib/eventBus'
+import { onStorageChange, broadcastStorage } from '../lib/crossTabSync'
 import { TradeCalendar } from '../components/dashboard/TradeCalendar'
+import { GradientText } from '../components/hub/Hub'
+import { motion } from 'framer-motion'
+import { fadeUp, staggerContainer } from '../lib/motion'
 import { cn } from '../lib/utils'
 import { DateRangePicker } from '../components/ui/DateRangePicker'
 
 function getChartColors() {
   const s = getComputedStyle(document.documentElement)
-  const primary = s.getPropertyValue('--color-primary').trim() || '#7C3AED'
-  const primaryLight = s.getPropertyValue('--color-primary-light').trim() || '#A78BFA'
+  const primary = s.getPropertyValue('--color-primary').trim() || '#4F46E5'
+  const primaryLight = s.getPropertyValue('--color-primary-light').trim() || '#A5B4FC'
   return {
     pie: [
       s.getPropertyValue('--color-success').trim() || '#22C55E',
@@ -80,6 +85,17 @@ function calculateEquityCurve(monthly: MonthlyPerformance[]) {
   })
 }
 
+function fmtMoney(v: number): string {
+  return `${v >= 0 ? '+' : '-'}$${Math.abs(Number(v)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+function getGreeting(): string {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good Morning'
+  if (h < 18) return 'Good Afternoon'
+  return 'Good Evening'
+}
+
 const STORAGE_KEY = 'tradesense_calendar_account'
 
 const PERIODS: { value: TimePeriod; label: string }[] = [
@@ -103,8 +119,8 @@ export function DashboardPage() {
   const [recentTrades, setRecentTrades] = useState<RecentTrade[]>([])
   const [overallStats, setOverallStats] = useState<DashboardStats | null>(null)
   const [todayStats, setTodayStats] = useState<DashboardStats | null>(null)
-  const [challengeProgress, setChallengeProgress] = useState<ChallengeProgress | null>(null)
-  const [accounts, setAccounts] = useState<Template[]>([])
+  const [weekStats, setWeekStats] = useState<DashboardStats | null>(null)
+  const [accounts, setAccounts] = useState<Account[]>([])
   const [colors, setColors] = useState(getChartColors)
   const [refreshKey, setRefreshKey] = useState(0)
   const [selectedAccountId, setSelectedAccountId] = useState<string>(() => {
@@ -117,6 +133,9 @@ export function DashboardPage() {
   const accountDropdownRef = useRef<HTMLDivElement>(null)
   const [calendarYear, setCalendarYear] = useState(new Date().getFullYear())
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth() + 1)
+  const [selectedPhase, setSelectedPhase] = useState<string | null>(null)
+  const [viewingDropdownOpen, setViewingDropdownOpen] = useState(false)
+  const viewingDropdownRef = useRef<HTMLDivElement>(null)
 
   const sortedAccounts = useMemo(() => {
     return [...accounts].sort((a, b) => {
@@ -127,15 +146,30 @@ export function DashboardPage() {
 
   const selectedAccount = useMemo(() => accounts.find(a => a.id === selectedAccountId) || null, [accounts, selectedAccountId])
 
-  function formatChallengeValue(value: number | undefined | null, accountSize: number | undefined | null): string {
-    if (!value || !accountSize) return '—'
-    const pct = ((value / accountSize) * 100).toFixed(0)
-    return `${pct}% ($${value.toLocaleString()})`
-  }
+  useEffect(() => { setSelectedPhase(null) }, [selectedAccountId])
+
+  const PHASE_NAMES = ['PHASE1', 'PHASE2', 'PHASE3', 'FUNDED']
+  const currentPhase = useMemo(() => {
+    if (!selectedAccount) return 'PHASE1'
+    if (selectedAccount.phase === 'FUNDED') return 'FUNDED'
+    const idx = Number((selectedAccount.defaultValues?.phaseIndex as number) ?? 0)
+    return PHASE_NAMES[Math.min(idx, PHASE_NAMES.length - 1)]
+  }, [selectedAccount])
+  const effectivePhase = selectedPhase ?? currentPhase
+  const availablePhases = useMemo(() => {
+    if (!selectedAccount) return []
+    const idx = Number((selectedAccount.defaultValues?.phaseIndex as number) ?? 0)
+    const phases: string[] = []
+    for (let i = 0; i <= Math.min(idx, 3); i++) {
+      phases.push(PHASE_NAMES[i])
+    }
+    if (selectedAccount.phase === 'FUNDED' && !phases.includes('FUNDED')) phases.push('FUNDED')
+    return phases
+  }, [selectedAccount])
 
   async function handleToggleFavorite(id: string) {
     try {
-      const updated = await templateService.toggleFavorite(id)
+      const updated = await accountService.toggleFavorite(id)
       setAccounts((prev) => {
         const next = prev.map((a) => a.id === id ? { ...a, isFavorite: updated.isFavorite } : a)
         next.sort((a, b) => {
@@ -152,25 +186,45 @@ export function DashboardPage() {
       if (accountDropdownRef.current && !accountDropdownRef.current.contains(e.target as Node)) {
         setAccountDropdownOpen(false)
       }
+      if (viewingDropdownRef.current && !viewingDropdownRef.current.contains(e.target as Node)) {
+        setViewingDropdownOpen(false)
+      }
     }
-    if (accountDropdownOpen) document.addEventListener('mousedown', handler)
+    if (accountDropdownOpen || viewingDropdownOpen) document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [accountDropdownOpen])
+  }, [accountDropdownOpen, viewingDropdownOpen])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, selectedAccountId)
+    broadcastStorage(STORAGE_KEY, selectedAccountId)
   }, [selectedAccountId])
+
+  useEffect(() => {
+    const offStorage = onStorageChange(STORAGE_KEY, (_k, v) => {
+      setSelectedAccountId(v || '')
+      setRefreshKey((k) => k + 1)
+    })
+    return () => offStorage()
+  }, [])
 
   useEffect(() => {
     setRefreshKey((k) => k + 1)
     const onFocus = () => setRefreshKey((k) => k + 1)
     window.addEventListener('focus', onFocus)
-    return () => window.removeEventListener('focus', onFocus)
+    const offAccounts = eventBus.on('accounts:changed', () => setRefreshKey((k) => k + 1))
+    const offTrades = eventBus.on('trades:changed', () => setRefreshKey((k) => k + 1))
+    const offPayouts = eventBus.on('payouts:changed', () => setRefreshKey((k) => k + 1))
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      offAccounts()
+      offTrades()
+      offPayouts()
+    }
   }, [location.key])
 
   useEffect(() => {
-    templateService.listTemplates().then((all) => {
-      setAccounts(all.filter((t) => t.type === 'PROP_FIRM' || t.type === 'PERSONAL_ACCOUNT'))
+    accountService.listAccounts().then((all) => {
+      setAccounts(all.filter((a) => a.type === 'PROP_FIRM' || a.type === 'PERSONAL_ACCOUNT'))
     }).catch(() => {})
   }, [refreshKey])
 
@@ -185,7 +239,7 @@ export function DashboardPage() {
   useEffect(() => {
     const t = selectedAccountId || undefined
     Promise.all([
-      dashboardService.getStats(t, sd, ed),
+      dashboardService.getStats(t, sd, ed, effectivePhase),
       dashboardService.getMonthlyPerformance(t, sd, ed),
       dashboardService.getResultDistribution(t, sd, ed),
       dashboardService.getInstrumentPerformance(t, sd, ed),
@@ -199,33 +253,34 @@ export function DashboardPage() {
         setRecentTrades(r)
       })
       .catch(() => {})
-  }, [selectedAccountId, sd, ed, refreshKey])
+  }, [selectedAccountId, sd, ed, refreshKey, effectivePhase])
 
   useEffect(() => {
     if (!selectedAccountId) { setOverallStats(null); return }
-    dashboardService.getStats(selectedAccountId)
+    dashboardService.getStats(selectedAccountId, undefined, undefined, effectivePhase)
       .then(setOverallStats)
       .catch(() => setOverallStats(null))
-  }, [selectedAccountId, refreshKey])
+  }, [selectedAccountId, refreshKey, effectivePhase])
 
   useEffect(() => {
-    if (!selectedAccountId) { setTodayStats(null); return }
+    const acct = selectedAccountId || undefined
     const y = new Date().getFullYear()
     const m = new Date().getMonth()
     const d = new Date().getDate()
     const dayStart = new Date(y, m, d).toISOString()
     const dayEnd = new Date(y, m, d, 23, 59, 59).toISOString()
-    dashboardService.getStats(selectedAccountId, dayStart, dayEnd)
+    dashboardService.getStats(acct, dayStart, dayEnd, effectivePhase)
       .then(setTodayStats)
       .catch(() => setTodayStats(null))
-  }, [selectedAccountId, refreshKey])
+  }, [selectedAccountId, refreshKey, effectivePhase])
 
   useEffect(() => {
-    if (!selectedAccountId) { setChallengeProgress(null); return }
-    templateService.getChallengeProgress(selectedAccountId)
-      .then(setChallengeProgress)
-      .catch(() => setChallengeProgress(null))
-  }, [selectedAccountId, refreshKey])
+    const acct = selectedAccountId || undefined
+    const range = getDateRange('WEEK')
+    dashboardService.getStats(acct, range.startDate, range.endDate, effectivePhase)
+      .then(setWeekStats)
+      .catch(() => setWeekStats(null))
+  }, [selectedAccountId, refreshKey, effectivePhase])
 
   useEffect(() => {
     if (timePeriod === 'CUSTOM' && customStart) {
@@ -266,9 +321,9 @@ export function DashboardPage() {
   const statCards = [
     { label: 'Total Trades', value: stats?.total ?? '--', icon: BarChart3, suffix: '' },
     { label: 'Win Rate', value: stats ? `${stats.winRate}%` : '--', icon: Target, suffix: '' },
-    { label: 'P&L', value: totalPnL >= 0 ? `+$${totalPnL.toFixed(0)}` : `-$${Math.abs(totalPnL).toFixed(0)}`, icon: DollarSign, suffix: '', positive: totalPnL >= 0 },
-    { label: 'Best Day', value: stats?.bestDay ? formatDateLabel(stats.bestDay.date) : '-', sub: stats?.bestDay ? `+$${stats.bestDay.pnl.toFixed(0)}` : '-', icon: TrendingUp, suffix: '', positive: true as const },
-    { label: 'Worst Day', value: stats?.worstDay ? formatDateLabel(stats.worstDay.date) : '-', sub: stats?.worstDay ? `-$${Math.abs(stats.worstDay.pnl).toFixed(0)}` : '-', icon: TrendingUp, suffix: '', positive: false as const },
+    { label: 'P&L', value: totalPnL >= 0 ? `+$${Number(totalPnL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : `-$${Math.abs(Number(totalPnL)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, suffix: '', positive: totalPnL >= 0 },
+    { label: 'Best Day', value: stats?.bestDay ? formatDateLabel(stats.bestDay.date) : '-', sub: stats?.bestDay ? `+$${Number(stats.bestDay.pnl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-', icon: TrendingUp, suffix: '', positive: true as const },
+    { label: 'Worst Day', value: stats?.worstDay ? formatDateLabel(stats.worstDay.date) : '-', sub: stats?.worstDay ? `-$${Math.abs(Number(stats.worstDay.pnl)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-', icon: TrendingUp, suffix: '', positive: false as const },
   ]
 
   function getProfitFactorColor(pf: number | null | undefined): { text: string; bg: string; label: string } {
@@ -282,12 +337,80 @@ export function DashboardPage() {
 
   const equityData = calculateEquityCurve(monthly)
 
+  const bestInstrument = useMemo(() => {
+    const candidates = instruments.filter((i) => i.total >= 2)
+    if (candidates.length === 0) return null
+    return [...candidates].sort((a, b) => b.winRate - a.winRate)[0]
+  }, [instruments])
+
+  const mostTradedInstrument = useMemo(() => {
+    if (instruments.length === 0) return null
+    return [...instruments].sort((a, b) => b.total - a.total)[0]
+  }, [instruments])
+
+  const bestMonth = useMemo(() => {
+    if (monthly.length === 0) return null
+    return [...monthly].sort((a, b) => b.pnl - a.pnl)[0]
+  }, [monthly])
+
+  const currentStreak = useMemo(() => {
+    let count = 0
+    let type: 'win' | 'loss' | null = null
+    for (const t of recentTrades) {
+      if (t.result !== 'WIN' && t.result !== 'LOSS') break
+      const next = t.result === 'WIN' ? 'win' : 'loss'
+      if (type === null) type = next
+      else if (type !== next) break
+      count++
+    }
+    return { count, type }
+  }, [recentTrades])
+
+  const insights = useMemo(() => {
+    const list: Array<{ icon: typeof Award; tone: string; title: string; text: string }> = []
+    if (!stats || stats.total === 0) return list
+    if (bestMonth) {
+      list.push({ icon: Award, tone: 'bg-success/10 text-success', title: 'Best month', text: `${bestMonth.month} earned ${fmtMoney(bestMonth.pnl)} over ${bestMonth.trades} trades.` })
+    }
+    if (stats.bestDay) {
+      list.push({ icon: TrendingUp, tone: 'bg-success/10 text-success', title: 'Most productive day', text: `${formatDateLabel(stats.bestDay.date)} brought ${fmtMoney(stats.bestDay.pnl)} — your best result.` })
+    }
+    if (stats.worstDay) {
+      list.push({ icon: TrendingDown, tone: 'bg-danger/10 text-danger', title: 'Hardest day', text: `${formatDateLabel(stats.worstDay.date)} cost ${fmtMoney(stats.worstDay.pnl)} — review what happened before repeating.` })
+    }
+    if (mostTradedInstrument) {
+      list.push({ icon: BarChart3, tone: 'bg-primary/10 text-primary', title: 'Home market', text: `${mostTradedInstrument.instrument} is your most traded market (${mostTradedInstrument.total} trades).` })
+    }
+    if (stats.profitFactor !== null && stats.profitFactor !== undefined && stats.profitFactor >= 1.2) {
+      list.push({ icon: DollarSign, tone: 'bg-primary/10 text-primary', title: 'Profit factor', text: `Profit factor ${stats.profitFactor.toFixed(2)} — you earn ${stats.profitFactor.toFixed(2)} for every 1 unit risked.` })
+    }
+    if (stats.winRate >= 55) {
+      list.push({ icon: Target, tone: 'bg-success/10 text-success', title: 'Winning edge', text: `You win ${stats.winRate}% of trades — above 50% keeps the account growing.` })
+    }
+    return list.slice(0, 6)
+  }, [stats, bestMonth, mostTradedInstrument])
+
+  const todaySubText = todayStats
+    ? todayStats.total === 0
+      ? 'No trades today yet'
+      : `${todayStats.total} trade${todayStats.total !== 1 ? 's' : ''} today`
+    : 'No trades today yet'
+
+  const weekSubText = weekStats
+    ? weekStats.total === 0
+      ? 'No trades this week yet'
+      : `${weekStats.total} trade${weekStats.total !== 1 ? 's' : ''} this week`
+    : 'No trades this week yet'
+
   return (
-    <div className="p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="p-6 lg:p-8 space-y-6">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">
-            Welcome back, {user?.fullName || user?.username}
+            {getGreeting()},{' '}
+            <GradientText animated className="font-extrabold">
+              {user?.fullName || user?.username}
+            </GradientText>
           </h1>
           <p className="text-text-secondary mt-1 text-sm">Here's your trading overview.</p>
         </div>
@@ -296,16 +419,39 @@ export function DashboardPage() {
           <span className="text-xs text-text-muted">Today</span>
           <span className="text-xs font-medium text-text-primary">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-col gap-3">
+      <motion.div variants={fadeUp} className="hidden lg:grid grid-cols-2 gap-4">
+        <div className="card p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <DollarSign className="w-5 h-5 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Today's Profit</p>
+            <p className={`text-xl font-bold mt-0.5 ${todayStats ? (todayStats.pnl < 0 ? 'text-danger' : 'text-success') : 'text-text-primary'}`}>{todayStats ? fmtMoney(todayStats.pnl) : '—'}</p>
+            <p className="text-xs text-text-muted mt-0.5 truncate">{todaySubText}</p>
+          </div>
+        </div>
+        <div className="card p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+            <CalendarDays className="w-5 h-5 text-success" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Week Profit</p>
+            <p className={`text-xl font-bold mt-0.5 ${weekStats ? (weekStats.pnl < 0 ? 'text-danger' : 'text-success') : 'text-text-primary'}`}>{weekStats ? fmtMoney(weekStats.pnl) : '—'}</p>
+            <p className="text-xs text-text-muted mt-0.5 truncate">{weekSubText}</p>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="flex flex-col gap-3">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="w-64 max-w-full relative" ref={accountDropdownRef}>
             <button type="button" onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
               className={cn(
                 'flex items-center gap-2 w-full rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm transition-all duration-200',
                 'hover:border-primary/40',
-                accountDropdownOpen && 'border-primary shadow-[0_0_0_2px_rgba(124,58,237,0.12)]',
+                accountDropdownOpen && 'border-primary shadow-[0_0_0_2px_rgba(79,70,229,0.12)]',
               )}>
               <span className={cn('flex-1 text-left', !selectedAccountId && 'text-text-muted')}>
                 {selectedAccountId
@@ -315,11 +461,11 @@ export function DashboardPage() {
               <ChevronDown className={`w-4 h-4 text-text-muted transition-transform duration-200 ${accountDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
             {accountDropdownOpen && (
-              <div className="absolute z-50 top-full mt-1 left-0 w-full bg-glass/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl py-1 max-h-60 overflow-y-auto">
+              <div className="absolute z-50 top-full mt-1 left-0 w-full bg-elevated border border-border rounded-xl shadow-2xl py-1 max-h-60 overflow-y-auto">
                 <button key="" type="button" onClick={() => { setSelectedAccountId(''); setAccountDropdownOpen(false) }}
                   className={cn(
                     'w-full text-left px-3.5 py-2.5 text-sm transition-colors',
-                    !selectedAccountId ? 'bg-primary/15 text-primary-light' : 'text-text-secondary hover:bg-card'
+                    !selectedAccountId ? 'bg-primary text-white' : 'text-text-primary hover:bg-hover'
                   )}>
                   All Accounts
                 </button>
@@ -327,7 +473,7 @@ export function DashboardPage() {
                   <div key={a.id}
                     className={cn(
                       'flex items-center justify-between px-3.5 py-2.5 text-sm transition-colors',
-                      selectedAccountId === a.id ? 'bg-primary/15 text-primary-light' : 'text-text-secondary hover:bg-card'
+                      selectedAccountId === a.id ? 'bg-primary text-white' : 'text-text-primary hover:bg-hover'
                     )}>
                     <button type="button" onClick={() => { setSelectedAccountId(a.id); setAccountDropdownOpen(false) }}
                       className="flex-1 text-left">
@@ -364,11 +510,11 @@ export function DashboardPage() {
             onEndChange={setCustomEnd}
           />
         )}
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div className="col-span-2 lg:col-span-1 bg-gradient-to-br from-brand/15 via-brand/5 to-transparent rounded-2xl border border-primary/15 p-5 flex flex-col items-center justify-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),transparent)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.15),transparent)] pointer-events-none" />
           <p className="text-xs text-text-muted uppercase tracking-widest font-medium relative z-10">TradeSense Score</p>
           <p className="text-4xl font-bold text-text-primary mt-2 relative z-10">{Math.min(100, Math.max(0, tradesenseScore))}</p>
           <div className="w-full mt-3 h-1.5 bg-hover/50 rounded-full overflow-hidden relative z-10">
@@ -380,7 +526,7 @@ export function DashboardPage() {
         </div>
 
         {statCards.map((stat) => (
-          <div key={stat.label} className="card card-hover p-5">
+          <motion.div key={stat.label} variants={fadeUp} className="card card-hover p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs text-text-muted uppercase tracking-widest font-medium">{stat.label}</p>
               <stat.icon className={`w-4 h-4 ${'positive' in stat ? (stat.positive ? 'text-success' : 'text-danger') : 'text-primary-light'}`} />
@@ -393,23 +539,23 @@ export function DashboardPage() {
                 {stat.sub}
               </p>
             )}
-          </div>
+          </motion.div>
         ))}
 
-        {selectedAccountId && selectedAccount?.defaultValues?.currentAccountSize && (
-          <div className="card p-5">
+        {selectedAccountId && !!selectedAccount?.defaultValues?.currentAccountSize && (
+          <motion.div variants={fadeUp} className="card p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Current Balance</p>
               <DollarSign className="w-4 h-4 text-success" />
             </div>
             <p className="mt-3 text-3xl font-bold text-text-primary">
-              ${(selectedAccount.defaultValues.currentAccountSize as number).toLocaleString()}
+              ${(selectedAccount.defaultValues.currentAccountSize as number).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-          </div>
+          </motion.div>
         )}
 
         {stats && (
-          <div className="card p-5">
+          <motion.div variants={fadeUp} className="card p-5">
             <div className="flex items-center justify-between">
               <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Profit Factor</p>
               <Activity className={`w-4 h-4 ${getProfitFactorColor(stats.profitFactor).text}`} />
@@ -420,19 +566,81 @@ export function DashboardPage() {
             <p className={`text-xs font-medium ${getProfitFactorColor(stats.profitFactor).text}/70`}>
               {getProfitFactorColor(stats.profitFactor).label}
             </p>
-          </div>
+          </motion.div>
         )}
 
-      </div>
+      </motion.div>
 
       {/* Challenge Metrics - Prop Firm Style */}
-      {selectedAccountId && selectedAccount && overallStats && (
+      {selectedAccountId && selectedAccount && overallStats && selectedAccount.type === 'PROP_FIRM' && (
         <div className="space-y-6">
+          {availablePhases.length > 0 && (
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-text-muted font-medium">Phase:</span>
+                <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-primary/20 text-primary">
+                  {currentPhase.replace('PHASE', 'Phase ')} {currentPhase === 'FUNDED' ? '• Current' : '• Current'}
+                </span>
+                {selectedPhase !== null && (
+                  <span className="px-3 py-1.5 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
+                    Viewing: {selectedPhase.replace('PHASE', 'Phase ')}
+                  </span>
+                )}
+              </div>
+              {availablePhases.length > 1 && (
+                <div className="relative" ref={viewingDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setViewingDropdownOpen(!viewingDropdownOpen)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border border-border/80 bg-input/60 text-text-secondary hover:text-text-primary hover:border-primary/40 transition-all"
+                  >
+                    {selectedPhase ? `Viewing: ${selectedPhase.replace('PHASE', 'Phase ')}` : 'Viewing: Current'}
+                    <ChevronDown className={`w-3.5 h-3.5 text-text-muted transition-transform duration-200 ${viewingDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {viewingDropdownOpen && (
+                    <div className="absolute z-50 top-full mt-1 right-0 w-56 bg-elevated border border-border rounded-xl shadow-2xl py-1">
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedPhase(null); setViewingDropdownOpen(false) }}
+                        className={`w-full text-left px-3.5 py-2.5 text-sm transition-colors ${
+                          selectedPhase === null ? 'bg-primary text-white' : 'text-text-primary hover:bg-hover'
+                        }`}
+                      >
+                        Current ({currentPhase.replace('PHASE', 'Phase ')})
+                      </button>
+                      <div className="h-px bg-border my-1" />
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedPhase('ALL'); setViewingDropdownOpen(false) }}
+                        className={`w-full text-left px-3.5 py-2.5 text-sm transition-colors ${
+                          selectedPhase === 'ALL' ? 'bg-primary text-white' : 'text-text-primary hover:bg-hover'
+                        }`}
+                      >
+                        All Phases
+                      </button>
+                      {availablePhases.filter(p => p !== currentPhase).map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => { setSelectedPhase(p); setViewingDropdownOpen(false) }}
+                          className={`w-full text-left px-3.5 py-2.5 text-sm transition-colors ${
+                            selectedPhase === p ? 'bg-primary text-white' : 'text-text-primary hover:bg-hover'
+                          }`}
+                        >
+                          {p.replace('PHASE', 'Phase ')}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 bg-[#171A21] border border-white/5 shadow-[0_8px_30px_rgba(0,0,0,.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,.45)]">
+            <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 card hover:-translate-y-0.5 hover:shadow-md">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs sm:text-sm font-semibold text-[#B8C0D4]">Daily Drawdown Level</p>
-                <span className="bg-[#222734] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+                <p className="text-xs sm:text-sm font-semibold text-text-secondary">Daily Drawdown Level</p>
+                <span className="bg-hover px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-text-primary whitespace-nowrap">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
                     const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
@@ -443,7 +651,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-end gap-2 mt-1">
-                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-none">
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-text-primary leading-none">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
                     const pnl = todayStats?.pnl || 0
@@ -455,25 +663,25 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="mt-6 sm:mt-8">
-                <div className="h-4 sm:h-5 lg:h-6 bg-[#252A35] rounded-full overflow-hidden relative">
-                  <div className="h-full rounded-full transition-all duration-[400ms] bg-[#4D6BFF]"
+                <div className="h-4 sm:h-5 lg:h-6 bg-hover rounded-full overflow-hidden relative">
+                  <div className="h-full rounded-full transition-all duration-[400ms] bg-info"
                     style={{ width: `${(() => {
                       const limit = (selectedAccount.defaultValues?.maxDailyDrawdown as number) || 0
                       const pnl = todayStats?.pnl || 0
                       const used = Math.abs(Math.min(0, pnl))
                       return limit ? Math.min(100, (used / limit) * 100) : 0
                     })()}%` }} />
-                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
+                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-text-muted">
                     <span>0%</span><span>100%</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 bg-[#171A21] border border-white/5 shadow-[0_8px_30px_rgba(0,0,0,.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,.45)]">
+            <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 card hover:-translate-y-0.5 hover:shadow-md">
               <div className="flex items-center justify-between mb-1">
-                <p className="text-xs sm:text-sm font-semibold text-[#B8C0D4]">Max Drawdown Level</p>
-                <span className="bg-[#222734] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+                <p className="text-xs sm:text-sm font-semibold text-text-secondary">Max Drawdown Level</p>
+                <span className="bg-hover px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-text-primary whitespace-nowrap">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.maxTotalDrawdown as number) || 0
                     const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
@@ -484,7 +692,7 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-end gap-2 mt-1">
-                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-none">
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-text-primary leading-none">
                   {(() => {
                     const dv = selectedAccount.defaultValues || {}
                     const limit = (dv.maxTotalDrawdown as number) || 0
@@ -492,7 +700,7 @@ export function DashboardPage() {
                     const currentBalance = (dv.currentAccountSize as number) || 0
                     const pnl = overallStats.pnl || 0
                     if (!limit) return '—'
-                    const used = challengeProgress?.maxDrawdown ?? Math.max(
+                    const used = Math.max(
                       currentBalance > 0 && accountSize > 0 ? Math.max(0, accountSize - currentBalance) : 0,
                       Math.abs(Math.min(0, pnl))
                     )
@@ -502,8 +710,8 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="mt-6 sm:mt-8">
-                <div className="h-4 sm:h-5 lg:h-6 bg-[#252A35] rounded-full overflow-hidden relative">
-                  <div className="h-full rounded-full transition-all duration-[400ms] bg-[#4D6BFF]"
+                <div className="h-4 sm:h-5 lg:h-6 bg-hover rounded-full overflow-hidden relative">
+                  <div className="h-full rounded-full transition-all duration-[400ms] bg-info"
                     style={{ width: `${(() => {
                       const dv = selectedAccount.defaultValues || {}
                       const limit = (dv.maxTotalDrawdown as number) || 0
@@ -511,13 +719,13 @@ export function DashboardPage() {
                       const currentBalance = (dv.currentAccountSize as number) || 0
                       const pnl = overallStats.pnl || 0
                       if (!limit) return 0
-                      const used = challengeProgress?.maxDrawdown ?? Math.max(
+                      const used = Math.max(
                         currentBalance > 0 && accountSize > 0 ? Math.max(0, accountSize - currentBalance) : 0,
                         Math.abs(Math.min(0, pnl))
                       )
                       return Math.min(100, (used / limit) * 100)
                     })()}%` }} />
-                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
+                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-text-muted">
                     <span>0%</span><span>100%</span>
                   </div>
                 </div>
@@ -525,10 +733,11 @@ export function DashboardPage() {
             </div>
           </div>
 
-          <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 bg-[#171A21] border border-white/5 shadow-[0_8px_30px_rgba(0,0,0,.35)] hover:-translate-y-0.5 hover:shadow-[0_12px_40px_rgba(0,0,0,.45)]">
+          {selectedAccount.phase !== 'FUNDED' && (selectedAccount.defaultValues?.targetProfit as number || 0) > 0 && (
+          <div className="group relative overflow-hidden rounded-[20px] p-5 sm:p-6 lg:p-7 transition-all duration-250 card hover:-translate-y-0.5 hover:shadow-md">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-xs sm:text-sm font-semibold text-[#B8C0D4]">Target Profit</p>
-              <span className="bg-[#222734] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-white whitespace-nowrap">
+              <p className="text-xs sm:text-sm font-semibold text-text-secondary">Target Profit</p>
+              <span className="bg-hover px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-text-primary whitespace-nowrap">
                   {(() => {
                     const limit = (selectedAccount.defaultValues?.targetProfit as number) || 0
                     const accountSize = (selectedAccount.defaultValues?.accountSize as number) || 0
@@ -539,20 +748,20 @@ export function DashboardPage() {
                 </span>
               </div>
               <div className="flex items-end gap-2 mt-1 flex-wrap">
-                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-none">
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-text-primary leading-none">
                   {(() => {
                     const dv = selectedAccount.defaultValues || {}
                     const limit = (dv.targetProfit as number) || 0
                     const accountSize = (dv.accountSize as number) || 0
                     const currentBalance = (dv.currentAccountSize as number) || 0
+                    const startingBalance = (dv.startingBalance as number) || accountSize
                     const pnl = overallStats.pnl || 0
                     if (!limit) return '—'
-                    const hasBalance = currentBalance > 0 && accountSize > 0
-                    const progress = hasBalance ? currentBalance - accountSize : pnl
+                    const hasBalance = currentBalance > 0 && startingBalance > 0
                     const rem = hasBalance
                       ? Math.max(0, (accountSize + limit) - currentBalance)
                       : Math.max(0, limit - pnl)
-                    return `$${rem.toLocaleString()}`
+                    return `$${Number(rem).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                   })()}
                 </span>
                 {(() => {
@@ -560,14 +769,15 @@ export function DashboardPage() {
                   const limit = (dv.targetProfit as number) || 0
                   const accountSize = (dv.accountSize as number) || 0
                   const currentBalance = (dv.currentAccountSize as number) || 0
+                  const startingBalance = (dv.startingBalance as number) || accountSize
                   const pnl = overallStats.pnl || 0
                   if (!limit) return null
-                  const hasBalance = currentBalance > 0 && accountSize > 0
-                  const progress = hasBalance ? currentBalance - accountSize : pnl
+                  const hasBalance = currentBalance > 0 && startingBalance > 0
+                  const progress = hasBalance ? currentBalance - startingBalance : pnl
                   const pct = limit > 0 ? (progress / limit) * 100 : 0
                   return (
                     <>
-                      <span className="text-lg sm:text-xl font-medium text-[#D5D8DF] self-end mb-1">left</span>
+                      <span className="text-lg sm:text-xl font-medium text-text-secondary self-end mb-1">left</span>
                       <span className="text-sm sm:text-base font-semibold text-success self-end mb-1">
                         ({Math.round(pct)}%)
                       </span>
@@ -576,7 +786,7 @@ export function DashboardPage() {
                 })()}
               </div>
               <div className="mt-6 sm:mt-8">
-                <div className="h-4 sm:h-5 lg:h-6 bg-[#252A35] rounded-full overflow-hidden relative">
+                <div className="h-4 sm:h-5 lg:h-6 bg-hover rounded-full overflow-hidden relative">
                   <div className="h-full rounded-full transition-all duration-[400ms] bg-success"
                     style={{ width: `${(() => {
                       const dv = selectedAccount.defaultValues || {}
@@ -589,16 +799,15 @@ export function DashboardPage() {
                       const progress = hasBalance ? currentBalance - accountSize : pnl
                       return Math.min(100, Math.max(0, (progress / limit) * 100))
                     })()}%` }} />
-                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-white">
+                  <div className="absolute inset-0 flex items-center justify-between px-2 text-xs font-bold text-text-muted">
                     <span>0%</span><span>100%</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-
+           )}
+        </div>
+      )}
 
       <TradeCalendar
         selectedAccountId={selectedAccountId}
@@ -607,7 +816,51 @@ export function DashboardPage() {
         year={calendarYear}
         month={calendarMonth}
         onMonthChange={handleCalendarMonthChange}
+        onViewDay={(dateStr) => navigate(`/trades?date=${dateStr}`)}
+        phase={effectivePhase}
       />
+
+      {/* Trading Behaviour - below calendar */}
+      {stats && stats.total > 0 && (
+        <div className="card p-5">
+          <h2 className="text-sm font-semibold text-text-primary mb-4">Trading Behaviour</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="rounded-xl bg-surface border border-border/50 p-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <DollarSign className="w-4 h-4 text-primary" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Avg P&amp;L / Trade</p>
+              <p className={`text-lg font-bold mt-1 ${stats.pnl >= 0 ? 'text-success' : 'text-danger'}`}>
+                {fmtMoney(stats.pnl / stats.total)}
+              </p>
+            </div>
+            <div className="rounded-xl bg-surface border border-border/50 p-4">
+              <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center mb-2">
+                <TrendingUp className="w-4 h-4 text-success" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Best Instrument</p>
+              <p className="text-lg font-bold text-text-primary mt-1">{bestInstrument ? bestInstrument.instrument : '—'}</p>
+              <p className="text-xs text-text-muted mt-0.5">{bestInstrument ? `${bestInstrument.winRate}% win rate` : 'Need data'}</p>
+            </div>
+            <div className="rounded-xl bg-surface border border-border/50 p-4">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <BarChart3 className="w-4 h-4 text-primary" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Most Traded</p>
+              <p className="text-lg font-bold text-text-primary mt-1">{mostTradedInstrument ? mostTradedInstrument.instrument : '—'}</p>
+              <p className="text-xs text-text-muted mt-0.5">{mostTradedInstrument ? `${mostTradedInstrument.total} trades` : 'no data'}</p>
+            </div>
+            <div className="rounded-xl bg-surface border border-border/50 p-4">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-2 ${currentStreak.type === 'win' ? 'bg-success/10 text-success' : currentStreak.type === 'loss' ? 'bg-danger/10 text-danger' : 'bg-primary/10 text-primary'}`}>
+                <Flame className="w-4 h-4" />
+              </div>
+              <p className="text-xs text-text-muted uppercase tracking-widest font-medium">Current Streak</p>
+              <p className="text-lg font-bold text-text-primary mt-1">{currentStreak.count > 0 ? `${currentStreak.count} ${currentStreak.type}${currentStreak.count > 1 ? 's' : ''}` : '—'}</p>
+              <p className="text-xs text-text-muted mt-0.5">{currentStreak.count > 0 ? 'keep it going' : 'no recent streak'}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card p-5">
@@ -617,11 +870,11 @@ export function DashboardPage() {
           ) : (
             <ResponsiveContainer width="100%" height={280}>
               <LineChart data={equityData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(30,30,56,0.5)" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#5D5D7A' }} tickLine={false} axisLine={{ stroke: 'rgba(30,30,56,0.5)' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#5D5D7A' }} tickLine={false} axisLine={{ stroke: 'rgba(30,30,56,0.5)' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} tickLine={false} axisLine={{ stroke: 'var(--color-border)' }} />
+                <YAxis tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} tickLine={false} axisLine={{ stroke: 'var(--color-border)' }} />
                 <Tooltip
-                  contentStyle={{ borderRadius: '16px', border: '1px solid rgba(30,30,56,0.8)', background: 'rgba(26,26,46,0.9)', backdropFilter: 'blur(16px)', color: '#fff', fontSize: '13px' }}
+                  contentStyle={{ borderRadius: '16px', border: '1px solid var(--color-border)', background: 'var(--color-card)', backdropFilter: 'blur(16px)', color: 'var(--color-text-primary)', fontSize: '13px' }}
                 />
                 <Line type="monotone" dataKey="equity" stroke={colors.primary} strokeWidth={2.5} dot={{ fill: colors.primary, r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: colors.primaryLight }} />
               </LineChart>
@@ -651,7 +904,7 @@ export function DashboardPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ borderRadius: '16px', border: '1px solid rgba(30,30,56,0.8)', background: 'rgba(26,26,46,0.9)', backdropFilter: 'blur(16px)', color: '#fff', fontSize: '13px' }}
+                    contentStyle={{ borderRadius: '16px', border: '1px solid var(--color-border)', background: 'var(--color-card)', backdropFilter: 'blur(16px)', color: 'var(--color-text-primary)', fontSize: '13px' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -692,9 +945,9 @@ export function DashboardPage() {
         </div>
       )}
 
-      <div className="card p-5">
+      <motion.div variants={fadeUp} className="card p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-text-primary">Recent Trades</h2>
+          <h2 className="text-sm font-semibold text-text-primary">Recent Journals</h2>
           <button onClick={() => navigate('/trades')} className="text-xs text-primary-light hover:text-primary-light/80 transition-colors">View all</button>
         </div>
         {recentTrades.length === 0 ? (
@@ -734,7 +987,31 @@ export function DashboardPage() {
             })}
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-text-primary">Insights</h2>
+          <Award className="w-4 h-4 text-primary" />
+        </div>
+        {insights.length === 0 ? (
+          <div className="py-8 text-center text-text-muted text-sm">No insights yet — journal your trades to unlock them.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {insights.map((ins) => (
+              <div key={ins.title} className="flex items-start gap-3 rounded-xl bg-surface border border-border/50 p-3.5">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${ins.tone}`}>
+                  <ins.icon className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-text-primary">{ins.title}</p>
+                  <p className="text-xs text-text-muted mt-0.5">{ins.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   )
 }

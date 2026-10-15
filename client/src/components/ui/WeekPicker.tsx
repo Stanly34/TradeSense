@@ -162,15 +162,15 @@ export function WeekPicker({ label, value, onChange }: WeekPickerProps) {
         </div>
 
         {open && (
-          <div className="absolute z-50 mt-1 left-0 w-80 bg-[#1E1E2E] border border-[#2A2A3E] rounded-2xl shadow-2xl p-5 space-y-2">
+          <div className="absolute z-50 mt-1 left-0 w-80 bg-elevated border border-border rounded-2xl shadow-xl p-5 space-y-2">
             <div className="flex items-center justify-between">
               <button type="button" onClick={prevMonth}
-                className="p-1.5 text-text-muted hover:text-white hover:bg-[#2A2A3E] rounded-lg transition-colors">
+                className="p-1.5 text-text-muted hover:text-text-primary hover:bg-hover rounded-lg transition-colors">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="text-sm font-semibold text-white">{monthLabel}</span>
+              <span className="text-sm font-semibold text-text-primary">{monthLabel}</span>
               <button type="button" onClick={nextMonth}
-                className="p-1.5 text-text-muted hover:text-white hover:bg-[#2A2A3E] rounded-lg transition-colors">
+                className="p-1.5 text-text-muted hover:text-text-primary hover:bg-hover rounded-lg transition-colors">
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -186,16 +186,16 @@ export function WeekPicker({ label, value, onChange }: WeekPickerProps) {
                   <button key={i} type="button" onClick={() => selectWeek(mon)}
                     className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm transition-all ${
                       isSelected
-                        ? 'bg-primary/20 text-white font-semibold ring-1 ring-primary/50'
+                        ? 'bg-primary/15 text-primary font-semibold ring-1 ring-primary/40'
                         : inMonth
-                          ? 'text-text-primary hover:bg-[#2A2A3E]'
-                          : 'text-text-muted/30 hover:bg-[#2A2A3E]'
+                          ? 'text-text-primary hover:bg-hover'
+                          : 'text-text-muted/40 hover:bg-hover'
                     }`}>
                     <span className="flex items-center gap-2">
                       {formatDateLong(mon)}
-                      {isCurrent && <span className="text-[10px] font-bold text-primary-light uppercase tracking-wider">Current</span>}
+                      {isCurrent && <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Current</span>}
                     </span>
-                    <span className={`text-xs font-medium ${isSelected ? 'text-primary-light' : 'text-text-muted'}`}>→</span>
+                    <span className={`text-xs font-medium ${isSelected ? 'text-primary' : 'text-text-muted'}`}>→</span>
                     <span>{formatDateLong(fri)}</span>
                   </button>
                 )

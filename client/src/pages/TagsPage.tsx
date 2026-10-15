@@ -30,7 +30,7 @@ export function TagsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchDeleteCount, setBatchDeleteCount] = useState(0)
 
-  const longTimerRef = useRef<ReturnType<typeof setTimeout>>()
+  const longTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const longPressTriggeredRef = useRef(false)
 
   useEffect(() => {
@@ -163,7 +163,7 @@ export function TagsPage() {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="New checklist item..."
-            className="flex-1 px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.2)] transition-all"
+            className="flex-1 px-3 py-2 text-sm bg-input border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.2)] transition-all"
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
           />
           <Button size="sm" onClick={handleCreate} leftIcon={<Plus className="w-3.5 h-3.5" />}>
@@ -178,7 +178,6 @@ export function TagsPage() {
         ) : (
           <>
           <SelectionBar
-            selecting={selecting}
             count={selectedIds.size}
             onCancel={cancelSelect}
             onDelete={() => setBatchDeleteCount(selectedIds.size)}

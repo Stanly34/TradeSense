@@ -23,7 +23,7 @@ export async function getTrade(req: Request, res: Response) {
 
 export async function listTrades(req: Request, res: Response) {
   try {
-    const { page, limit, status, result, direction, instrument, date, templateId, sortBy, sortOrder } = req.query
+    const { page, limit, status, result, direction, instrument, date, accountId, sortBy, sortOrder } = req.query
     const result_ = await tradeService.listTrades(req.user!.userId, {
       page: page ? parseInt(page as string) : undefined,
       limit: limit ? parseInt(limit as string) : undefined,
@@ -32,7 +32,7 @@ export async function listTrades(req: Request, res: Response) {
       direction: direction as string,
       instrument: instrument as string,
       date: date as string,
-      templateId: templateId as string,
+      accountId: accountId as string,
       sortBy: sortBy as string,
       sortOrder: sortOrder as 'asc' | 'desc',
     })

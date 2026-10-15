@@ -79,7 +79,7 @@ export function DateRangePicker({ startDate, endDate, onStartChange, onEndChange
         className={cn(
           'flex items-center gap-2.5 rounded-xl border border-border/80 px-3.5 py-2.5 text-sm bg-input/60 backdrop-blur-sm transition-all duration-200',
           'hover:border-primary/40',
-          open && 'border-primary shadow-[0_0_0_2px_rgba(124,58,237,0.12)]'
+          open && 'border-primary shadow-[0_0_0_2px_rgba(79,70,229,0.12)]'
         )}>
         <div className="p-1.5 rounded-lg bg-primary/10 text-primary-light">
           <CalendarDays className="w-4 h-4" />
@@ -94,20 +94,20 @@ export function DateRangePicker({ startDate, endDate, onStartChange, onEndChange
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-2 left-0 w-72 sm:w-80 bg-glass/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-5 space-y-4">
+        <div className="absolute z-50 top-full mt-2 left-0 w-72 sm:w-80 bg-elevated border border-border rounded-2xl shadow-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex gap-1 bg-card/50 rounded-lg p-0.5">
               <button type="button" onClick={() => setMode('start')}
                 className={cn(
                   'text-xs font-medium px-3 py-1.5 rounded-lg transition-colors',
-                  mode === 'start' ? 'bg-primary text-text-primary shadow-sm' : 'text-text-muted hover:text-text-secondary'
+                  mode === 'start' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-secondary'
                 )}>
                 Start
               </button>
               <button type="button" onClick={() => setMode('end')}
                 className={cn(
                   'text-xs font-medium px-3 py-1.5 rounded-lg transition-colors',
-                  mode === 'end' ? 'bg-primary text-text-primary shadow-sm' : 'text-text-muted hover:text-text-secondary'
+                  mode === 'end' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-secondary'
                 )}>
                 End
               </button>
@@ -143,7 +143,7 @@ export function DateRangePicker({ startDate, endDate, onStartChange, onEndChange
                   className={cn(
                     'text-sm py-2 rounded-lg font-medium transition-colors',
                     y === year
-                      ? 'bg-primary text-text-primary'
+                      ? 'bg-primary text-white'
                       : 'text-text-secondary hover:bg-card'
                   )}>
                   {y}
@@ -199,13 +199,13 @@ export function DateRangePicker({ startDate, endDate, onStartChange, onEndChange
                     isFuture
                       ? 'opacity-30 pointer-events-none'
                       : isSelected
-                        ? 'bg-primary text-text-primary shadow-lg shadow-primary/25'
+                        ? 'bg-primary text-white shadow-lg shadow-primary/25'
                         : isToday
                           ? 'bg-primary/10 text-primary-light'
                           : 'text-text-secondary hover:bg-card',
                     !isFuture && inRange && 'bg-primary/10 rounded-none',
-                    !isFuture && isStart && 'rounded-r-none bg-primary text-text-primary shadow-lg shadow-primary/25',
-                    !isFuture && isEnd && 'rounded-l-none bg-primary text-text-primary shadow-lg shadow-primary/25'
+                    !isFuture && isStart && 'rounded-r-none bg-primary text-white shadow-lg shadow-primary/25',
+                    !isFuture && isEnd && 'rounded-l-none bg-primary text-white shadow-lg shadow-primary/25'
                   )}>
                   {d}
                 </button>

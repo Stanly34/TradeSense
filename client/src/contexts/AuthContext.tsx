@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import * as authService from '../services/auth'
-import api, { setAccessToken, getAccessToken } from '../services/api'
+import { setAccessToken, getAccessToken, refreshSession } from '../services/api'
 
 export interface AuthUser {
   id: string
@@ -67,14 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // access token expired, fall through to refresh
         }
       }
-      const { data } = await api.post('/auth/refresh', { refreshToken })
-      setAccessToken(data.data.accessToken)
-      sessionStorage.setItem('refreshToken', data.data.refreshToken)
+      const result = await refreshSession()
+      if (!result) throw new Error('No active session')
       const userData = await authService.getMe()
       setUser(userData as AuthUser)
     } catch {
-      sessionStorage.removeItem('refreshToken')
       setAccessToken(null)
+      sessionStorage.removeItem('refreshToken')
     } finally {
       setIsLoading(false)
     }

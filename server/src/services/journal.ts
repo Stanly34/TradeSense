@@ -29,7 +29,7 @@ export async function listJournals(userId: string) {
     where: { userId },
     include: {
       trade: {
-        select: { instrument: true, direction: true, result: true, createdAt: true },
+        select: { instrument: true, direction: true, result: true, createdAt: true, lesson: true },
       },
     },
     orderBy: { updatedAt: 'desc' },

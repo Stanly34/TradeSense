@@ -32,6 +32,11 @@ router.get('/platforms', adminController.listPlatforms)
 router.post('/platforms', adminOnly, adminController.createPlatform)
 router.patch('/platforms/:id', adminOnly, adminController.updatePlatform)
 router.delete('/platforms/:id', adminOnly, adminController.deletePlatform)
+router.get('/prop-firms', adminManager, adminController.listPropFirms)
+router.post('/prop-firms', adminOnly, adminController.createPropFirm)
+router.post('/prop-firms/scan', adminOnly, adminController.scanPropFirms)
+router.patch('/prop-firms/:id', adminOnly, adminController.updatePropFirm)
+router.delete('/prop-firms/:id', adminOnly, adminController.deletePropFirm)
 router.get('/audit-logs', adminManager, adminController.getAuditLogs)
 
 export default router

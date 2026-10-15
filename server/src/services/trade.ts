@@ -2,7 +2,8 @@ import { prisma } from '../lib/prisma.js'
 import type { Prisma } from '@prisma/client'
 import { getUserPlan } from './subscription.js'
 import { sendTradeSummary } from './email.js'
-import { updateEodPeak } from './template.js'
+import { reconcileAccount } from './accountEngine.js'
+import { nykSessionStartUtc, nowNYKey } from '../utils/nykTime.js'
 
 const tradeInclude = {
   images: true,
@@ -11,7 +12,7 @@ const tradeInclude = {
   tags: { include: { tag: true } },
   journal: true,
   aiReviews: { orderBy: { createdAt: 'desc' as const }, take: 1 },
-  template: { select: { id: true, name: true, type: true, defaultValues: true } },
+  tradeAccount: { select: { id: true, name: true, type: true, defaultValues: true } },
 } satisfies Prisma.TradeInclude
 
 function stripPartialExits(data: Record<string, unknown>) {
@@ -19,56 +20,32 @@ function stripPartialExits(data: Record<string, unknown>) {
   return rest as Prisma.TradeUncheckedCreateInput
 }
 
+function computeDayKey(entryTime: unknown): string | null {
+  if (!entryTime || typeof entryTime !== 'string') return null
+  const d = new Date(entryTime)
+  if (isNaN(d.getTime())) return null
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 function stripPartialExitsForUpdate(data: Record<string, unknown>) {
   const { _partialExits, ...rest } = data
   return rest as Prisma.TradeUncheckedUpdateInput
 }
 
-async function syncAccountBalance(userId: string, templateId: string | null) {
-  if (!templateId) { console.log('[syncAccountBalance] no templateId'); return }
-  const template = await prisma.template.findUnique({ where: { id: templateId } })
-  if (!template || (template.type !== 'PROP_FIRM' && template.type !== 'PERSONAL_ACCOUNT')) { console.log('[syncAccountBalance] not found or unsupported type'); return }
+const PHASE_NAMES = ['PHASE1', 'PHASE2', 'PHASE3', 'FUNDED']
 
-  const dv = (template.defaultValues || {}) as Record<string, unknown>
-  const accountSize = (dv.accountSize as number) || 0
-  if (template.type === 'PROP_FIRM' && !accountSize) { console.log('[syncAccountBalance] no accountSize'); return }
-
-  const trades = await prisma.trade.findMany({
-    where: { userId, templateId, isDeleted: false, status: 'COMPLETED' },
-    select: { entryPrice: true, exitPrice: true, direction: true, fees: true, quantity: true, pipSize: true, pipValue: true },
-  })
-
-  let totalPnl = 0
-  for (const t of trades) {
-    if (!t.entryPrice || !t.exitPrice) continue
-    const rawDiff = t.direction === 'LONG' ? t.exitPrice - t.entryPrice : t.entryPrice - t.exitPrice
-    const diff = (t.pipSize && t.pipSize !== 0) ? rawDiff / t.pipSize : rawDiff
-    const tradePnl = diff * (t.pipValue || 1) * (t.quantity || 1) - (t.fees || 0)
-    totalPnl += tradePnl
-    console.log(`[syncAccountBalance] trade: rawDiff=${rawDiff} pipSize=${t.pipSize} diff=${diff} pipValue=${t.pipValue} qty=${t.quantity} fees=${t.fees} tradePnl=${tradePnl}`)
-  }
-
-  const baseBalance = (dv.startingBalance as number) || accountSize
-  const newBalance = Math.round((baseBalance + totalPnl) * 100) / 100
-  console.log(`[syncAccountBalance] totalPnl=${totalPnl} baseBalance=${baseBalance} newBalance=${newBalance} oldBalance=${dv.currentAccountSize}`)
-
-  if (dv.currentAccountSize !== newBalance) {
-    dv.currentAccountSize = newBalance
-    await prisma.template.update({
-      where: { id: templateId },
-      data: { defaultValues: dv as never },
-    })
-    console.log('[syncAccountBalance] updated!')
-  }
-
-  await updateEodPeak(userId, templateId, { force: true })
+function computePhase(phaseIndex: number | undefined | null): string {
+  if (phaseIndex == null || phaseIndex < 0) return 'PHASE1'
+  return PHASE_NAMES[Math.min(phaseIndex, PHASE_NAMES.length - 1)]
 }
 
 export async function createTrade(userId: string, data: Record<string, unknown>) {
   const plan = await getUserPlan(userId)
   if (plan.plan.dailyTradeLimit !== null) {
-    const startOfToday = new Date()
-    startOfToday.setHours(0, 0, 0, 0)
+    const startOfToday = nykSessionStartUtc(nowNYKey())
     const dailyCount = await prisma.trade.count({
       where: {
         userId,
@@ -99,10 +76,29 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
     }
   }
 
+  // Block journaling for funded accounts that haven't chosen their payout path (e.g. Tradeify Select Flex vs Daily)
+  const accountId = typeof data.accountId === 'string' ? data.accountId : null
+  let tradePhase: string | null = null
+  if (accountId) {
+    const acct = await prisma.account.findFirst({ where: { id: accountId, userId } })
+    if (acct) {
+      const dv = (acct.defaultValues || {}) as Record<string, unknown>
+      tradePhase = computePhase(Number(dv.phaseIndex) || 0)
+      if (acct.status === 'FUNDED') {
+        const planName = String(dv.planName || '')
+        if (/select evaluation/i.test(planName) && !dv.fundedPath) {
+          throw new Error(`Choose your funded path for "${acct.name}" first — open the account to pick Flex or Daily payouts.`)
+        }
+      }
+    }
+  }
+
   const partialExits = (data._partialExits as Array<{ quantity: number; exitPrice: number; exitTime?: string }> | undefined) || []
 
   const tradeData: Prisma.TradeUncheckedCreateInput = {
     ...stripPartialExits(data),
+    dayKey: computeDayKey(data.entryTime),
+    phase: tradePhase,
     userId,
     entryTime: data.entryTime ? new Date(data.entryTime as string) : new Date(),
     partialExits: partialExits.length > 0 ? {
@@ -119,8 +115,8 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
   }
 
   const qty = tradeData.quantity
-  if (qty != null && tradeData.templateId) {
-    const tpl = await prisma.template.findUnique({ where: { id: tradeData.templateId as string }, select: { defaultValues: true } })
+  if (qty != null && tradeData.accountId) {
+    const tpl = await prisma.account.findUnique({ where: { id: tradeData.accountId as string }, select: { defaultValues: true } })
     if (tpl?.defaultValues) {
       const dv = tpl.defaultValues as Record<string, unknown>
       const marketType = dv.marketType as string | undefined
@@ -155,8 +151,10 @@ export async function createTrade(userId: string, data: Record<string, unknown>)
     }
   }
 
-  sendTradeSummary(userId, trade).catch(e => console.error('[TRADE SUMMARY EMAIL ERROR]', e))
-  await syncAccountBalance(userId, trade.templateId)
+  sendTradeSummary(userId, trade).catch(() => {})
+  if (trade.accountId) {
+    await reconcileAccount(userId, trade.accountId)
+  }
 
   return trade
 }
@@ -176,7 +174,7 @@ export async function listTrades(userId: string, query: {
   direction?: string
   instrument?: string
   date?: string
-  templateId?: string
+  accountId?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }) {
@@ -189,7 +187,7 @@ export async function listTrades(userId: string, query: {
   if (query.result) where.result = query.result
   if (query.direction) where.direction = query.direction
   if (query.instrument) where.instrument = { contains: query.instrument, mode: 'insensitive' }
-  if (query.templateId) where.templateId = query.templateId
+  if (query.accountId) where.accountId = query.accountId
   if (query.date) {
     const start = new Date(query.date)
     const end = new Date(start)
@@ -244,25 +242,39 @@ export async function updateTrade(userId: string, tradeId: string, data: Record<
 
   const qty = data.quantity != null ? Number(data.quantity) : trade.quantity
   if (qty != null) {
-    const templateId = trade.templateId
-    if (templateId) {
-      const tpl = await prisma.template.findUnique({ where: { id: templateId }, select: { defaultValues: true } })
-      if (tpl?.defaultValues) {
-        const dv = tpl.defaultValues as Record<string, unknown>
-        const marketType = dv.marketType as string | undefined
-        if (marketType === 'FUTURES') {
+    const qtyAccountId = trade.accountId
+    if (qtyAccountId) {
+      const qtyAcct = await prisma.account.findUnique({ where: { id: qtyAccountId }, select: { defaultValues: true } })
+      if (qtyAcct?.defaultValues) {
+        const qtyDv = qtyAcct.defaultValues as Record<string, unknown>
+        const qtyMarketType = qtyDv.marketType as string | undefined
+        if (qtyMarketType === 'FUTURES') {
           if (!Number.isInteger(qty)) throw new Error('Futures quantity must be a whole number')
           if (qty < 1) throw new Error('Minimum quantity for Futures is 1')
-        } else if (marketType === 'FOREX') {
+        } else if (qtyMarketType === 'FOREX') {
           if (qty < 0.01) throw new Error('Minimum quantity for Forex is 0.01')
         }
       }
     }
   }
 
+  const updateData: Record<string, unknown> = {
+    ...stripPartialExitsForUpdate(data),
+    ...(data.entryTime !== undefined ? { dayKey: computeDayKey(data.entryTime) } : {}),
+  }
+
+  const updatedAccountId = typeof data.accountId === 'string' ? data.accountId : trade.accountId
+  if (updatedAccountId && (data.accountId !== undefined || data.entryTime !== undefined)) {
+    const acct = await prisma.account.findFirst({ where: { id: updatedAccountId, userId } })
+    if (acct) {
+      const dv = (acct.defaultValues || {}) as Record<string, unknown>
+      updateData.phase = computePhase(Number(dv.phaseIndex) || 0)
+    }
+  }
+
   const updated = await prisma.trade.update({
     where: { id: tradeId },
-    data: stripPartialExitsForUpdate(data),
+    data: updateData,
     include: tradeInclude,
   })
 
@@ -288,7 +300,9 @@ export async function updateTrade(userId: string, tradeId: string, data: Record<
     }
   }
 
-  await syncAccountBalance(userId, updated.templateId)
+  if (updated.accountId) {
+    await reconcileAccount(userId, updated.accountId)
+  }
   return updated
 }
 
@@ -303,14 +317,16 @@ export async function deleteTrade(userId: string, tradeId: string) {
     data: { isDeleted: true, deletedAt: new Date() },
   })
 
-  await syncAccountBalance(userId, deleted.templateId)
+  if (deleted.accountId) {
+    await reconcileAccount(userId, deleted.accountId)
+  }
   return deleted
 }
 
 export async function batchDeleteTrades(userId: string, tradeIds: string[]) {
   const trades = await prisma.trade.findMany({
     where: { id: { in: tradeIds }, userId, isDeleted: false },
-    select: { id: true, templateId: true },
+    select: { id: true, accountId: true },
   })
   if (trades.length !== tradeIds.length) throw new Error('Some trades not found')
 
@@ -319,9 +335,9 @@ export async function batchDeleteTrades(userId: string, tradeIds: string[]) {
     data: { isDeleted: true, deletedAt: new Date() },
   })
 
-  const affectedTemplates = new Set(trades.map(t => t.templateId).filter(Boolean))
-  for (const templateId of affectedTemplates) {
-    await syncAccountBalance(userId, templateId)
+  const affectedAccounts = new Set(trades.map(t => t.accountId).filter((x): x is string => Boolean(x)))
+  for (const accountId of affectedAccounts) {
+    await reconcileAccount(userId, accountId)
   }
 }
 

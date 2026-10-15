@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from './Button'
 import { X } from 'lucide-react'
 
@@ -22,22 +23,23 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, message, confir
 
   if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div className="relative card p-6 max-w-sm w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+  return createPortal(
+    <div className="fixed inset-0 z-[80] flex flex-col justify-end sm:items-center sm:justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="relative bg-elevated w-full sm:max-w-sm mx-0 sm:mx-4 rounded-t-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 border-t sm:border border-border mb-safe" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text-primary">{title || 'Confirm'}</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-text-primary">{title || 'Confirm'}</h2>
           <button onClick={onClose} className="p-1 text-text-muted hover:text-text-primary rounded-lg hover:bg-hover transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="text-sm text-text-secondary mb-6">{message || 'Are you sure?'}</div>
+        <div className="text-sm text-text-secondary mb-5">{message || 'Are you sure?'}</div>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={onClose}>Cancel</Button>
           <Button variant="danger" onClick={onConfirm} isLoading={isLoading}>{confirmLabel}</Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -4,7 +4,6 @@ import { forgotPassword } from '../../services/auth'
 import { AuthLayout } from '../../components/layout/AuthLayout'
 import { Input } from '../../components/ui/Input'
 import { Button } from '../../components/ui/Button'
-import toast from 'react-hot-toast'
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

@@ -104,6 +104,58 @@ export interface AdminPlatform {
   createdAt: string
 }
 
+export interface AdminRuleRow {
+  label: string
+  value: string
+}
+
+export interface AdminPropFirmPrice {
+  size: string
+  price: number
+  discounted: number
+  evalRules?: AdminRuleRow[]
+  fundedRules?: AdminRuleRow[]
+}
+
+export interface AdminPropFirmPlan {
+  plan: string
+  planDesc?: string
+  sizes: AdminPropFirmPrice[]
+}
+
+export interface AdminPropFirm {
+  id: string
+  name: string
+  slug: string
+  websiteUrl: string
+  description: string | null
+  rating: number
+  country: string
+  instruments: string
+  profitSplit: number
+  payoutSpeed: string
+  logoColor: string
+  accountPrices: AdminPropFirmPlan[] | null
+  discountPercent: number
+  promoCode: string | null
+  promoSourceUrl: string | null
+  lastCodeCheckAt: string | null
+  codeStatus: string
+  dealEndsAt: string | null
+  rulesSourceUrl: string | null
+  lastRulesCheckAt: string | null
+  rulesStatus: string
+  dailyPayouts: boolean
+  noActivationFee: boolean
+  oneTimeFee: boolean
+  instantFunding: boolean
+  isFeatured: boolean
+  isActive: boolean
+  createdAt: string
+}
+
+export type AdminPropFirmInput = Partial<Omit<AdminPropFirm, 'id' | 'createdAt'>> & { name: string; slug: string }
+
 export interface AdminCoupon {
   id: string
   code: string
@@ -248,6 +300,29 @@ export async function updatePlatform(id: string, input: Partial<{ name: string; 
 
 export async function deletePlatform(id: string): Promise<void> {
   await api.delete(`/admin/platforms/${id}`)
+}
+
+export async function listPropFirms(): Promise<AdminPropFirm[]> {
+  const { data } = await api.get('/admin/prop-firms')
+  return data.data
+}
+
+export async function createPropFirm(input: AdminPropFirmInput): Promise<AdminPropFirm> {
+  const { data } = await api.post('/admin/prop-firms', input)
+  return data.data
+}
+
+export async function updatePropFirm(id: string, input: Partial<AdminPropFirmInput>): Promise<void> {
+  await api.patch(`/admin/prop-firms/${id}`, input)
+}
+
+export async function deletePropFirm(id: string): Promise<void> {
+  await api.delete(`/admin/prop-firms/${id}`)
+}
+
+export async function scanPropFirms(): Promise<{ ok: number; stale: number; manual: number; changed: number }> {
+  const { data } = await api.post('/admin/prop-firms/scan')
+  return data.data
 }
 
 export async function listAuditLogs(page = 1, limit = 50, params?: { action?: string; userId?: string }): Promise<{ logs: AuditLogEntry[]; total: number; totalPages: number }> {

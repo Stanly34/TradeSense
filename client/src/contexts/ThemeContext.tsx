@@ -28,7 +28,7 @@ function applyTheme(theme: Theme) {
 function getInitialMode(): ThemeMode {
   const stored = localStorage.getItem(STORAGE_KEY)
   if (stored === 'light' || stored === 'dark' || stored === 'system') return stored
-  return 'dark'
+  return 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -42,7 +42,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const recalc = useCallback((mode: ThemeMode) => {
     const t = resolveTheme(mode)
-    console.log('[ThemeContext] recalc mode=%s resolved=%s', mode, t)
     setActiveTheme(t)
     applyTheme(t)
     localStorage.setItem(STORAGE_KEY, mode)
@@ -66,7 +65,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [themeMode])
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
-    console.log('[ThemeContext] setThemeMode called with:', mode)
     setThemeModeState(mode)
   }, [])
 

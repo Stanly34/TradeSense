@@ -47,13 +47,15 @@ import tagRoutes from './routes/tag.js'
 import uploadRoutes from './routes/upload.js'
 import aiRoutes from './routes/ai.js'
 import dashboardRoutes from './routes/dashboard.js'
-import templateRoutes from './routes/template.js'
+import accountRoutes from './routes/account.js'
 import journalRoutes from './routes/journal.js'
 import notificationRoutes from './routes/notification.js'
 import adminRoutes from './routes/admin.js'
 import favoriteInstrumentRoutes from './routes/favoriteInstrument.js'
 import subscriptionRoutes from './routes/subscription.js'
 import outlookRoutes from './routes/outlook.js'
+import analyticsRoutes from './routes/analytics.js'
+import propFirmRoutes from './routes/propFirm.js'
 
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/trades', tradeRoutes)
@@ -62,13 +64,15 @@ app.use('/api/v1/tags', tagRoutes)
 app.use('/api/v1/upload', uploadRoutes)
 app.use('/api/v1/ai', aiRoutes)
 app.use('/api/v1/dashboard', dashboardRoutes)
-app.use('/api/v1/templates', templateRoutes)
+app.use('/api/v1/accounts', accountRoutes)
 app.use('/api/v1/favorite-instruments', favoriteInstrumentRoutes)
 app.use('/api/v1/journals', journalRoutes)
 app.use('/api/v1/notifications', notificationRoutes)
 app.use('/api/v1/admin', adminRoutes)
 app.use('/api/v1/subscriptions', subscriptionRoutes)
 app.use('/api/v1/outlook', outlookRoutes)
+app.use('/api/v1/analytics', analyticsRoutes)
+app.use('/api/v1/prop-firms', propFirmRoutes)
 
 const uploadsDir = path.join(process.cwd(), 'uploads')
 try {
@@ -88,6 +92,12 @@ app.get('/api/health', (_req, res) => {
     },
   })
 })
+
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (_req, res) => {
+    res.redirect('http://localhost:5173')
+  })
+}
 
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(process.cwd(), 'client', 'dist')

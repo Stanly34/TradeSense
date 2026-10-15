@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Search, X } from 'lucide-react'
 import type { TradeListParams } from '../../types/trade'
-import * as templateService from '../../services/templates'
-import type { Template } from '../../services/templates'
+import * as accountService from '../../services/accounts'
+import type { Account } from '../../services/accounts'
 import { Select } from '../ui/Select'
 
 interface TradeFiltersProps {
@@ -11,11 +11,11 @@ interface TradeFiltersProps {
 }
 
 export function TradeFilters({ params, onChange }: TradeFiltersProps) {
-  const [accounts, setAccounts] = useState<Template[]>([])
+  const [accounts, setAccounts] = useState<Account[]>([])
 
   useEffect(() => {
-    templateService.listTemplates().then((all) => {
-      setAccounts(all.filter((t) => t.type === 'PROP_FIRM' || t.type === 'PERSONAL_ACCOUNT'))
+    accountService.listAccounts().then((all) => {
+      setAccounts(all.filter((a) => a.type === 'PROP_FIRM' || a.type === 'PERSONAL_ACCOUNT'))
     }).catch(() => {})
   }, [])
 
@@ -23,7 +23,7 @@ export function TradeFilters({ params, onChange }: TradeFiltersProps) {
     onChange({ ...params, [key]: value || undefined, page: 1 })
   }
 
-  const hasFilters = params.status || params.result || params.direction || params.instrument || params.templateId
+  const hasFilters = params.status || params.result || params.direction || params.instrument || params.accountId
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -34,7 +34,7 @@ export function TradeFilters({ params, onChange }: TradeFiltersProps) {
           placeholder="Search instrument..."
           value={params.instrument || ''}
           onChange={(e) => set('instrument', e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 text-sm bg-input border border-border rounded-xl text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(124,58,237,0.12)] transition-all"
+          className="w-full pl-9 pr-4 py-2.5 text-sm bg-input border border-border rounded-xl text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(79,70,229,0.12)] transition-all"
         />
       </div>
 
@@ -67,8 +67,8 @@ export function TradeFilters({ params, onChange }: TradeFiltersProps) {
           { value: 'SHORT', label: 'Short' },
         ]} />
 
-      <Select value={params.templateId || ''}
-        onChange={(v) => set('templateId', v)}
+      <Select value={params.accountId || ''}
+        onChange={(v) => set('accountId', v)}
         placeholder="All Accounts"
         options={[
           { value: '', label: 'All Accounts' },
@@ -78,7 +78,7 @@ export function TradeFilters({ params, onChange }: TradeFiltersProps) {
       {hasFilters && (
         <button
           onClick={() => onChange({ page: 1 })}
-          className="flex items-center gap-1.5 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-input border border-border rounded-xl text-text-primary hover:bg-hover hover:border-border-hover transition-colors"
         >
           <X className="w-4 h-4" />
           Clear
